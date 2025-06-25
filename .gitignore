@@ -1,32 +1,39 @@
-# Prerequisites
-*.d
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.code-workspace
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
 
-# Precompiled Headers
-*.gch
-*.pch
+/node_modules
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+/dist
 
-# Fortran module files
-*.mod
-*.smod
+.vite-cache
+.env.local
+.env.*.local
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# 调试日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Executables
-*.exe
-*.out
-*.app
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+/backend/build/
+/backend/test/build/
+
+*.o                # 目标文件
+*.a                # 静态库
+*.so               # 共享库 (Linux)
+*.so.*             # 带版本的共享库
+*.out              # 通用可执行文件输出名
+
+/docs
+docs
+

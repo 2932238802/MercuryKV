@@ -1,75 +1,46 @@
-cmake_minimum_required(VERSION 3.5)
-project(backend CXX)
+# ==============================================================================
+# 1. 项目定义与基本设置 (极简版)
+# ==============================================================================
+cmake_minimum_required(VERSION 3.15)
+project(mercury_kv_test VERSION 1.0.0 LANGUAGES CXX)
 
-include(CheckIncludeFileCXX)
+# [关键!] 告诉 CMake 生成 compile_commands.json，这是为了让 clangd 等编辑器工具能找到头文件
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-check_include_file_cxx(any HAS_ANY)
-check_include_file_cxx(string_view HAS_STRING_VIEW)
-check_include_file_cxx(coroutine HAS_COROUTINE)
-if (NOT "${CMAKE_CXX_STANDARD}" STREQUAL "")
-    # Do nothing
-elseif (HAS_ANY AND HAS_STRING_VIEW AND HAS_COROUTINE)
-    set(CMAKE_CXX_STANDARD 20)
-elseif (HAS_ANY AND HAS_STRING_VIEW)
-    set(CMAKE_CXX_STANDARD 17)
-else ()
-    set(CMAKE_CXX_STANDARD 14)
-endif ()
-
+# ==============================================================================
+# 2. C++ 标准设置
+# ==============================================================================
+# Drogon 需要 C++17 或更高版本，我们直接设置为 17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+message(STATUS "项目 ${PROJECT_NAME} 使用 C++${CMAKE_CXX_STANDARD} 标准进行编译")
+
+# ==============================================================================
+# 3. 创建可执行文件并链接 Drogon
+# ==============================================================================
+# 创建一个名为 "mercury_kv_test" 的可执行文件，源文件只有 main.cc
 add_executable(${PROJECT_NAME} main.cc)
 
-# ##############################################################################
-# If you include the drogon source code locally in your project, use this method
-# to add drogon 
-# add_subdirectory(drogon) 
-# target_link_libraries(${PROJECT_NAME} PRIVATE drogon)
-#
-# and comment out the following lines
+# 查找 Drogon 框架的配置
+# 如果这步失败，说明 Drogon 没有被正确安装或 vcpkg 工具链没有配置好
 find_package(Drogon CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
-# ##############################################################################
+# [核心步骤!] 将 Drogon 链接到我们的可执行文件
+# 这一行命令会自动处理好链接库、头文件包含路径等所有事情
+target_link_libraries(${PROJECT_NAME} PUBLIC Drogon::Drogon)
 
-if (CMAKE_CXX_STANDARD LESS 17)
-    message(FATAL_ERROR "c++17 or higher is required")
-elseif (CMAKE_CXX_STANDARD LESS 20)
-    message(STATUS "use c++17")
-else ()
-    message(STATUS "use c++20")
-endif ()
+# (可选) 添加一些基本的编译器警告
+if(NOT MSVC)
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+endif()
 
-aux_source_directory(controllers CTL_SRC)
-aux_source_directory(filters FILTER_SRC)
-aux_source_directory(plugins PLUGIN_SRC)
-aux_source_directory(models MODEL_SRC)
+message(STATUS "Drogon 已成功链接到目标 ${PROJECT_NAME}")
 
-drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
-                    ${CMAKE_CURRENT_BINARY_DIR})
-# use the following line to create views with namespaces.
-# drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
-#                     ${CMAKE_CURRENT_BINARY_DIR} TRUE)
-# use the following line to create views with namespace CHANGE_ME prefixed
-# and path namespaces.
-# drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
-#                     ${CMAKE_CURRENT_BINARY_DIR} TRUE CHANGE_ME)
-
-target_include_directories(${PROJECT_NAME}
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                                   ${CMAKE_CURRENT_SOURCE_DIR}/models)
-target_sources(${PROJECT_NAME}
-               PRIVATE
-               ${SRC_DIR}
-               ${CTL_SRC}
-               ${FILTER_SRC}
-               ${PLUGIN_SRC}
-               ${MODEL_SRC})
-# ##############################################################################
-# uncomment the following line for dynamically loading views 
-# set_property(TARGET ${PROJECT_NAME} PROPERTY ENABLE_EXPORTS ON)
-
-# ##############################################################################
-
-add_subdirectory(test)
+# ==============================================================================
+# 4. 安装设置 (可选，但建议保留)
+# ==============================================================================
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION bin
+)

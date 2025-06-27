@@ -1,52 +1,15 @@
 #!/bin/bash
 
-# PROJECT_DIR=/home/losangelous/LosAngelous/Project/MercuryKV
-# FRONTEND_DIR=$PROJECT_DIR/frontend
-# BACKEND_DIR=$PROJECT_DIR/backend
-
-# echo " -- 脚本开始运行 -- "
-# echo " -- 进入前端目录 -- "
-# cd $FRONTEND_DIR
-
-# echo " -- 安装前端依赖 -- "
-# npm install || {
-#     echo " -- 依赖安装失败! -- "
-#     exit 1
-# }
-
-# echo " -- 打包前端代码 至dist -- "
-# npm run build || {
-#     echo " -- 打包前端代码失败! -- "
-# exit 1
-# }
-
-# echo " -- 前端代码处理完成 -- "
-# if [ ! -d "$FRONTEND_DIR/dist" ]; then
-#     echo " -- dist 文件丢失 -- "
-#     exit 1
-# fi
-# cp -r $FRONTEND_DIR/dist/* $BACKEND_DIR/public/ || {
-#     echo "Error: Failed to copy Vue files"
-#     exit 1
-# }
-# echo " -- 前端代码打包至后端成功 -- "
-
-
-
-
-
-
 
 PROJECT_DIR=/home/losangelous/LosAngelous/Project/MercuryKV
 FRONTEND_DIR=$PROJECT_DIR/frontend
 BACKEND_DIR=$PROJECT_DIR/backend
-BACKEND_BUILD_DIR=$BACKEND_DIR/build # 后端构建目录
+BACKEND_BUILD_DIR=$BACKEND_DIR/build 
 EXECUTABLE_NAME=mercury_kv          
 
 echo " -- 脚本开始运行 -- "
-
 echo " "
-echo "========== 1. 处理前端 =========="
+echo "========== 处理前端 =========="
 echo "进入前端目录: $FRONTEND_DIR"
 cd $FRONTEND_DIR
 
@@ -61,8 +24,6 @@ if [ ! -d "$FRONTEND_DIR/dist" ]; then
     echo "dist 目录未找到!"; exit 1;
 fi
 
-# echo "创建后端 public 目录 (如果不存在)..."
-# mkdir -p $BACKEND_DIR/public 
 
 echo "复制 dist 内容到后端 public 目录..."
 cp -r $FRONTEND_DIR/dist/* $BACKEND_DIR/public/ || { echo " 复制前端文件失败!"; exit 1; }
@@ -70,7 +31,7 @@ cp -r $FRONTEND_DIR/dist/* $BACKEND_DIR/public/ || { echo " 复制前端文件�
 echo "前端部分处理完成！"
 
 echo " "
-echo "========== 2. 处理后端 =========="
+echo "========== 处理后端 =========="
 echo "进入后端构建目录: $BACKEND_BUILD_DIR"
 
 rm build && mkdir build

@@ -13,6 +13,9 @@ CREATE TABLE users (
 
     -- 哈希加密进来的啊
     password_hash VARCHAR(255) NOT NULL,
+
+    salt VARCHAR(64) NOT NULL,
+    
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_login_at TIMESTAMPTZ
 );

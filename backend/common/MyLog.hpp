@@ -82,9 +82,9 @@ public:
   }
 };
 
-#define LOG_INF(...) MyLog::Log(__FILE__, __LINE__, G::INF, ##__VA_ARGS__)
-#define LOG_WARN(...) MyLog::Log(__FILE__, __LINE__, G::WAR, ##__VA_ARGS__)
-#define LOG_ERROR(...) MyLog::Log(__FILE__, __LINE__, G::ERR, ##__VA_ARGS__)
-#define LOG_SUC(...) MyLog::Log(__FILE__, __LINE__, G::SUC, ##__VA_ARGS__)
+#define MY_LOG_INF(...) MyLog::Log(__FILE__, __LINE__, G::INF, ##__VA_ARGS__)
+#define MY_LOG_WARN(...) MyLog::Log(__FILE__, __LINE__, G::WAR, ##__VA_ARGS__)
+#define MY_LOG_ERROR(...) MyLog::Log(__FILE__, __LINE__, G::ERR, ##__VA_ARGS__)
+#define MY_LOG_SUC(...) MyLog::Log(__FILE__, __LINE__, G::SUC, ##__VA_ARGS__)
 
 } // namespace MyLogNS

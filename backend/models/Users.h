@@ -46,6 +46,7 @@ class Users
     {
         static const std::string _id;
         static const std::string _username;
+        static const std::string _email;
         static const std::string _password_hash;
         static const std::string _salt;
         static const std::string _created_at;
@@ -118,6 +119,15 @@ class Users
     void setUsername(const std::string &pUsername) noexcept;
     void setUsername(std::string &&pUsername) noexcept;
 
+    /**  For column email  */
+    ///Get the value of the column email, returns the default value if the column is null
+    const std::string &getValueOfEmail() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getEmail() const noexcept;
+    ///Set the value of the column email
+    void setEmail(const std::string &pEmail) noexcept;
+    void setEmail(std::string &&pEmail) noexcept;
+
     /**  For column password_hash  */
     ///Get the value of the column password_hash, returns the default value if the column is null
     const std::string &getValueOfPasswordHash() const noexcept;
@@ -154,7 +164,7 @@ class Users
     void setLastLoginAtToNull() noexcept;
 
 
-    static size_t getColumnNumber() noexcept {  return 6;  }
+    static size_t getColumnNumber() noexcept {  return 7;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -177,6 +187,7 @@ class Users
     void updateId(const uint64_t id);
     std::shared_ptr<int64_t> id_;
     std::shared_ptr<std::string> username_;
+    std::shared_ptr<std::string> email_;
     std::shared_ptr<std::string> passwordHash_;
     std::shared_ptr<std::string> salt_;
     std::shared_ptr<::trantor::Date> createdAt_;
@@ -192,7 +203,7 @@ class Users
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[6]={ false };
+    bool dirtyFlag_[7]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -219,21 +230,26 @@ class Users
         }
         if(dirtyFlag_[2])
         {
-            sql += "password_hash,";
+            sql += "email,";
             ++parametersCount;
         }
         if(dirtyFlag_[3])
+        {
+            sql += "password_hash,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[4])
         {
             sql += "salt,";
             ++parametersCount;
         }
         sql += "created_at,";
         ++parametersCount;
-        if(!dirtyFlag_[4])
+        if(!dirtyFlag_[5])
         {
             needSelection=true;
         }
-        if(dirtyFlag_[5])
+        if(dirtyFlag_[6])
         {
             sql += "last_login_at,";
             ++parametersCount;
@@ -271,11 +287,16 @@ class Users
             n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
             sql.append(placeholderStr, n);
         }
+        if(dirtyFlag_[5])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
         else
         {
             sql +="default,";
         }
-        if(dirtyFlag_[5])
+        if(dirtyFlag_[6])
         {
             n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
             sql.append(placeholderStr, n);

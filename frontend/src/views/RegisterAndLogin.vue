@@ -67,13 +67,17 @@ const Login = async () => {
             login_info
         )
 
-        console.log("登录成功!", response.message);
-        const token = response.token;
-        router.push({ name: "Mercury" });
+        // 注册成功 201
+        // 然后保存token 到本地
+        if (response.code == 201) {
+            console.log("登录成功!" );
+            const token = response.token;
+            router.push({ name: "Mercury" });
+            localStorage.setItem('AuthToken', token);
+            alert(response.message);
+        }
 
-        localStorage.setItem('AuthToken', token);
 
-        alert("登录成功,欢迎回来");
     }
     catch (error) {
         // 日志输出一下
@@ -279,7 +283,7 @@ span {
 button {
 
     /* 边界 */
-    margin-top: 30px ;
+    margin-top: 30px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 100px;

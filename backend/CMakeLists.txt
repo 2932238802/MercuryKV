@@ -9,23 +9,29 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(${PROJECT_NAME}
   main.cc
   models/Users.cc
+  controllers/LoginApi/Login.cc
+  controllers/RegisterApi/Register.cc
 )
 
 find_package(OpenSSL REQUIRED)
 find_package(Drogon CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+find_package(jwt-cpp CONFIG REQUIRED) 
 
+# 链接库
 target_link_libraries(${PROJECT_NAME} PUBLIC
   Drogon::Drogon
   yaml-cpp::yaml-cpp
   OpenSSL::SSL
   OpenSSL::Crypto
+  jwt-cpp::jwt-cpp     
 )
 
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 target_include_directories(${PROJECT_NAME} PUBLIC
-  .
   common
   models
+  controllers
 )
 
 if(NOT MSVC)

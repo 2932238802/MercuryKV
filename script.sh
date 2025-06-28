@@ -4,8 +4,9 @@
 PROJECT_DIR=/home/losangelous/LosAngelous/Project/MercuryKV
 FRONTEND_DIR=$PROJECT_DIR/frontend
 BACKEND_DIR=$PROJECT_DIR/backend
-BACKEND_BUILD_DIR=$BACKEND_DIR/build 
-EXECUTABLE_NAME=mercury_kv          
+BACKEND_BUILD_DIR=$BACKEND_DIR/build
+EXECUTABLE_NAME=mercury_kv
+VCPKG_TOOLCHAIN_FILE=/home/losangelous/LosAngelous/dev/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 echo " -- 脚本开始运行 -- "
 echo " "
@@ -32,16 +33,18 @@ echo "前端部分处理完成！"
 
 echo " "
 echo "========== 处理后端 =========="
-echo "进入后端构建目录: $BACKEND_BUILD_DIR"
+echo "清理并重建后端构建目录..."
 
-rm build && mkdir build
+rm -rf $BACKEND_BUILD_DIR
+mkdir -p $BACKEND_BUILD_DIR
 cd $BACKEND_BUILD_DIR
 
-echo "使用 CMake 生成 Makefile..."
-cmake .. || { echo " CMake 配置失败!"; exit 1; }
+
+echo "使用 CMake 生成 Makefile (并指定 Vcpkg 和 Redis 支持)..."
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_TOOLCHAIN_FILE -DBUILD_REDIS=ON || { echo " CMake 配置失败!"; exit 1; }
 
 echo "使用 Make 编译后端项目..."
-make || { echo "编译后端失败!"; exit 1; }
+make -j$(nproc) || { echo "编译后端失败!"; exit 1; } # 增加了 -j$(nproc) 来加速编译
 
 echo "后端编译完成！可执行文件位于: $BACKEND_BUILD_DIR/$EXECUTABLE_NAME"
 

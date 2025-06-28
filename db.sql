@@ -10,7 +10,7 @@ CREATE TABLE users (
     -- 
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
-
+    email VARCHAR(100) NOT NULL UNIQUE,
     -- 哈希加密进来的啊
     password_hash VARCHAR(255) NOT NULL,
 

@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import service from '../components/request';
 import router from '../router';
 
+
+// ------------------------------
 // 绑定页面的输入内容
 const user_name_register = ref("");
 const password_register = ref("");
@@ -15,11 +17,11 @@ const show_register_warning_for_user_name = ref(false)
 const show_register_warning_for_password = ref(false)
 const show_register_warning_for_email = ref(false)
 const API_PATHS = {
-    LOGIN: '/login',
-    REGISTER: '/register'
+    LOGIN: '/Login/login',
+    REGISTER: '/Register/register'
 };
 
-
+// ------------------------------
 // 登录和注册的切换
 const isrightpanelactive = ref(false);
 const ShowSignIn = () => {
@@ -58,9 +60,8 @@ const Login = async () => {
     }
 
 
-
-    // (1) 理解一下会话： 就是手环 编号
-    // (2) 理解一下 token : 
+    // 理解一下会话： 就是手环 编号
+    // 理解一下 token : 
     try {
         const login_info = {
             username: user_name_login.value,
@@ -74,15 +75,23 @@ const Login = async () => {
 
         // 注册成功 201
         // 然后保存token 到本地
-        // TODO: 后端看一眼 201
-        if (response.code == 201) {
-            console.log("登录成功!");
+        // TODO: 后端看一眼 200
+        if (response.code == 200) {
+            // console.log("登录成功!");
+
+            // token本地保存一下
             const token = response.token;
-            router.push({ name: "Mercury" });
             localStorage.setItem('AuthToken', token);
+
+            router.push({ name: "Mercury" });
             alert(response.message);
         }
 
+        if(response.code == 400 || response.code == 500)
+        {
+            // console.log("登录失败!");
+            alert(response.message);
+        }
     }
     catch (error) {
         // 日志输出一下
@@ -92,6 +101,9 @@ const Login = async () => {
 
 }
 
+// ------------------------------
+// 向后端发送请求
+// 注册
 const Register = async () => {
     // 初始化赋值
     show_register_warning_for_user_name.value = false;
@@ -130,14 +142,18 @@ const Register = async () => {
             API_PATHS.REGISTER,
             register_info
         )
-        console.log("注册成功!", response.message);
-        const token = response.token;
-        localStorage.setItem('AuthToken', token);
 
-        // 跳转界面
-        router.push({ name: "Mercury" });
+        if (response.code == 201) {
+            const token = response.token;
+            localStorage.setItem('AuthToken', token);
+            // 跳转界面
+            router.push({ name: "Mercury" });
+            alert(response.message);
+        }
 
-        alert("注册成功，下次记得直接走登录哈~");
+        if (response.code == 500) {
+            console.error("注册失败", error.message)
+        }
     }
     catch (error) {
         console.error("注册失败:", error.message);

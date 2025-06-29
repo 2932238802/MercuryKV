@@ -32,7 +32,7 @@ void Login::HandleLogin(
   auto db_client = app().getDbClient();
   Mapper<Users> mapper(db_client);
 
-  Criteria criteria("user_name", CompareOperator::EQ, username);
+  Criteria criteria("username", CompareOperator::EQ, username);
   criteria = criteria && Criteria("password", CompareOperator::EQ, password);
 
   mapper.findOne(
@@ -40,6 +40,7 @@ void Login::HandleLogin(
       [callback](const Users &user) {
         Json::Value result;
         result["message"] = "登录成功!";
+        result["code"] = 200;
         auto resp = HttpResponse::newHttpJsonResponse(result);
         callback(resp);
       },
@@ -49,16 +50,21 @@ void Login::HandleLogin(
           Json::Value error;
           // TODO: 前端处理 message
           error["message"] = "用户名或密码错误";
+          error["code"] = 400;
           auto resp = HttpResponse::newHttpJsonResponse(error);
           resp->setStatusCode(k401Unauthorized);
           callback(resp);
         } else {
           // TODO: 前端处理 message
           MY_LOG_ERROR("数据库查询异常: ", e.base().what());
+
+          // 形成json文件
           Json::Value error;
           error["message"] = "服务器内部错误，请稍后重试";
+          error["code"] = 500;
           auto resp = HttpResponse::newHttpJsonResponse(error);
           resp->setStatusCode(k500InternalServerError);
+
           callback(resp);
         }
       });

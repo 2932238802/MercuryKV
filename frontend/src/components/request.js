@@ -1,9 +1,10 @@
 import axios from "axios";
 
 const service = axios.create({
-  baseURL: "/api",
+  baseURL: "/",
   timeout: 5000,
 });
+
 
 service.interceptors.request.use(
   (config) => {
@@ -28,7 +29,6 @@ service.interceptors.response.use(
       console.error("业务错误:", res.message);
       return Promise.reject(new Error(res.message || "Error"));
     } else {
-      // 这里已经返回对应的data的 就不用在业务代码里面额外的处理了
       return res;
     }
   },

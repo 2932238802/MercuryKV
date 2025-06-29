@@ -10,6 +10,6 @@ public:
   void HandleRegister(const HttpRequestPtr &req,
                       std::function<void(const HttpResponsePtr &)> &&callback);
   METHOD_LIST_BEGIN
-  METHOD_ADD(Register::HandleRegister, "/api/register", {drogon::Post});
+  METHOD_ADD(Register::HandleRegister, "/register", {drogon::Post});
   METHOD_LIST_END
 };

@@ -18,7 +18,6 @@ find_package(Drogon CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 find_package(jwt-cpp CONFIG REQUIRED) 
 
-# 链接库
 target_link_libraries(${PROJECT_NAME} PUBLIC
   Drogon::Drogon
   yaml-cpp::yaml-cpp
@@ -33,7 +32,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   models
   controllers
 )
-
 if(NOT MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 endif()

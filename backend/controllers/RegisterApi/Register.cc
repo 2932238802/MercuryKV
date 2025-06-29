@@ -59,6 +59,8 @@ void Register::HandleRegister(
     // 赋值 resp
     result["message"] = "User registered successfully";
     result["token"] = token;
+    result["code"] = 201;
+
     auto resp = HttpResponse::newHttpJsonResponse(result);
     resp->setStatusCode(k201Created);
     MY_LOG_SUC("用户插入成功", username);

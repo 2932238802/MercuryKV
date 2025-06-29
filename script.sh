@@ -52,6 +52,6 @@ echo "后端编译完成！可执行文件位于: $BACKEND_BUILD_DIR/$EXECUTABLE
 echo " "
 echo "========== 3. 启动服务 =========="
 echo "运行后端程序..."
-./$EXECUTABLE_NAME
+stdbuf -o0 -e0 ./$EXECUTABLE_NAME
 echo " "
 echo " -- 后端程序已停止，脚本执行完毕 -- "

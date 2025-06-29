@@ -14,6 +14,11 @@ const show_login_warning_for_password = ref(false)
 const show_register_warning_for_user_name = ref(false)
 const show_register_warning_for_password = ref(false)
 const show_register_warning_for_email = ref(false)
+const API_PATHS = {
+    LOGIN: '/login',
+    REGISTER: '/register'
+};
+
 
 // 登录和注册的切换
 const isrightpanelactive = ref(false);
@@ -58,25 +63,25 @@ const Login = async () => {
     // (2) 理解一下 token : 
     try {
         const login_info = {
-            user_name: user_name_login.value,
+            username: user_name_login.value,
             password: password_login.value
         }
 
         const response = await service.post(
-            "/login",
+            API_PATHS.LOGIN,
             login_info
         )
 
         // 注册成功 201
         // 然后保存token 到本地
+        // TODO: 后端看一眼 201
         if (response.code == 201) {
-            console.log("登录成功!" );
+            console.log("登录成功!");
             const token = response.token;
             router.push({ name: "Mercury" });
             localStorage.setItem('AuthToken', token);
             alert(response.message);
         }
-
 
     }
     catch (error) {
@@ -93,27 +98,37 @@ const Register = async () => {
     show_register_warning_for_password.value = false;
     show_register_warning_for_email.value = false;
 
+    let has_false = false;
+
     if (!user_name_register.value) {
         show_register_warning_for_user_name.value = true;
+        has_false = true
     }
     if (!password_register.value) {
         show_register_warning_for_password.value = true;
+        has_false = true
     }
 
     if (!email_register.value) {
         show_register_warning_for_email.value = true
+        has_false = true
+
+    }
+
+    if (has_false == true) {
+        return;
     }
 
     try {
         // 注册信息
         const register_info = {
-            user_name: user_name_register.value,
+            username: user_name_register.value,
             password: password_register.value,
-            email: email_register
+            email: email_register.value
         }
         const response = await service.post(
-            url = '/register',
-            data = register_info
+            API_PATHS.REGISTER,
+            register_info
         )
         console.log("注册成功!", response.message);
         const token = response.token;
@@ -169,7 +184,7 @@ const Register = async () => {
                 <div class="return-button" @click="ReturnIndex"> Return </div>
                 <form @submit.prevent>
                     <h1>登 录</h1>
-                    <input type="email" placeholder="邮箱" v-model="user_name_login" />
+                    <input type="text" placeholder="用户名" v-model="user_name_login" />
                     <input type="password" placeholder="密码" v-model="password_login" />
                     <div v-if="show_login_warning_for_user_name" class="warning_word">用户名输入格式错误!</div>
                     <div v-if="show_login_warning_for_password" class="warning_word">密码输入格式错误!</div>

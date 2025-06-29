@@ -22,5 +22,5 @@ clean:
 	@rm -rf $(BUILD_DIR)
 
 check:
-	@tree -L 3 -I "node_modules"
+	@tree -L 4 -I "node_modules"
 

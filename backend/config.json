@@ -82,7 +82,7 @@
             "logfile_base_name": "",
             "log_size_limit": 100000000,
             "max_files": 0,
-            "log_level": "DEBUG",
+            "log_level": "trace",
             "display_local_time": false
         },
         "run_as_daemon": false,

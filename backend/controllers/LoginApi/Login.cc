@@ -25,6 +25,7 @@ void Login::HandleLogin(
     return;
   }
 
+  // 账号密码 获取
   std::string username = (*requestjson).get("username", "").asString();
   std::string password = (*requestjson).get("password", "").asString();
 
@@ -36,12 +37,13 @@ void Login::HandleLogin(
 
   mapper.findOne(
       criteria,
-      [callback](Users user) {
+      [callback](const Users &user) {
         Json::Value result;
         result["message"] = "登录成功!";
         auto resp = HttpResponse::newHttpJsonResponse(result);
         callback(resp);
       },
+
       [callback](const DrogonDbException &e) {
         if (typeid(e) == typeid(UnexpectedRows)) {
           Json::Value error;

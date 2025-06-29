@@ -28,12 +28,11 @@ void Register::HandleRegister(
   std::string username = (*registerjson).get("username", "").asString();
   std::string passward = (*registerjson).get("password", "").asString();
   std::string email = (*registerjson).get("email", "").asString();
-
-  MY_LOG_SUC("user_name:", username, "\n", "password", passward, "\n", "email",
+  MY_LOG_SUC("username:", username, "\n", "password", passward, "\n", "email",
              email, "\n");
 
   try {
-    //   信息获取完毕之后输出一下
+    // 信息获取完毕之后输出一下
     auto db_client = app().getDbClient();
     Mapper<Users> mapper(db_client);
 
@@ -55,28 +54,32 @@ void Register::HandleRegister(
 
     // 响应和回馈
     Json::Value result;
-    // TODO 前端看一眼
 
+    // TODO 前端看一眼  一个是 message 一个是token
+    // 赋值 resp
     result["message"] = "User registered successfully";
     result["token"] = token;
     auto resp = HttpResponse::newHttpJsonResponse(result);
     resp->setStatusCode(k201Created);
     MY_LOG_SUC("用户插入成功", username);
 
+    // 回馈
     callback(resp);
-
   }
   // 500 表示服务器内部错误
   catch (const DrogonDbException &e) {
+    // 日志输出
     MY_LOG_ERROR("用户插入数据库失败");
 
-    Json::Value error;
-
     // TODO 前端看一眼
+    // 设置错误码
+    Json::Value error;
     error["code"] = 500;
-    error["message "] = "数据库插入失败!";
+    error["message"] = "数据库插入失败!";
     auto resp = HttpResponse::newHttpJsonResponse(error);
     resp->setStatusCode(drogon::k500InternalServerError);
+
+    // 回调
     callback(resp);
   }
 }

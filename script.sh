@@ -27,6 +27,7 @@ fi
 
 
 echo "复制 dist 内容到后端 public 目录..."
+rm -r $BACKEND_DIR/public/*
 cp -r $FRONTEND_DIR/dist/* $BACKEND_DIR/public/ || { echo " 复制前端文件失败!"; exit 1; }
 
 echo "前端部分处理完成！"
@@ -40,7 +41,7 @@ mkdir -p $BACKEND_BUILD_DIR
 cd $BACKEND_BUILD_DIR
 
 
-echo "使用 CMake 生成 Makefile (并指定 Vcpkg 和 Redis 支持)..."
+echo "使用 CMake 生成 Makefile ..."
 cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_TOOLCHAIN_FILE -DBUILD_REDIS=ON || { echo " CMake 配置失败!"; exit 1; }
 
 echo "使用 Make 编译后端项目..."

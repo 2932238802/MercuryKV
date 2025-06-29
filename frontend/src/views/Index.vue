@@ -1,13 +1,34 @@
 <script setup>
 import router from '../router';
+import service from '../components/request';
 
-/**
- * 实现界面跳转
- */
-const Login = () => {
-    router.push({ name: "RegisterAndLogin" });
-    return;
+// 常量
+const API_PATH = {
+    TOKEN_CHECK: "/Login/checktoken"
 }
+
+
+
+const CheckTokenForLastLogin = async () => {
+    try {
+        const response = await service.get(API_PATH.TOKEN_CHECK);
+        return response; // 拦截器返回的是 res，所以这里直接就是后端数据
+    } catch (error) {
+        console.error("Token verification failed in component:", error.message);
+        return null;
+    }
+}
+
+const Login = async () => {
+    const responseData = await CheckTokenForLastLogin(); 
+    if (!responseData || responseData.code !== 200) {
+        router.push({ name: "RegisterAndLogin" });
+    } else {
+        router.push({ name: "Mercury" });
+        alert("欢迎回来");
+    }
+}
+
 const About = () => {
     router.push({ name: "About" });
     return;

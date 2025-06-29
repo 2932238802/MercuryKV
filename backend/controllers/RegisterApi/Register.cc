@@ -57,9 +57,10 @@ void Register::HandleRegister(
 
     // TODO 前端看一眼  一个是 message 一个是token
     // 赋值 resp
-    result["message"] = "User registered successfully";
+    result["message"] = "注册成功!";
     result["token"] = token;
     result["code"] = 201;
+    result["user_id"] = user_id;
 
     auto resp = HttpResponse::newHttpJsonResponse(result);
     resp->setStatusCode(k201Created);

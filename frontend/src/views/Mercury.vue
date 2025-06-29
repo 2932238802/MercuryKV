@@ -7,112 +7,104 @@ const KvPairs = ref([
   { id: 2, key: 'user:101:permissions', value: '["read", "write", "comment"]', tags: ['user', 'security'], updated_at: '2023-10-26 18:05:01' },
 ]);
 
-const isModalOpen = ref(false);
-const isEditing = ref(false);
-const currentItem = ref(null);
+const ismodalopen = ref(false);
+const isediting = ref(false);
+const currentitem = ref(null);
 const router = useRouter();
-
-const modalTitle = computed(() => {
-  return isEditing.value ? 'Edit KV Pair' : 'Create KV Pair';
+const modaltitle = computed(() => {
+  return isediting.value ? 'Edit KV Pair' : 'Create KV Pair';
 });
 
-const tagsAsString = computed({
+// 当程序需要读取 TagsAsString  值的时候 -> get() 
+// 写入或者 修改的时候 才会调用 这个 set
+const TagsAsString = computed({
   get() {
-    return currentItem.value?.tags?.join(', ') || '';
+    return currentitem.value?.tags?.join(',') || '';
   },
   set(newValue) {
-    if (currentItem.value) {
-      currentItem.value.tags = newValue.split(',').map(tag => tag.trim()).filter(tag => tag);
+    if (currentitem.value) {
+      currentitem.value.tags = newValue.split(/[,\s\.，。]+/)
+        .map(tag => tag.trim())
+        .filter(tag => tag);
     }
   }
 });
 
-
-// --- 方法 ---
-
+// -----------------------------------------------------------------
 // 导航到主页或上一页
 function HandleReturn() {
   router.push({ name: 'Index' }); // 假设你的主页路由名叫 'Index'
 }
+// -----------------------------------------------------------------
+
+// -----------------------------------------------------------------
+function HandleReLogin() {
+  localStorage.removeItem('AuthToken');
+  router.push({ name: 'RegisterAndLogin' });
+}
+// -----------------------------------------------------------------
+
 
 // 打开“添加”弹窗
 function HandleAddNew() {
-  isEditing.value = false;
+  isediting.value = false;
   // 为新条目提供一个干净的模板
-  currentItem.value = {
+  currentitem.value = {
     key: '',
     value: '',
     tags: []
   };
-  isModalOpen.value = true;
+  ismodalopen.value = true;
 }
 
 // 打开“编辑”弹窗
-function handleEdit(itemToEdit) {
-  isEditing.value = true;
+function handleEdit(itemtoedit) {
+  isediting.value = true;
   // 创建一个副本进行编辑，避免直接修改列表中的原始数据
-  currentItem.value = { ...itemToEdit };
-  isModalOpen.value = true;
+  currentitem.value = { ...itemtoedit };
+  ismodalopen.value = true;
 }
 
 // 关闭弹窗并重置状态
-function closeModal() {
-  isModalOpen.value = false;
-  currentItem.value = null;
+function CloseModal() {
+  ismodalopen.value = false;
+  currentitem.value = null;
 }
 
 // 处理表单提交（添加或更新）
-async function handleSubmit() {
-  if (!currentItem.value) return;
+async function HandleSubmit() {
+  if (!currentitem.value) return;
 
-  if (isEditing.value) {
-    // --- 更新逻辑 ---
-    console.log('Updating item:', currentItem.value);
-    // 在这里调用你的后端 API 来更新数据
-    // await service.put(`/api/kv/${currentItem.value.id}`, currentItem.value);
+  if (isediting.value) {
+    console.log('Updating item:', currentitem.value);
 
-    // 模拟成功后，更新前端列表
-    const index = KvPairs.value.findIndex(item => item.id === currentItem.value.id);
+    // 后端实现一下
+
+    const index = KvPairs.value.findIndex(item => item.id === currentitem.value.id);
     if (index !== -1) {
-      KvPairs.value[index] = { ...currentItem.value, updated_at: new Date().toLocaleString() };
+      KvPairs.value[index] = { ...currentitem.value, updated_at: new Date().toLocaleString() };
     }
 
   } else {
-    // --- 添加逻辑 ---
-    console.log('Creating new item:', currentItem.value);
-    // 在这里调用你的后端 API 来创建新数据
-    // const response = await service.post('/api/kv', currentItem.value);
-    // const newItem = response.data;
-
-    // 模拟成功后，添加到前端列表
-    const newItem = { ...currentItem.value, id: Date.now(), updated_at: new Date().toLocaleString() }; // 使用时间戳作为临时id
-    KvPairs.value.unshift(newItem); // 添加到列表顶部
+    console.log('Creating new item:', currentitem.value);
+    const newItem = { ...currentitem.value, id: Date.now(), updated_at: new Date().toLocaleString() }; // 使用时间戳作为临时id
+    KvPairs.value.unshift(newItem);
   }
 
-  closeModal(); // 操作完成后关闭弹窗
+  CloseModal();
 }
 
 // 删除条目 (带确认)
-function handleDelete(itemToDelete) {
-  if (confirm(`Are you sure you want to delete the key "${itemToDelete.key}"?`)) {
-    console.log('Deleting item:', itemToDelete);
-    // 在这里调用你的后端 API 来删除数据
-    // await service.delete(`/api/kv/${itemToDelete.id}`);
+function HandleDelete(itemtodelete) {
+  if (confirm(`Are you sure you want to delete the key "${itemtodelete.key}"?`)) {
+    console.log('Deleting item:', itemtodelete);
 
-    // 模拟成功后，从前端列表中移除
-    KvPairs.value = KvPairs.value.filter(item => item.id !== itemToDelete.id);
+    //TODO: 后端完善一下
+    // filter 就能过滤内容
+    KvPairs.value = KvPairs.value.filter(item => item.id !== itemtodelete.id);
   }
 }
-
 </script>
-
-
-
-
-
-
-
-
 
 <template>
   <!-- A -->
@@ -121,13 +113,13 @@ function handleDelete(itemToDelete) {
     <!-- B_1. 主要业务代码 -->
     <div class="content-card">
 
-      <!-- 这个是返回按钮 -->
+      <!-- C_1 这个是返回按钮 -->
       <!-- title 当用户将鼠标悬停在按钮上时，会显示一个提示框显示 "Go back"  -->
       <button class="btn-return" @click="HandleReturn" title="Go back">
         <i class="fas fa-arrow-left"></i>
       </button>
 
-      <!-- 工具栏 -->
+      <!-- C_2 工具栏 -->
       <!-- 一个搜索输入框 一个是增加新value -->
       <header class="kv-manager-header">
         <h1>KV Store</h1>
@@ -140,11 +132,15 @@ function handleDelete(itemToDelete) {
           <button class="btn-primary" @click="HandleAddNew">
             + Add New
           </button>
+
+          <button class="btn-ghost" @click="HandleReLogin" title="Logout and login again">
+            <i class="fas fa-sign-out-alt"></i> 
+            Re-Login
+          </button>
         </div>
       </header>
 
-
-
+      <!-- C_3 主要显示栏 -->
       <div class="table-wrapper">
         <table class="kv-table">
           <thead>
@@ -171,13 +167,15 @@ function handleDelete(itemToDelete) {
                 <button class="btn-icon" title="View History" @click="handleViewHistory(item)">
                   <i class="fas fa-history"></i>
                 </button>
+
                 <button class="btn-icon" title="Edit" @click="handleEdit(item)">
                   <i class="fas fa-pencil-alt"></i>
                 </button>
 
-                <button class="btn-icon btn-danger" title="Delete" @click="handleDelete(item)">
+                <button class="btn-icon btn-danger" title="Delete" @click="HandleDelete(item)">
                   <i class="fas fa-trash-alt"></i>
                 </button>
+
               </td>
             </tr>
 
@@ -187,11 +185,12 @@ function handleDelete(itemToDelete) {
                 No Key-Value pairs found. <a href="#" @click.prevent="HandleAddNew">Add one now!</a>
               </td>
             </tr>
+
           </tbody>
         </table>
       </div>
 
-
+      <!-- C_4 换页按钮 -->
       <footer class="kv-manager-footer">
         <div class="pagination">
           <span>Page 1 of 1</span>
@@ -199,29 +198,29 @@ function handleDelete(itemToDelete) {
           <button class="btn-ghost" disabled>Next &gt;</button>
         </div>
       </footer>
+
     </div>
 
-
     <!-- B_2. 弹窗 -->
-    <div class="modal-overlay" v-if="isModalOpen">
+    <div class="modal-overlay" v-if="ismodalopen">
       <div class="modal-content">
-        <form @submit.prevent="handleSubmit">
-          <h1>{{ modalTitle }}</h1>
+        <form @submit.prevent="HandleSubmit">
+          <h1>{{ modaltitle }}</h1>
           <div class="form-group">
-            <input v-model="currentItem.key" id="kv-key" type="text" placeholder="Key (e.g., app:settings:retries)"
+            <input v-model="currentitem.key" id="kv-key" type="text" placeholder="Key (e.g., app:settings:retries)"
               required />
           </div>
           <div class="form-group">
-            <textarea v-model="currentItem.value" id="kv-value" rows="5"
+            <textarea v-model="currentitem.value" id="kv-value" rows="5"
               placeholder="Value (string or valid JSON)"></textarea>
           </div>
           <div class="form-group">
-            <input v-model="tagsAsString" id="kv-tags" type="text"
+            <input v-model="TagsAsString" id="kv-tags" type="text"
               placeholder="Tags (comma separated, e.g., api,config,user)" />
           </div>
 
           <div class="modal-actions">
-            <button type="button" class="btn-ghost" @click="closeModal">Cancel</button>
+            <button type="button" class="btn-ghost" @click="CloseModal">Cancel</button>
             <button type="submit" class="btn-primary">Save</button>
           </div>
         </form>
@@ -231,17 +230,10 @@ function handleDelete(itemToDelete) {
 </template>
 
 
-
-
-
-
-
 <style scoped>
-/* 引入与登录页一致的字体和图标库 */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
-/* --- 基础和布局 --- */
 .kv-manager-page {
   display: flex;
   justify-content: center;
@@ -255,7 +247,6 @@ function handleDelete(itemToDelete) {
 
 .content-card {
   position: relative;
-  /* 为返回按钮定位 */
   width: 100%;
   max-width: 1200px;
   background-color: #ffffff;
@@ -264,12 +255,10 @@ function handleDelete(itemToDelete) {
   padding: 2rem 2.5rem;
 }
 
-/* --- 新增：返回按钮样式 --- */
 .btn-return {
   position: absolute;
   top: 2rem;
   left: -4rem;
-  /* 放在卡片外部左侧 */
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;

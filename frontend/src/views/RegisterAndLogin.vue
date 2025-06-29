@@ -43,6 +43,11 @@ const ReturnIndex = () => {
 // ------------------------------
 // 向后端发送请求
 // 登录
+// 注册成功 201
+// 然后保存token 到本地
+// TODO: 后端看一眼 200
+// console.log("登录成功!");
+// token本地保存一下
 const Login = async () => {
 
     // 警告要重置一下
@@ -73,32 +78,18 @@ const Login = async () => {
             login_info
         )
 
-        // 注册成功 201
-        // 然后保存token 到本地
-        // TODO: 后端看一眼 200
-        if (response.code == 200) {
-            // console.log("登录成功!");
+        const token = response.token;
+        localStorage.setItem('AuthToken', token);
+        router.push({ name: "Mercury" });
+        alert(response.message);
 
-            // token本地保存一下
-            const token = response.token;
-            localStorage.setItem('AuthToken', token);
 
-            router.push({ name: "Mercury" });
-            alert(response.message);
-        }
-
-        if(response.code == 400 || response.code == 500)
-        {
-            // console.log("登录失败!");
-            alert(response.message);
-        }
     }
     catch (error) {
         // 日志输出一下
         console.error("登录失败:", error.message);
         alert(`登录失败：${error.message}`);
     }
-
 }
 
 // ------------------------------
@@ -142,26 +133,18 @@ const Register = async () => {
             API_PATHS.REGISTER,
             register_info
         )
-
-        if (response.code == 201) {
-            const token = response.token;
-            localStorage.setItem('AuthToken', token);
-            // 跳转界面
-            router.push({ name: "Mercury" });
-            alert(response.message);
-        }
-
-        if (response.code == 500) {
-            console.error("注册失败", error.message)
-        }
+        const token = response.token;
+        const user_id = response.user_id;
+        localStorage.setItem('AuthToken', token);
+        localStorage.setItem('AuthToken', user_id);
+        router.push({ name: "Mercury" });
+        alert(response.message);                        // TODO: 后端看一眼
     }
     catch (error) {
         console.error("注册失败:", error.message);
         alert(`注册失败：${error.message}`);
     }
 }
-
-
 
 </script>
 

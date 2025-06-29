@@ -58,7 +58,6 @@ public:
     }
 
     catch (const std::exception &e) {
-      // 捕获其他异常 (如 token 格式本身就无效，导致 jwt::decode 失败)
 
       MY_LOG_WARN("An unexpected error occurred during JWT verification:  ",
                   e.what());

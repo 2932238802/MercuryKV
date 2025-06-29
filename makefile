@@ -1,10 +1,12 @@
 BACKEND_DIR = ./backend
+FRONT_DIR = ./frontend
 BUILD_DIR = $(BACKEND_DIR)/build
 VCPKG_TOOLCHAIN_FILE = /home/losangelous/LosAngelous/dev/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 .PHONY: all build rebuild clean check
 
 all: build
+
 
 rebuild: clean build
 

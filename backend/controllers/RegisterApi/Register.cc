@@ -46,7 +46,16 @@ void Register::HandleRegister(
     user.setSalt(salt);
 
     // 插入数据
-    mapper.insert(user);
+    try {
+      mapper.insert(user);
+    } catch (const drogon::orm::DrogonDbException &e) {
+      Json::Value error;
+      error["message"] =
+          "Database insertion failed: " + std::string(e.base().what());
+      auto res = HttpResponse::newHttpJsonResponse(error);
+      callback(res);
+      return;
+    }
 
     // 生成对应的user_id 和 token
     std::string user_id = std::to_string(user.getValueOfUserId());

@@ -6,75 +6,55 @@ DROP TABLE IF EXISTS users CASCADE;
 
 
 CREATE TABLE users (
-    -- bigserial 就会自动增加
-    -- 
-    id BIGSERIAL PRIMARY KEY,
+    user_id BIGSERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    -- 哈希加密进来的啊
     password_hash VARCHAR(255) NOT NULL,
-
     salt VARCHAR(64) NOT NULL,
-    
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_login_at TIMESTAMPTZ
 );
 
+-- 这个是 标签名字 对应用户 就是用户创建的标签
+CREATE TABLE tags (
+    tag_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    tag_name VARCHAR(100) NOT NULL,
+    UNIQUE (user_id, tag_name),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
 
--- CREATE TABLE tags (
---     id BIGSERIAL PRIMARY KEY,
---     user_id BIGINT NOT NULL,
---     name VARCHAR(100) NOT NULL,
+-- kv 表
+CREATE TABLE kv_store (
+    kv_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    key_input VARCHAR(255) NOT NULL,
+    value_input JSONB NOT NULL,
+    previous_value JSONB NULL, 
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, key_input),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
 
---     -- 禁止任何一个用户拥有两个相同的键名
---     UNIQUE (user_id, name),
+-- 一个用户的 一个api 接口
+CREATE TABLE api_keys (
+    api_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    key_hash VARCHAR(255) NOT NULL UNIQUE,
+    api_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
---     -- 级联
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
--- );
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
 
-
--- CREATE TABLE kv_store (
---     id BIGSERIAL PRIMARY KEY,
---     user_id BIGINT NOT NULL,
---     key VARCHAR(255) NOT NULL,
---     value JSONB NOT NULL,
---     previous_value JSONB NULL, -- Can be NULL if it's the first entry
---     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
---     -- A user cannot have duplicate keys.
---     UNIQUE (user_id, key),
-
---     -- 级联
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
--- );
-
--- CREATE TABLE api_keys (
---     id BIGSERIAL PRIMARY KEY,
---     user_id BIGINT NOT NULL,
---     key_hash VARCHAR(255) NOT NULL UNIQUE,
---     name VARCHAR(255) NOT NULL,
---     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
--- );
+-- tag 和 kv的表
+CREATE TABLE kv_tag_association (
+    kv_id BIGINT NOT NULL,
+    tag_id BIGINT NOT NULL,
+    PRIMARY KEY (kv_id, tag_id),
+    FOREIGN KEY (kv_id) REFERENCES kv_store(kv_id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
+);
 
 
--- -- 一个 kv 对应一个标签 没有设置就是默认
--- CREATE TABLE kv_tag_association (
---     kv_id BIGINT NOT NULL,
---     tag_id BIGINT NOT NULL,
-
---     -- The combination of a KV pair and a Tag must be unique.
---     PRIMARY KEY (kv_id, tag_id),
-
---     -- If the KV pair is deleted, this association is removed.
---     FOREIGN KEY (kv_id) REFERENCES kv_store(id) ON DELETE CASCADE,
-
---     -- If the Tag is deleted, this association is removed.
---     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
--- );
-
--- CREATE INDEX IF NOT EXISTS idx_kv_store_key ON kv_store(key);
--- CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
 

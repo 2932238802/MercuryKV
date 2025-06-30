@@ -2,7 +2,7 @@
 #include "MyCrypt.hpp"
 #include "MyJWT.hpp"
 #include "MyLog.hpp"
-#include "Users.h"
+#include "Users/Users.h"
 #include <drogon/HttpTypes.h>
 #include <drogon/orm/Exception.h>
 #include <json/value.h>
@@ -49,7 +49,7 @@ void Register::HandleRegister(
     mapper.insert(user);
 
     // 生成对应的user_id 和 token
-    std::string user_id = std::to_string(user.getValueOfId());
+    std::string user_id = std::to_string(user.getValueOfUserId());
     std::string token = MyJWT::GetJWT(user_id);
 
     // 响应和回馈

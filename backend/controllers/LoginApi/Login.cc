@@ -2,7 +2,7 @@
 #include "MyCrypt.hpp"
 #include "MyJWT.hpp"
 #include "MyLog.hpp"
-#include "Users.h"
+#include "Users/Users.h"
 #include <drogon/HttpResponse.h>
 #include <drogon/orm/Criteria.h>
 #include <drogon/orm/Mapper.h>
@@ -52,7 +52,7 @@ void Login::HandleLogin(
         auto password_stored = user.getPasswordHash();
         if (MyCrypt::VerifyPassword(password, salt, *password_stored)) {
           std::string token =
-              MyJWT::GetJWT(std::to_string(user.getValueOfId()));
+              MyJWT::GetJWT(std::to_string(user.getValueOfUserId()));
 
           Json::Value result;
           result["message"] = "登录成功!";

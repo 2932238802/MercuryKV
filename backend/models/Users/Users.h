@@ -44,7 +44,7 @@ class Users
   public:
     struct Cols
     {
-        static const std::string _id;
+        static const std::string _user_id;
         static const std::string _username;
         static const std::string _email;
         static const std::string _password_hash;
@@ -102,13 +102,13 @@ class Users
                           std::string &err,
                           bool isForCreation);
 
-    /**  For column id  */
-    ///Get the value of the column id, returns the default value if the column is null
-    const int64_t &getValueOfId() const noexcept;
+    /**  For column user_id  */
+    ///Get the value of the column user_id, returns the default value if the column is null
+    const int64_t &getValueOfUserId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int64_t> &getId() const noexcept;
-    ///Set the value of the column id
-    void setId(const int64_t &pId) noexcept;
+    const std::shared_ptr<int64_t> &getUserId() const noexcept;
+    ///Set the value of the column user_id
+    void setUserId(const int64_t &pUserId) noexcept;
 
     /**  For column username  */
     ///Get the value of the column username, returns the default value if the column is null
@@ -185,7 +185,7 @@ class Users
     void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
-    std::shared_ptr<int64_t> id_;
+    std::shared_ptr<int64_t> userId_;
     std::shared_ptr<std::string> username_;
     std::shared_ptr<std::string> email_;
     std::shared_ptr<std::string> passwordHash_;
@@ -207,13 +207,13 @@ class Users
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="select * from " + tableName + " where id = $1";
+        static const std::string sql="select * from " + tableName + " where user_id = $1";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="delete from " + tableName + " where id = $1";
+        static const std::string sql="delete from " + tableName + " where user_id = $1";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
@@ -221,7 +221,7 @@ class Users
         std::string sql="insert into " + tableName + " (";
         size_t parametersCount = 0;
         needSelection = false;
-            sql += "id,";
+            sql += "user_id,";
             ++parametersCount;
         if(dirtyFlag_[1])
         {

@@ -8,7 +8,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME}
   main.cc
-  models/Users.cc
+  models/Users/Users.cc
+  models/ApiKey/ApiKeys.cc
+  models/KV_Tag/KvTagAssociation.cc
+  models/KVStore/KvStore.cc
+  models/Tags/Tags.cc
   controllers/LoginApi/Login.cc
   controllers/RegisterApi/Register.cc
 )

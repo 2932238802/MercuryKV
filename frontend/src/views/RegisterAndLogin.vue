@@ -4,7 +4,6 @@ import service from '../components/request';
 import router from '../router';
 import { ShowCustomModal } from '../components/show'
 
-
 // ------------------------------
 // 绑定页面的输入内容
 const user_name_register = ref("");

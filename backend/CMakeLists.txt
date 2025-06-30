@@ -13,8 +13,10 @@ add_executable(${PROJECT_NAME}
   models/KV_Tag/KvTagAssociation.cc
   models/KVStore/KvStore.cc
   models/Tags/Tags.cc
+
   controllers/LoginApi/Login.cc
   controllers/RegisterApi/Register.cc
+  controllers/FetchDataApi/FetchData.cc
 )
 
 find_package(OpenSSL REQUIRED)

@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import service from '../components/request'
+import { ShowCustomModal } from '../components/show';
 
-// -----------------------------------------------------------------
+
+// ----------------- ------------------------------------------------
 const KvPairs = ref([
-  { id: 1, key: 'my-app:config:theme', value: '"dark"', tags: ['config', 'ui'], updated_at: '2023-10-27 10:30:15' },
-  { id: 2, key: 'user:101:permissions', value: '["read", "write", "comment"]', tags: ['user', 'security'], updated_at: '2023-10-26 18:05:01' },
 ]);
 const ismodalopen = ref(false);
 const isediting = ref(false);
@@ -14,9 +15,11 @@ const router = useRouter();
 const modaltitle = computed(() => {
   return isediting.value ? 'Edit KV Pair' : 'Create KV Pair';
 });
+
+const API_PATH = {
+  FETCH:"/FetchData/fetch"
+}
 // -----------------------------------------------------------------
-
-
 
 // -----------------------------------------------------------------
 // 当程序需要读取 TagsAsString  值的时候 -> get() 
@@ -133,6 +136,27 @@ function HandleDelete(itemtodelete) {
   }
 }
 // -----------------------------------------------------------------
+
+
+const loadInitialData = async () => {
+  const user_id = localStorage.getItem("user_id");
+
+  try {
+    const data = await service.get(API_PATH.FETCH,{params:user_id});
+
+    // 数据封装
+    // TODO: 处理后端发来的请求
+    KvPairs = data.data;
+  }
+  catch (error) {
+    console.error("获取后端数据失败,账号异常请重新登录");
+    ShowCustomModal(error.message);
+  }
+}
+
+onMounted(() => {
+  loadInitialData();
+});
 </script>
 
 <template>
@@ -228,7 +252,6 @@ function HandleDelete(itemtodelete) {
           <button class="btn-ghost" disabled>Next &gt;</button>
         </div>
       </footer>
-
     </div>
 
     <!-- B_2. 弹窗 -->

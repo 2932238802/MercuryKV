@@ -36,6 +36,15 @@ CREATE TABLE kv_store (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+-- tag 和 kv的表
+CREATE TABLE kv_tag_association (
+    kv_id BIGINT NOT NULL,
+    tag_id BIGINT NOT NULL,
+    PRIMARY KEY (kv_id, tag_id),
+    FOREIGN KEY (kv_id) REFERENCES kv_store(kv_id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
+);
+
 -- 一个用户的 一个api 接口
 CREATE TABLE api_keys (
     api_id BIGSERIAL PRIMARY KEY,
@@ -46,15 +55,3 @@ CREATE TABLE api_keys (
 
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
-
--- tag 和 kv的表
-CREATE TABLE kv_tag_association (
-    kv_id BIGINT NOT NULL,
-    tag_id BIGINT NOT NULL,
-    PRIMARY KEY (kv_id, tag_id),
-    FOREIGN KEY (kv_id) REFERENCES kv_store(kv_id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
-);
-
-
-

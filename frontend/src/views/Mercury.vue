@@ -2,11 +2,11 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
+// -----------------------------------------------------------------
 const KvPairs = ref([
   { id: 1, key: 'my-app:config:theme', value: '"dark"', tags: ['config', 'ui'], updated_at: '2023-10-27 10:30:15' },
   { id: 2, key: 'user:101:permissions', value: '["read", "write", "comment"]', tags: ['user', 'security'], updated_at: '2023-10-26 18:05:01' },
 ]);
-
 const ismodalopen = ref(false);
 const isediting = ref(false);
 const currentitem = ref(null);
@@ -14,7 +14,11 @@ const router = useRouter();
 const modaltitle = computed(() => {
   return isediting.value ? 'Edit KV Pair' : 'Create KV Pair';
 });
+// -----------------------------------------------------------------
 
+
+
+// -----------------------------------------------------------------
 // 当程序需要读取 TagsAsString  值的时候 -> get() 
 // 写入或者 修改的时候 才会调用 这个 set
 const TagsAsString = computed({
@@ -29,6 +33,9 @@ const TagsAsString = computed({
     }
   }
 });
+// -----------------------------------------------------------------
+
+
 
 // -----------------------------------------------------------------
 // 导航到主页或上一页
@@ -36,6 +43,8 @@ function HandleReturn() {
   router.push({ name: 'Index' }); // 假设你的主页路由名叫 'Index'
 }
 // -----------------------------------------------------------------
+
+
 
 // -----------------------------------------------------------------
 function HandleReLogin() {
@@ -45,6 +54,8 @@ function HandleReLogin() {
 // -----------------------------------------------------------------
 
 
+
+// -----------------------------------------------------------------
 // 打开“添加”弹窗
 function HandleAddNew() {
   isediting.value = false;
@@ -56,7 +67,11 @@ function HandleAddNew() {
   };
   ismodalopen.value = true;
 }
+// -----------------------------------------------------------------
 
+
+
+// -----------------------------------------------------------------
 // 打开“编辑”弹窗
 function handleEdit(itemtoedit) {
   isediting.value = true;
@@ -64,21 +79,30 @@ function handleEdit(itemtoedit) {
   currentitem.value = { ...itemtoedit };
   ismodalopen.value = true;
 }
+// -----------------------------------------------------------------
 
+
+// -----------------------------------------------------------------
 // 关闭弹窗并重置状态
 function CloseModal() {
   ismodalopen.value = false;
   currentitem.value = null;
 }
+// -----------------------------------------------------------------
 
+
+
+// -----------------------------------------------------------------
 // 处理表单提交（添加或更新）
 async function HandleSubmit() {
   if (!currentitem.value) return;
 
   if (isediting.value) {
+    // 日志输出
     console.log('Updating item:', currentitem.value);
 
     // 后端实现一下
+    // TODO: 提交表单
 
     const index = KvPairs.value.findIndex(item => item.id === currentitem.value.id);
     if (index !== -1) {
@@ -93,7 +117,11 @@ async function HandleSubmit() {
 
   CloseModal();
 }
+// -----------------------------------------------------------------
 
+
+
+// -----------------------------------------------------------------
 // 删除条目 (带确认)
 function HandleDelete(itemtodelete) {
   if (confirm(`Are you sure you want to delete the key "${itemtodelete.key}"?`)) {
@@ -104,6 +132,7 @@ function HandleDelete(itemtodelete) {
     KvPairs.value = KvPairs.value.filter(item => item.id !== itemtodelete.id);
   }
 }
+// -----------------------------------------------------------------
 </script>
 
 <template>
@@ -134,7 +163,7 @@ function HandleDelete(itemtodelete) {
           </button>
 
           <button class="btn-ghost" @click="HandleReLogin" title="Logout and login again">
-            <i class="fas fa-sign-out-alt"></i> 
+            <i class="fas fa-sign-out-alt"></i>
             Re-Login
           </button>
         </div>
@@ -191,6 +220,7 @@ function HandleDelete(itemtodelete) {
       </div>
 
       <!-- C_4 换页按钮 -->
+      <!-- TODO: 页面部分完善 -->
       <footer class="kv-manager-footer">
         <div class="pagination">
           <span>Page 1 of 1</span>

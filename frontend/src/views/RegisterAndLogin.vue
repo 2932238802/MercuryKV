@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import service from '../components/request';
 import router from '../router';
+import { ShowCustomModal } from '../components/show'
 
 
 // ------------------------------
@@ -81,14 +82,12 @@ const Login = async () => {
         const token = response.token;
         localStorage.setItem('AuthToken', token);
         router.push({ name: "Mercury" });
-        alert(response.message);
-
-
+        ShowCustomModal(response.message);
     }
     catch (error) {
         // 日志输出一下
         console.error("登录失败:", error.message);
-        alert(`登录失败：${error.message}`);
+        ShowCustomModal(`登录失败：${error.message}`);
     }
 }
 
@@ -136,13 +135,13 @@ const Register = async () => {
         const token = response.token;
         const user_id = response.user_id;
         localStorage.setItem('AuthToken', token);
-        localStorage.setItem('AuthToken', user_id);
+        localStorage.setItem('UserId', user_id);
         router.push({ name: "Mercury" });
-        alert(response.message);                        // TODO: 后端看一眼
+        ShowCustomModal(response.message);                        // TODO: 后端看一眼
     }
     catch (error) {
         console.error("注册失败:", error.message);
-        alert(`注册失败：${error.message}`);
+        ShowCustomModal(`注册失败：${error.message}`);
     }
 }
 
@@ -156,9 +155,11 @@ const Register = async () => {
                 <div class="return-button" @click="ReturnIndex"> Return </div>
                 <form @submit.prevent>
                     <h1>创建账户</h1>
-                    <input type="text" placeholder="用户名" v-model="user_name_register" />
-                    <input type="email" placeholder="邮箱" v-model="email_register" />
-                    <input type="password" placeholder="密码" v-model="password_register" />
+                    <input type="text" placeholder="用户名" v-model="user_name_register" minlength="8" maxlength="14"
+                        required />
+                    <input type="email" placeholder="邮箱" v-model="email_register" required />
+                    <input type="password" placeholder="密码" v-model="password_register" minlength="8" maxlength="20"
+                        pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$" required />
                     <!-- 
                     
                     (1) : 是 v-bind: 的简写 

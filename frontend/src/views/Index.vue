@@ -1,6 +1,7 @@
 <script setup>
 import router from '../router';
 import service from '../components/request';
+import {ShowCustomModal} from '../components/show';
 
 // 常量
 const API_PATH = {
@@ -25,7 +26,7 @@ const Login = async () => {
         router.push({ name: "RegisterAndLogin" });
     } else {
         router.push({ name: "Mercury" });
-        alert("欢迎回来");
+        ShowCustomModal("欢迎回来");
     }
 }
 

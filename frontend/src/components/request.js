@@ -31,8 +31,8 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    console.error("发生错误错误: " + error.data);
-    return Promise.reject(error.data);
+    console.error("发生错误错误: " + error);
+    return Promise.reject(error);
   }
 );
 

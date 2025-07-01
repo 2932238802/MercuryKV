@@ -6,7 +6,9 @@
 #include <cstdint>
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
+#include <drogon/orm/Criteria.h>
 #include <json/value.h>
+#include <optional>
 #include <string>
 #include <trantor/utils/Date.h>
 
@@ -163,7 +165,7 @@ void Alter::AddData(const HttpRequestPtr &req,
     1. put 请求
     2. 实现一下 修改数据的函数 更新数据库
     3. 请求发来的内容 应该有
-    4. 前端需要的内容 {user_id , key_input ,tag , value_input}
+    4. 前端需要的内容 {kv_id,user_id,key_input,value_input,tag_name}
     5. 返回的内容 应该有
  *
  * @param req
@@ -171,14 +173,13 @@ void Alter::AddData(const HttpRequestPtr &req,
  * @param id
  */
 void Alter::AlterData(const HttpRequestPtr &req,
-                      std::function<void(const HttpResponsePtr &)> &&callback,
-                      const std::string &id) {
+                      std::function<void(const HttpResponsePtr &)> &&callback) {
 
   // 获取请求体中的 JSON 对象
   auto jsonobject = req->getJsonObject();
   if (!jsonobject) {
     Json::Value error;
-    error["message"] = "Invalid request body";
+    error["message"] = "Invalid kv_id or Invalid request body";
     auto res = HttpResponse::newHttpJsonResponse(error);
     res->setStatusCode(k400BadRequest);
     callback(res);
@@ -188,11 +189,14 @@ void Alter::AlterData(const HttpRequestPtr &req,
   // 不为空
   // 不相信前端原则
   if (!(*jsonobject).isMember("user_id") ||
-      !(*jsonobject)["user_id"].isInt64() ||
+      !(*jsonobject)["user_id"].isInt64() || !(*jsonobject).isMember("kv_id") ||
+      !(*jsonobject)["kv_id"].isInt64() ||
       !(*jsonobject).isMember("key_input") ||
       !(*jsonobject)["key_input"].isString() ||
       !(*jsonobject).isMember("value_input") ||
-      !(*jsonobject)["value_input"].isString()) {
+      !(*jsonobject)["value_input"].isString() ||
+      !(*jsonobject).isMember("tag_name") ||
+      !(*jsonobject)["tag_name"].isString()) {
     Json::Value error;
     error["error"] = "Missing or invalid field in request body";
     auto res = HttpResponse::newHttpJsonResponse(error);
@@ -202,14 +206,74 @@ void Alter::AlterData(const HttpRequestPtr &req,
   }
 
   // 数据库生成
+  // 生成事务
   auto db_client = app().getDbClient();
   auto trans = db_client->newTransaction();
 
-  // 插入
+  // 修改数据
+  // 先根据主键 找到这个数据 然后 对C++ 进行修改 然后 mapper.update
+  // 进行修改到数据库
   // TODO: 改一下
   try {
     Mapper<KvStore> mapper(trans);
+    Mapper<Tags> mapper_tags(trans);
 
+    // 传到这里 说明了 被摆放在该带对应的数据
+    // 先前的数据
+    int64_t kv_id = (*jsonobject)["kv_id"].asInt64();
+    auto key_input = (*jsonobject)["key_input"].asString();
+    auto value_input = (*jsonobject)["value_input"].asString();
+    auto updated_at = trantor::Date::now();
+    auto tag_name = (*jsonobject)["tag_name"].asString();
+
+    std::optional<KvStore> kv_store = mapper.findOne(
+        Criteria(KvStore::Cols::_kv_id, CompareOperator::EQ, kv_id));
+
+    // 获取之前的数据
+    auto value_previous = kv_store->getValueOfKeyInput();
+
+    if (kv_store) {
+      Json::Value error;
+      error["message"] = "user_id is wrong or not found";
+      MY_LOG_ERROR("user_id is wrong or not found");
+      auto res = HttpResponse::newHttpJsonResponse(error);
+      res->setStatusCode(k404NotFound);
+      callback(res);
+      return;
+    }
+
+    // 更新数据
+    kv_store->setKeyInput(key_input);
+    kv_store->setValueInput(value_input);
+    kv_store->setUpdatedAt(updated_at);
+    kv_store->setPreviousValue(value_previous);
+    kv_store->setUpdatedAt(updated_at);
+
+    // 更新数据库
+    mapper.update(*kv_store);
+
+    // 更新另一个表 Tags
+    auto tag_id = kv_store->getValueOfKvId();
+    std::optional<Tags> existing_tag = mapper_tags.findOne(
+        Criteria(Tags::Cols::_user_id, CompareOperator::EQ, tag_id) &&
+        Criteria(Tags::Cols::_tag_name, CompareOperator::EQ, tag_name));
+
+    if (existing_tag) {
+      MY_LOG_SUC("New tag '", existing_tag->getTagName());
+
+      Tags new_tag;
+      existing_tag->setTagName(tag_name);
+      mapper_tags.insert(*existing_tag);
+    } else {
+      MY_LOG_ERROR("Tag not found");
+
+      Json::Value error;
+      error["message"] = "Tag not found";
+      auto res = HttpResponse::newHttpJsonResponse(error);
+      res->setStatusCode(k404NotFound);
+      callback(res);
+      return;
+    }
   } catch (const drogon::orm::DrogonDbException &e) {
     Json::Value error;
     error["message"] =
@@ -223,4 +287,54 @@ void Alter::AlterData(const HttpRequestPtr &req,
 
 void Alter::DeleteData(const HttpRequestPtr &req,
                        std::function<void(const HttpResponsePtr &)> &&callback,
-                       const std::string &id) {}
+                       const std::string &kv_id) {
+
+  auto jsonobject = req->getJsonObject();
+  if (!jsonobject) {
+    Json::Value error;
+    error["message"] = "Invalid request body";
+    auto res = HttpResponse::newHttpJsonResponse(error);
+    res->setStatusCode(k400BadRequest);
+    callback(res);
+    return;
+  }
+
+  // 删除 名为kv_id
+  auto db_client = app().getDbClient();
+  auto trans = db_client->newTransaction();
+
+  try {
+    // 这里是删除数据
+    Mapper<KvStore> mapper(trans);
+
+    std::optional<KvStore> findone = mapper.findOne(
+        Criteria(KvStore::Cols::_kv_id, CompareOperator::EQ, kv_id));
+
+    if (!findone) {
+      // 日志输出
+      MY_LOG_ERROR("Data not found for kv_id: ", kv_id);
+
+      Json::Value error;
+      error["message"] = "Data not found for kv_id: " + kv_id;
+      auto res = HttpResponse::newHttpJsonResponse(error);
+      res->setStatusCode(k404NotFound);
+      callback(res);
+      return;
+    }
+
+    // 删除数据库里面数据
+    mapper.deleteByPrimaryKey(findone->getValueOfKvId());
+
+    MY_LOG_SUC("Data deleted successfully for kv_id: ", kv_id);
+  }
+
+  catch (const drogon::orm::DrogonDbException &e) {
+    Json::Value error;
+    error["message"] =
+        "Database deletion failed: " + std::string(e.base().what());
+    auto res = HttpResponse::newHttpJsonResponse(error);
+    res->setStatusCode(k500InternalServerError);
+    callback(res);
+    return;
+  }
+}

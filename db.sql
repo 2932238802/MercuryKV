@@ -20,7 +20,9 @@ CREATE TABLE users (
 );
 
 -- 这个是 标签名字 对应用户 就是用户创建的标签
+-- 一个标签 对应多组数据 
 CREATE TABLE tags (
+    -- 一个标签的 一个唯一标识符号
     tag_id BIGSERIAL PRIMARY KEY,
 
     --------------------------------------------------------
@@ -34,6 +36,7 @@ CREATE TABLE tags (
 
 -- kv 表
 CREATE TABLE kv_store (
+    -- 一个键值对的 一个唯一标识符号
     kv_id BIGSERIAL PRIMARY KEY,
 
     --------------------------------------------------------

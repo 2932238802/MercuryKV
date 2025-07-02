@@ -3,6 +3,7 @@
 #include "MyJWT.hpp"
 #include "MyLog.hpp"
 #include "Users/Users.h"
+#include <cstdint>
 #include <drogon/HttpResponse.h>
 #include <drogon/orm/Criteria.h>
 #include <drogon/orm/Mapper.h>
@@ -50,16 +51,21 @@ void Login::HandleLogin(
       [callback, password](const Users &user) {
         std::string salt = user.getValueOfSalt();
         auto password_stored = user.getPasswordHash();
+        int64_t user_id = user.getValueOfUserId();
         if (MyCrypt::VerifyPassword(password, salt, *password_stored)) {
           std::string token =
               MyJWT::GetJWT(std::to_string(user.getValueOfUserId()));
 
+          // TODO: 前端处理
           Json::Value result;
           result["message"] = "登录成功!";
           result["code"] = 200;
           result["token"] = token;
-
+          result["user_id"] = std::to_string(user_id);
           auto resp = HttpResponse::newHttpJsonResponse(result);
+
+          MY_LOG_SUC("登录成功,用户名: ", user.getValueOfUsername());
+
           callback(resp);
         } else {
           Json::Value error;

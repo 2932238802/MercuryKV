@@ -1,14 +1,14 @@
 <script setup>
 import { ref } from 'vue';
 import service from '../components/request';
-import router from '../router';
+import { useRouter } from 'vue-router';
 import { ShowCustomModal } from '../components/show'
 
 // ------------------------------
 // 绑定页面的输入内容
 const user_name_register = ref("");
 const password_register = ref("");
-const user_name_login = ref("");
+const username_login = ref("");
 const password_login = ref("");
 const email_register = ref("");
 const show_login_warning_for_user_name = ref(false)
@@ -20,6 +20,7 @@ const API_PATHS = {
     LOGIN: '/Login/login',
     REGISTER: '/Register/register'
 };
+const router = useRouter();
 
 // ------------------------------
 // 登录和注册的切换
@@ -54,7 +55,7 @@ const Login = async () => {
     show_login_warning_for_user_name.value = false;
     show_login_warning_for_password.value = false;
 
-    if (!user_name_login.value) {
+    if (!username_login.value) {
         show_login_warning_for_user_name.value = true;
         return;
     }
@@ -69,7 +70,7 @@ const Login = async () => {
     // 理解一下 token : 
     try {
         const login_info = {
-            username: user_name_login.value,
+            username: username_login.value,
             password: password_login.value
         }
 
@@ -77,11 +78,16 @@ const Login = async () => {
             API_PATHS.LOGIN,
             login_info
         )
+        
+        // TODO: 后端看一眼
+        localStorage.setItem('AuthToken', response.token);
+        localStorage.setItem('UserId', response.user_id);
+        router.push({ name: "Mercury" }).catch(err => {
+            console.error('路由跳转失败:', err);
+            ShowCustomModal(`路由跳转失败: ${err.message}`); 
+        });
 
-        const token = response.token;
-        localStorage.setItem('AuthToken', token);
-        router.push({ name: "Mercury" });
-        ShowCustomModal(response.message);
+        ShowCustomModal(response.message || "登录成功");
     }
     catch (error) {
         // 日志输出一下
@@ -99,25 +105,17 @@ const Register = async () => {
     show_register_warning_for_password.value = false;
     show_register_warning_for_email.value = false;
 
-    let has_false = false;
-
-    if (!user_name_register.value) {
+     if (!user_name_register.value) {
         show_register_warning_for_user_name.value = true;
-        has_false = true
+        return; 
     }
     if (!password_register.value) {
         show_register_warning_for_password.value = true;
-        has_false = true
+        return; 
     }
-
     if (!email_register.value) {
         show_register_warning_for_email.value = true
-        has_false = true
-
-    }
-
-    if (has_false == true) {
-        return;
+        return; 
     }
 
     try {
@@ -183,7 +181,7 @@ const Register = async () => {
                 <div class="return-button" @click="ReturnIndex"> Return </div>
                 <form @submit.prevent>
                     <h1>登 录</h1>
-                    <input type="text" placeholder="用户名" v-model="user_name_login" />
+                    <input type="text" placeholder="用户名" v-model="username_login" />
                     <input type="password" placeholder="密码" v-model="password_login" />
                     <div v-if="show_login_warning_for_user_name" class="warning_word">用户名输入格式错误!</div>
                     <div v-if="show_login_warning_for_password" class="warning_word">密码输入格式错误!</div>

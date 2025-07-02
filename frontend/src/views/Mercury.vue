@@ -1,44 +1,30 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import service from '../components/request'
+import service from '../components/request';
 import { ShowCustomModal } from '../components/show';
 
-
 // ----------------- ------------------------------------------------
-const KvPairs = ref([
-]);
+const KvPairs = ref([]);
 const ismodalopen = ref(false);
 const isediting = ref(false);
 const currentitem = ref(null);
 const router = useRouter();
+const DATA_ALTER_METHOD = {
+  CREATE: 'create',
+  UPDATE: 'update',
+};
+const API_PATH = {
+  FETCH: "/FetchData/fetch",
+  CREATE: "/Alter/adddata",
+  UPDATE: "/Alter/alterdata",
+  DELETE: "/Alter/deletedata",
+};
+const data_alter_method = ref(DATA_ALTER_METHOD.CREATE);
 const modaltitle = computed(() => {
   return isediting.value ? 'Edit KV Pair' : 'Create KV Pair';
 });
-
-const API_PATH = {
-  FETCH:"/FetchData/fetch"
-}
 // -----------------------------------------------------------------
-
-// -----------------------------------------------------------------
-// 当程序需要读取 TagsAsString  值的时候 -> get() 
-// 写入或者 修改的时候 才会调用 这个 set
-const TagsAsString = computed({
-  get() {
-    return currentitem.value?.tags?.join(',') || '';
-  },
-  set(newValue) {
-    if (currentitem.value) {
-      currentitem.value.tags = newValue.split(/[,\s\.，。]+/)
-        .map(tag => tag.trim())
-        .filter(tag => tag);
-    }
-  }
-});
-// -----------------------------------------------------------------
-
-
 
 // -----------------------------------------------------------------
 // 导航到主页或上一页
@@ -47,39 +33,36 @@ function HandleReturn() {
 }
 // -----------------------------------------------------------------
 
-
-
 // -----------------------------------------------------------------
 function HandleReLogin() {
   localStorage.removeItem('AuthToken');
+  localStorage.removeItem('UserId');
   router.push({ name: 'RegisterAndLogin' });
 }
 // -----------------------------------------------------------------
-
-
 
 // -----------------------------------------------------------------
 // 打开“添加”弹窗
 function HandleAddNew() {
   isediting.value = false;
-  // 为新条目提供一个干净的模板
+  // 为新条目提供一个干净的模板，使用 tag_name
   currentitem.value = {
-    key: '',
-    value: '',
-    tags: []
+    key_input: '',
+    value_input: '',
+    tag_name: '',
   };
+  data_alter_method.value = DATA_ALTER_METHOD.CREATE;
   ismodalopen.value = true;
 }
 // -----------------------------------------------------------------
-
-
 
 // -----------------------------------------------------------------
 // 打开“编辑”弹窗
 function handleEdit(itemtoedit) {
   isediting.value = true;
-  // 创建一个副本进行编辑，避免直接修改列表中的原始数据
-  currentitem.value = { ...itemtoedit };
+  // 创建一个副本进行编辑，确保 tag_name 存在
+  currentitem.value = { ...itemtoedit, tag_name: itemtoedit.tag_name || '' };
+  data_alter_method.value = DATA_ALTER_METHOD.UPDATE;
   ismodalopen.value = true;
 }
 // -----------------------------------------------------------------
@@ -94,65 +77,101 @@ function CloseModal() {
 // -----------------------------------------------------------------
 
 
-
 // -----------------------------------------------------------------
 // 处理表单提交（添加或更新）
 async function HandleSubmit() {
   if (!currentitem.value) return;
 
-  if (isediting.value) {
-    // 日志输出
-    console.log('Updating item:', currentitem.value);
+  const user_id = localStorage.getItem("UserId");
+  const token = localStorage.getItem("AuthToken");
+  if (!user_id || !token) {
+    ShowCustomModal("User not logged in Please re-login");
+    HandleReLogin();
+    return;
+  }
 
-    // 后端实现一下
-    // TODO: 提交表单
+  try {
+    if (data_alter_method.value === DATA_ALTER_METHOD.CREATE) {
 
-    const index = KvPairs.value.findIndex(item => item.id === currentitem.value.id);
-    if (index !== -1) {
-      KvPairs.value[index] = { ...currentitem.value, updated_at: new Date().toLocaleString() };
+
+      const post_info = {
+        "user_id": Number(user_id),
+        "key_input": currentitem.value.key_input,
+        "value_input": currentitem.value.value_input,
+        "tag_name": currentitem.value.tag_name,
+      };
+      const response = await service.post(API_PATH.CREATE, post_info);
+
+      console.log('Response from create:', post_info.value);
+      console.log('Response from create:', response.data);
+
+      KvPairs.value.unshift({
+        ...currentitem.value,
+        kv_id: response.data.kv_id,
+        tag_id: response.data.tag_id,
+        updated_at: response.data.updated_at,
+      });
+    } 
+    
+    else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
+      // 编辑信息
+      const post_info = {
+        "user_id": Number(user_id),
+        "kv_id": currentitem.value.kv_id,
+        "key_input": currentitem.value.key_input,
+        "value_input": currentitem.value.value_input,
+        "tag_name": currentitem.value.tag_name,
+      };
+      
+      await service.put(API_PATH.UPDATE, post_info);
+      const index = KvPairs.value.findIndex(item => item.kv_id === currentitem.value.kv_id);
+      if (index !== -1) {
+        KvPairs.value[index] = { ...currentitem.value, updated_at: new Date().toLocaleString() };
+      }
     }
-
-  } else {
-    console.log('Creating new item:', currentitem.value);
-    const newItem = { ...currentitem.value, id: Date.now(), updated_at: new Date().toLocaleString() }; // 使用时间戳作为临时id
-    KvPairs.value.unshift(newItem);
+  } catch (error) {
+    console.error("Submission failed:", error);
+    ShowCustomModal(error.response?.data?.message || error.message || "An unknown error occurred.");
   }
 
   CloseModal();
 }
 // -----------------------------------------------------------------
 
-
-
 // -----------------------------------------------------------------
 // 删除条目 (带确认)
-function HandleDelete(itemtodelete) {
-  if (confirm(`Are you sure you want to delete the key "${itemtodelete.key}"?`)) {
+async function HandleDelete(itemtodelete) {
+  if (confirm(`你确定要删除这个"${itemtodelete.key_input}"?`)) {
     console.log('Deleting item:', itemtodelete);
+    try {
+      // 发送删除请求
+      await service.delete(`${API_PATH.DELETE}/${itemtodelete.kv_id}`);
 
-    //TODO: 后端完善一下
-    // filter 就能过滤内容
-    KvPairs.value = KvPairs.value.filter(item => item.id !== itemtodelete.id);
+      KvPairs.value = KvPairs.value.filter(item => item.kv_id !== itemtodelete.kv_id);
+    } 
+    catch (error) {
+      console.error("Deletion failed:", error);
+      ShowCustomModal(error.response?.data?.message || "Failed to delete item.");
+    }
   }
 }
 // -----------------------------------------------------------------
 
-
 const loadInitialData = async () => {
-  const user_id = localStorage.getItem("user_id");
-
+  const user_id = localStorage.getItem("UserId");
+  if (!user_id) {
+    HandleReLogin();
+    return;
+  }
   try {
-    const data = await service.get(API_PATH.FETCH,{params:user_id});
+    const response = await service.get(API_PATH.FETCH, { params: { user_id } });
 
-    // 数据封装
-    // TODO: 处理后端发来的请求
-    KvPairs = data.data;
+    KvPairs.value = response.data || [];
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+    ShowCustomModal(" 数据加载失败 ");
   }
-  catch (error) {
-    console.error("获取后端数据失败,账号异常请重新登录");
-    ShowCustomModal(error.message);
-  }
-}
+};
 
 onMounted(() => {
   loadInitialData();
@@ -162,33 +181,22 @@ onMounted(() => {
 <template>
   <!-- A -->
   <div class="kv-manager-page">
-
     <!-- B_1. 主要业务代码 -->
     <div class="content-card">
-
       <!-- C_1 这个是返回按钮 -->
-      <!-- title 当用户将鼠标悬停在按钮上时，会显示一个提示框显示 "Go back"  -->
       <button class="btn-return" @click="HandleReturn" title="Go back">
         <i class="fas fa-arrow-left"></i>
       </button>
 
       <!-- C_2 工具栏 -->
-      <!-- 一个搜索输入框 一个是增加新value -->
       <header class="kv-manager-header">
         <h1>KV Store</h1>
-
         <div class="toolbar">
-
           <input type="text" class="search-input" placeholder="Search by key or tag..."
             aria-label="Search Key-Value pairs" />
-
-          <button class="btn-primary" @click="HandleAddNew">
-            + Add New
-          </button>
-
+          <button class="btn-primary" @click="HandleAddNew">+ Add New</button>
           <button class="btn-ghost" @click="HandleReLogin" title="Logout and login again">
-            <i class="fas fa-sign-out-alt"></i>
-            Re-Login
+            <i class="fas fa-sign-out-alt"></i> Re-Login
           </button>
         </div>
       </header>
@@ -198,53 +206,46 @@ onMounted(() => {
         <table class="kv-table">
           <thead>
             <tr>
-              <th class="col-key">Key</th>
-              <th class="col-value">Value</th>
-              <th class="col-tags">Tags</th>
-              <th class="col-updated">Last Updated</th>
+              <th class="col-key">Key(key_input)</th>
+              <th class="col-value">Value(value_input)</th>
+              <th class="col-tags">Tag(tag_name)</th>
+              <th class="col-updated">Last Updated(updated_at)</th>
               <th class="col-actions">Actions</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr v-for="item in KvPairs" :key="item.id">
-              <td>{{ item.key }}</td>
+            <tr v-for="item in KvPairs" :key="item.k">
+              <td>{{ item.key_input }}</td>
               <td class="value-cell">
-                <span class="value-text">{{ item.value }}</span>
+                <span class="value-text">{{ item.value_input }}</span>
               </td>
               <td>
-                <span v-for="tag in item.tags" :key="tag" class="tag">{{ tag }}</span>
+                <span v-if="item.tag_name" class="tag">{{ item.tag_name }}</span>
               </td>
-              <td>{{ item.updated_at }}</td>
+              <td>{{ new Date(item.updated_at).toLocaleString() }}</td>
               <td class="actions-cell">
                 <button class="btn-icon" title="View History" @click="handleViewHistory(item)">
                   <i class="fas fa-history"></i>
                 </button>
-
                 <button class="btn-icon" title="Edit" @click="handleEdit(item)">
                   <i class="fas fa-pencil-alt"></i>
                 </button>
-
                 <button class="btn-icon btn-danger" title="Delete" @click="HandleDelete(item)">
                   <i class="fas fa-trash-alt"></i>
                 </button>
-
               </td>
             </tr>
-
             <!-- 空状态：当没有数据时显示 -->
             <tr v-if="!KvPairs.length">
               <td colspan="5" class="empty-state">
-                No Key-Value pairs found. <a href="#" @click.prevent="HandleAddNew">Add one now!</a>
+                No Key-Value pairs found <a href="#" @click.prevent="HandleAddNew">Add one now!</a>
               </td>
             </tr>
-
           </tbody>
         </table>
       </div>
 
       <!-- C_4 换页按钮 -->
-      <!-- TODO: 页面部分完善 -->
       <footer class="kv-manager-footer">
         <div class="pagination">
           <span>Page 1 of 1</span>
@@ -260,7 +261,7 @@ onMounted(() => {
         <form @submit.prevent="HandleSubmit">
           <h1>{{ modaltitle }}</h1>
           <div class="form-group">
-            <input v-model="currentitem.key" id="kv-key" type="text" placeholder="Key (e.g., app:settings:retries)"
+            <input v-model="currentitem.key_input" id="kv-key" type="text" placeholder="Key (e.g., app:settings:retries)"
               required />
           </div>
           <div class="form-group">
@@ -268,10 +269,8 @@ onMounted(() => {
               placeholder="Value (string or valid JSON)"></textarea>
           </div>
           <div class="form-group">
-            <input v-model="TagsAsString" id="kv-tags" type="text"
-              placeholder="Tags (comma separated, e.g., api,config,user)" />
+            <input v-model="currentitem.tag_name" id="kv-tags" type="text" placeholder="Tag (e.g., api)" />
           </div>
-
           <div class="modal-actions">
             <button type="button" class="btn-ghost" @click="CloseModal">Cancel</button>
             <button type="submit" class="btn-primary">Save</button>
@@ -282,8 +281,8 @@ onMounted(() => {
   </div>
 </template>
 
-
 <style scoped>
+/* 样式部分保持不变 */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 

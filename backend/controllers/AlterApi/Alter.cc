@@ -82,7 +82,7 @@ void Alter::AddData(const HttpRequestPtr &req,
     Tags tag;
     KvStore kv;
     KvTagAssociation kta;
-    std::string previous_value = "";
+    std::string previous_value = "null";
     auto old_kv_opt = mapper_kv.findBy(
         Criteria(KvStore::Cols::_user_id, CompareOperator::EQ, user_id) &&
         Criteria(KvStore::Cols::_key_input, CompareOperator::EQ, key_input));
@@ -94,6 +94,7 @@ void Alter::AddData(const HttpRequestPtr &req,
                  " and key_input:", key_input);
     } else {
       previous_value = old_kv_opt[0].getValueOfValueInput();
+
       MY_LOG_SUC("Previous value found for user_id:", user_id,
                  " and key_input:", key_input, " value:", previous_value);
     }
@@ -105,6 +106,7 @@ void Alter::AddData(const HttpRequestPtr &req,
     kv.setPreviousValue(previous_value);
     kv.setUpdatedAt(trantor::Date::now());
     mapper_kv.insert(kv);
+    MY_LOG_SUC("插入成功!");
 
     // Tags 插入数据
     int64_t kv_id = kv.getValueOfKvId();
@@ -112,6 +114,7 @@ void Alter::AddData(const HttpRequestPtr &req,
     auto existing_tag_opt = mapper_tags.findBy(
         Criteria(Tags::Cols::_user_id, CompareOperator::EQ, user_id) &&
         Criteria(Tags::Cols::_tag_name, CompareOperator::EQ, tag_name));
+
     if (!existing_tag_opt.empty()) {
       tag_id = existing_tag_opt[0].getValueOfTagId();
       MY_LOG_INF("Tag '", tag_name, "' already exists with id: ", tag_id);
@@ -134,7 +137,6 @@ void Alter::AddData(const HttpRequestPtr &req,
 
     // TODO: 前端看一眼 需要返回的内容
     success_resp["code"] = 201;
-    success_resp["message"] = "Data and tag associated successfully";
     data["kv_id"] = kv_id;
     data["tag_id"] = tag_id;
     data["updated_at"] = trantor::Date::now().toDbString();
@@ -154,7 +156,6 @@ void Alter::AddData(const HttpRequestPtr &req,
     callback(res);
     return;
   }
-  // -----------------------------------
 
   // 记录正确的约为
   MY_LOG_SUC("KvTagAssociation inserted successfully for user_id:", user_id);
@@ -229,9 +230,6 @@ void Alter::AlterData(const HttpRequestPtr &req,
     std::optional<KvStore> kv_store = mapper.findOne(
         Criteria(KvStore::Cols::_kv_id, CompareOperator::EQ, kv_id));
 
-    // 获取之前的数据
-    auto value_previous = kv_store->getValueOfKeyInput();
-
     if (kv_store) {
       Json::Value error;
       error["message"] = "user_id is wrong or not found";
@@ -241,6 +239,9 @@ void Alter::AlterData(const HttpRequestPtr &req,
       callback(res);
       return;
     }
+
+    // 获取之前的数据
+    auto value_previous = kv_store->getValueOfKeyInput();
 
     // 更新数据
     kv_store->setKeyInput(key_input);

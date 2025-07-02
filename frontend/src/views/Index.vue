@@ -1,14 +1,12 @@
 <script setup>
-import router from '../router';
+import { useRouter } from 'vue-router';
 import service from '../components/request';
-import {ShowCustomModal} from '../components/show';
+import { ShowCustomModal } from '../components/show';
 
-// 常量
+const router = useRouter();
 const API_PATH = {
     TOKEN_CHECK: "/Login/checktoken"
 }
-
-
 
 const CheckTokenForLastLogin = async () => {
     try {
@@ -21,7 +19,7 @@ const CheckTokenForLastLogin = async () => {
 }
 
 const Login = async () => {
-    const responseData = await CheckTokenForLastLogin(); 
+    const responseData = await CheckTokenForLastLogin();
     if (!responseData || responseData.code !== 200) {
         router.push({ name: "RegisterAndLogin" });
     } else {
@@ -54,7 +52,6 @@ const About = () => {
         </div>
     </div>
 </template>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap');

@@ -5,7 +5,9 @@ import service from '../components/request';
 import { ShowCustomModal } from '../components/show';
 
 // ----------------- ------------------------------------------------
-const KvPairs = ref([]);
+const KvPairs = ref([
+  { "tag_id": 1, "key_id": 1, "key_input": "test", "value_input": "right", "tag_name": "for_tset" }
+]);
 const ismodalopen = ref(false);
 const isediting = ref(false);
 const currentitem = ref(null);
@@ -45,7 +47,7 @@ function HandleReLogin() {
 // 打开“添加”弹窗
 function HandleAddNew() {
   isediting.value = false;
-  // 为新条目提供一个干净的模板，使用 tag_name
+  // 为新条目提供一个干净的模板，使
   currentitem.value = {
     key_input: '',
     value_input: '',
@@ -58,7 +60,7 @@ function HandleAddNew() {
 
 // -----------------------------------------------------------------
 // 打开“编辑”弹窗
-function handleEdit(itemtoedit) {
+function HandleEdit(itemtoedit) {
   isediting.value = true;
   // 创建一个副本进行编辑，确保 tag_name 存在
   currentitem.value = { ...itemtoedit, tag_name: itemtoedit.tag_name || '' };
@@ -89,10 +91,15 @@ async function HandleSubmit() {
     HandleReLogin();
     return;
   }
+  if(currentitem.value.key_input == "" ||  currentitem.value.value_input == "" || currentitem.value.tag_name=="")
+  {
+    ShowCustomModal("增加的key,value,tag不能为空哈！");
+    return;
+  }
+
 
   try {
     if (data_alter_method.value === DATA_ALTER_METHOD.CREATE) {
-
 
       const post_info = {
         "user_id": Number(user_id),
@@ -100,19 +107,19 @@ async function HandleSubmit() {
         "value_input": currentitem.value.value_input,
         "tag_name": currentitem.value.tag_name,
       };
+
       const response = await service.post(API_PATH.CREATE, post_info);
 
       console.log('Response from create:', post_info.value);
       console.log('Response from create:', response.data);
-
       KvPairs.value.unshift({
         ...currentitem.value,
         kv_id: response.data.kv_id,
         tag_id: response.data.tag_id,
         updated_at: response.data.updated_at,
       });
-    } 
-    
+    }
+
     else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
       // 编辑信息
       const post_info = {
@@ -122,7 +129,7 @@ async function HandleSubmit() {
         "value_input": currentitem.value.value_input,
         "tag_name": currentitem.value.tag_name,
       };
-      
+
       await service.put(API_PATH.UPDATE, post_info);
       const index = KvPairs.value.findIndex(item => item.kv_id === currentitem.value.kv_id);
       if (index !== -1) {
@@ -148,7 +155,7 @@ async function HandleDelete(itemtodelete) {
       await service.delete(`${API_PATH.DELETE}/${itemtodelete.kv_id}`);
 
       KvPairs.value = KvPairs.value.filter(item => item.kv_id !== itemtodelete.kv_id);
-    } 
+    }
     catch (error) {
       console.error("Deletion failed:", error);
       ShowCustomModal(error.response?.data?.message || "Failed to delete item.");
@@ -214,7 +221,7 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in KvPairs" :key="item.k">
+            <tr v-for="item in KvPairs" :key="item.key_id">
               <td>{{ item.key_input }}</td>
               <td class="value-cell">
                 <span class="value-text">{{ item.value_input }}</span>
@@ -227,7 +234,7 @@ onMounted(() => {
                 <button class="btn-icon" title="View History" @click="handleViewHistory(item)">
                   <i class="fas fa-history"></i>
                 </button>
-                <button class="btn-icon" title="Edit" @click="handleEdit(item)">
+                <button class="btn-icon" title="Edit" @click="HandleEdit(item)">
                   <i class="fas fa-pencil-alt"></i>
                 </button>
                 <button class="btn-icon btn-danger" title="Delete" @click="HandleDelete(item)">
@@ -261,15 +268,15 @@ onMounted(() => {
         <form @submit.prevent="HandleSubmit">
           <h1>{{ modaltitle }}</h1>
           <div class="form-group">
-            <input v-model="currentitem.key_input" id="kv-key" type="text" placeholder="Key (e.g., app:settings:retries)"
-              required />
+            <input v-model="currentitem.key_input" id="kv-key" type="text"
+              placeholder="电脑密码,工作邮箱,ssh提交密钥" required />
           </div>
           <div class="form-group">
-            <textarea v-model="currentitem.value" id="kv-value" rows="5"
-              placeholder="Value (string or valid JSON)"></textarea>
+            <textarea v-model="currentitem.value_input" id="kv-value" rows="5"
+              placeholder="123，123@123.com,36218631278631..."></textarea>
           </div>
           <div class="form-group">
-            <input v-model="currentitem.tag_name" id="kv-tags" type="text" placeholder="Tag (e.g., api)" />
+            <input v-model="currentitem.tag_name" id="kv-tags" type="text" placeholder="生活,工作,编程" />
           </div>
           <div class="modal-actions">
             <button type="button" class="btn-ghost" @click="CloseModal">Cancel</button>

@@ -65,12 +65,23 @@ void Alter::AddData(const HttpRequestPtr &req,
   // 获取请求中的数据
   // 前端传来的数据
   // 生成一个 数据库事务
+  // 前端发来的这些 信息不能为空 不然数据库插入失败
   uint64_t user_id = (*jsonobject)["user_id"].asInt64();
   std::string key_input = (*jsonobject)["key_input"].asString();
   std::string value_input = (*jsonobject)["value_input"].asString();
   std::string tag_name = (*jsonobject)["tag_name"].asString();
   auto db_client = app().getDbClient();
   auto trans = db_client->newTransaction();
+  if(key_input == "" || value_input == "" || tag_name == "")
+  {
+    MY_LOG_ERROR("key_input value_input tag_name 内容为空");
+    Json::Value error;
+    error["message"] = "前端的key或者value或者tagname内容为空,无法插入!";
+    auto res = HttpResponse::newHttpJsonResponse(error);
+    res->setStatusCode(k400BadRequest);
+    callback(res);
+    return;
+  }
   // -----------------------------------
 
   // -----------------------------------
@@ -82,7 +93,6 @@ void Alter::AddData(const HttpRequestPtr &req,
     Tags tag;
     KvStore kv;
     KvTagAssociation kta;
-    std::string previous_value = "null";
     auto old_kv_opt = mapper_kv.findBy(
         Criteria(KvStore::Cols::_user_id, CompareOperator::EQ, user_id) &&
         Criteria(KvStore::Cols::_key_input, CompareOperator::EQ, key_input));
@@ -90,11 +100,11 @@ void Alter::AddData(const HttpRequestPtr &req,
     // 如果找到了则获取之前的值
     // 如果没有找到对应的 kv 则创建一个新的
     if (old_kv_opt.empty()) {
-      MY_LOG_SUC("No previous kv found for user_id:", user_id,
+      MY_LOG_ERROR("No previous kv found for user_id:", user_id,
                  " and key_input:", key_input);
     } else {
-      previous_value = old_kv_opt[0].getValueOfValueInput();
-
+      std::string previous_value = old_kv_opt[0].getValueOfValueInput();
+      kv.setPreviousValue(previous_value);
       MY_LOG_SUC("Previous value found for user_id:", user_id,
                  " and key_input:", key_input, " value:", previous_value);
     }
@@ -103,7 +113,6 @@ void Alter::AddData(const HttpRequestPtr &req,
     kv.setUserId(user_id);
     kv.setKeyInput(key_input);
     kv.setValueInput(value_input);
-    kv.setPreviousValue(previous_value);
     kv.setUpdatedAt(trantor::Date::now());
     mapper_kv.insert(kv);
     MY_LOG_SUC("插入成功!");
@@ -180,7 +189,7 @@ void Alter::AlterData(const HttpRequestPtr &req,
   auto jsonobject = req->getJsonObject();
   if (!jsonobject) {
     Json::Value error;
-    error["message"] = "Invalid kv_id or Invalid request body";
+    error["message"] = "请求体错误 解析json错误!";
     auto res = HttpResponse::newHttpJsonResponse(error);
     res->setStatusCode(k400BadRequest);
     callback(res);
@@ -199,7 +208,7 @@ void Alter::AlterData(const HttpRequestPtr &req,
       !(*jsonobject).isMember("tag_name") ||
       !(*jsonobject)["tag_name"].isString()) {
     Json::Value error;
-    error["error"] = "Missing or invalid field in request body";
+    error["error"] = "内容缺失!";
     auto res = HttpResponse::newHttpJsonResponse(error);
     res->setStatusCode(k400BadRequest);
     callback(res);
@@ -232,8 +241,8 @@ void Alter::AlterData(const HttpRequestPtr &req,
 
     if (kv_store) {
       Json::Value error;
-      error["message"] = "user_id is wrong or not found";
-      MY_LOG_ERROR("user_id is wrong or not found");
+      error["message"] = "user_id不存在!";
+      MY_LOG_ERROR("user_id不存在");
       auto res = HttpResponse::newHttpJsonResponse(error);
       res->setStatusCode(k404NotFound);
       callback(res);

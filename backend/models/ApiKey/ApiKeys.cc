@@ -22,13 +22,12 @@ const std::string ApiKeys::primaryKeyName = "api_id";
 const bool ApiKeys::hasPrimaryKey = true;
 const std::string ApiKeys::tableName = "\"api_keys\"";
 
-const std::vector<typename ApiKeys::MetaData> ApiKeys::metaData_={
-{"api_id","int64_t","bigint",8,1,1,1},
-{"user_id","int64_t","bigint",8,0,0,1},
-{"key_hash","std::string","character varying",255,0,0,1},
-{"api_name","std::string","character varying",255,0,0,1},
-{"created_at","::trantor::Date","timestamp with time zone",0,0,0,1}
-};
+const std::vector<typename ApiKeys::MetaData> ApiKeys::metaData_ = {
+    {"api_id", "int64_t", "bigint", 8, 1, 1, 1},
+    {"user_id", "int64_t", "bigint", 8, 0, 0, 1},
+    {"key_hash", "std::string", "character varying", 255, 0, 0, 1},
+    {"api_name", "std::string", "character varying", 255, 0, 0, 1},
+    {"created_at", "::trantor::Date", "timestamp with time zone", 0, 0, 0, 1}};
 const std::string &ApiKeys::getColumnName(size_t index) noexcept(false)
 {
     assert(index < metaData_.size());
@@ -36,165 +35,165 @@ const std::string &ApiKeys::getColumnName(size_t index) noexcept(false)
 }
 ApiKeys::ApiKeys(const Row &r, const ssize_t indexOffset) noexcept
 {
-    if(indexOffset < 0)
+    if (indexOffset < 0)
     {
-        if(!r["api_id"].isNull())
+        if (!r["api_id"].isNull())
         {
-            apiId_=std::make_shared<int64_t>(r["api_id"].as<int64_t>());
+            apiId_ = std::make_shared<int64_t>(r["api_id"].as<int64_t>());
         }
-        if(!r["user_id"].isNull())
+        if (!r["user_id"].isNull())
         {
-            userId_=std::make_shared<int64_t>(r["user_id"].as<int64_t>());
+            userId_ = std::make_shared<int64_t>(r["user_id"].as<int64_t>());
         }
-        if(!r["key_hash"].isNull())
+        if (!r["key_hash"].isNull())
         {
-            keyHash_=std::make_shared<std::string>(r["key_hash"].as<std::string>());
+            keyHash_ = std::make_shared<std::string>(r["key_hash"].as<std::string>());
         }
-        if(!r["api_name"].isNull())
+        if (!r["api_name"].isNull())
         {
-            apiName_=std::make_shared<std::string>(r["api_name"].as<std::string>());
+            apiName_ = std::make_shared<std::string>(r["api_name"].as<std::string>());
         }
-        if(!r["created_at"].isNull())
+        if (!r["created_at"].isNull())
         {
             auto timeStr = r["created_at"].as<std::string>();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createdAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 5 > r.size())
+        if (offset + 5 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
         size_t index;
         index = offset + 0;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            apiId_=std::make_shared<int64_t>(r[index].as<int64_t>());
+            apiId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
         }
         index = offset + 1;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            userId_=std::make_shared<int64_t>(r[index].as<int64_t>());
+            userId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
         }
         index = offset + 2;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            keyHash_=std::make_shared<std::string>(r[index].as<std::string>());
+            keyHash_ = std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 3;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            apiName_=std::make_shared<std::string>(r[index].as<std::string>());
+            apiName_ = std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 4;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
             auto timeStr = r[index].as<std::string>();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createdAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
-
 }
 
-ApiKeys::ApiKeys(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
+ApiKeys::ApiKeys(const Json::Value &pJson,
+                 const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 5)
+    if (pMasqueradingVector.size() != 5)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
-    if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+    if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
     {
         dirtyFlag_[0] = true;
-        if(!pJson[pMasqueradingVector[0]].isNull())
+        if (!pJson[pMasqueradingVector[0]].isNull())
         {
-            apiId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
+            apiId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
-    if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+    if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
     {
         dirtyFlag_[1] = true;
-        if(!pJson[pMasqueradingVector[1]].isNull())
+        if (!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
-    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+    if (!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
     {
         dirtyFlag_[2] = true;
-        if(!pJson[pMasqueradingVector[2]].isNull())
+        if (!pJson[pMasqueradingVector[2]].isNull())
         {
-            keyHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            keyHash_ = std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
-    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+    if (!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
     {
         dirtyFlag_[3] = true;
-        if(!pJson[pMasqueradingVector[3]].isNull())
+        if (!pJson[pMasqueradingVector[3]].isNull())
         {
-            apiName_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            apiName_ = std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    if (!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
     {
         dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
+        if (!pJson[pMasqueradingVector[4]].isNull())
         {
             auto timeStr = pJson[pMasqueradingVector[4]].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createdAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
@@ -202,128 +201,128 @@ ApiKeys::ApiKeys(const Json::Value &pJson, const std::vector<std::string> &pMasq
 
 ApiKeys::ApiKeys(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("api_id"))
+    if (pJson.isMember("api_id"))
     {
-        dirtyFlag_[0]=true;
-        if(!pJson["api_id"].isNull())
+        dirtyFlag_[0] = true;
+        if (!pJson["api_id"].isNull())
         {
-            apiId_=std::make_shared<int64_t>((int64_t)pJson["api_id"].asInt64());
+            apiId_ = std::make_shared<int64_t>((int64_t)pJson["api_id"].asInt64());
         }
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
-        dirtyFlag_[1]=true;
-        if(!pJson["user_id"].isNull())
+        dirtyFlag_[1] = true;
+        if (!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
         }
     }
-    if(pJson.isMember("key_hash"))
+    if (pJson.isMember("key_hash"))
     {
-        dirtyFlag_[2]=true;
-        if(!pJson["key_hash"].isNull())
+        dirtyFlag_[2] = true;
+        if (!pJson["key_hash"].isNull())
         {
-            keyHash_=std::make_shared<std::string>(pJson["key_hash"].asString());
+            keyHash_ = std::make_shared<std::string>(pJson["key_hash"].asString());
         }
     }
-    if(pJson.isMember("api_name"))
+    if (pJson.isMember("api_name"))
     {
-        dirtyFlag_[3]=true;
-        if(!pJson["api_name"].isNull())
+        dirtyFlag_[3] = true;
+        if (!pJson["api_name"].isNull())
         {
-            apiName_=std::make_shared<std::string>(pJson["api_name"].asString());
+            apiName_ = std::make_shared<std::string>(pJson["api_name"].asString());
         }
     }
-    if(pJson.isMember("created_at"))
+    if (pJson.isMember("created_at"))
     {
-        dirtyFlag_[4]=true;
-        if(!pJson["created_at"].isNull())
+        dirtyFlag_[4] = true;
+        if (!pJson["created_at"].isNull())
         {
             auto timeStr = pJson["created_at"].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createdAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
 }
 
-void ApiKeys::updateByMasqueradedJson(const Json::Value &pJson,
-                                            const std::vector<std::string> &pMasqueradingVector) noexcept(false)
+void ApiKeys::updateByMasqueradedJson(
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 5)
+    if (pMasqueradingVector.size() != 5)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
-    if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+    if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
     {
-        if(!pJson[pMasqueradingVector[0]].isNull())
+        if (!pJson[pMasqueradingVector[0]].isNull())
         {
-            apiId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
+            apiId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
-    if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+    if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
     {
         dirtyFlag_[1] = true;
-        if(!pJson[pMasqueradingVector[1]].isNull())
+        if (!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
-    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+    if (!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
     {
         dirtyFlag_[2] = true;
-        if(!pJson[pMasqueradingVector[2]].isNull())
+        if (!pJson[pMasqueradingVector[2]].isNull())
         {
-            keyHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            keyHash_ = std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
-    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+    if (!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
     {
         dirtyFlag_[3] = true;
-        if(!pJson[pMasqueradingVector[3]].isNull())
+        if (!pJson[pMasqueradingVector[3]].isNull())
         {
-            apiName_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            apiName_ = std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    if (!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
     {
         dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
+        if (!pJson[pMasqueradingVector[4]].isNull())
         {
             auto timeStr = pJson[pMasqueradingVector[4]].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createdAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
@@ -331,60 +330,60 @@ void ApiKeys::updateByMasqueradedJson(const Json::Value &pJson,
 
 void ApiKeys::updateByJson(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("api_id"))
+    if (pJson.isMember("api_id"))
     {
-        if(!pJson["api_id"].isNull())
+        if (!pJson["api_id"].isNull())
         {
-            apiId_=std::make_shared<int64_t>((int64_t)pJson["api_id"].asInt64());
+            apiId_ = std::make_shared<int64_t>((int64_t)pJson["api_id"].asInt64());
         }
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
         dirtyFlag_[1] = true;
-        if(!pJson["user_id"].isNull())
+        if (!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
         }
     }
-    if(pJson.isMember("key_hash"))
+    if (pJson.isMember("key_hash"))
     {
         dirtyFlag_[2] = true;
-        if(!pJson["key_hash"].isNull())
+        if (!pJson["key_hash"].isNull())
         {
-            keyHash_=std::make_shared<std::string>(pJson["key_hash"].asString());
+            keyHash_ = std::make_shared<std::string>(pJson["key_hash"].asString());
         }
     }
-    if(pJson.isMember("api_name"))
+    if (pJson.isMember("api_name"))
     {
         dirtyFlag_[3] = true;
-        if(!pJson["api_name"].isNull())
+        if (!pJson["api_name"].isNull())
         {
-            apiName_=std::make_shared<std::string>(pJson["api_name"].asString());
+            apiName_ = std::make_shared<std::string>(pJson["api_name"].asString());
         }
     }
-    if(pJson.isMember("created_at"))
+    if (pJson.isMember("created_at"))
     {
         dirtyFlag_[4] = true;
-        if(!pJson["created_at"].isNull())
+        if (!pJson["created_at"].isNull())
         {
             auto timeStr = pJson["created_at"].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createdAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
@@ -393,7 +392,7 @@ void ApiKeys::updateByJson(const Json::Value &pJson) noexcept(false)
 const int64_t &ApiKeys::getValueOfApiId() const noexcept
 {
     static const int64_t defaultValue = int64_t();
-    if(apiId_)
+    if (apiId_)
         return *apiId_;
     return defaultValue;
 }
@@ -406,7 +405,7 @@ void ApiKeys::setApiId(const int64_t &pApiId) noexcept
     apiId_ = std::make_shared<int64_t>(pApiId);
     dirtyFlag_[0] = true;
 }
-const typename ApiKeys::PrimaryKeyType & ApiKeys::getPrimaryKey() const
+const typename ApiKeys::PrimaryKeyType &ApiKeys::getPrimaryKey() const
 {
     assert(apiId_);
     return *apiId_;
@@ -415,7 +414,7 @@ const typename ApiKeys::PrimaryKeyType & ApiKeys::getPrimaryKey() const
 const int64_t &ApiKeys::getValueOfUserId() const noexcept
 {
     static const int64_t defaultValue = int64_t();
-    if(userId_)
+    if (userId_)
         return *userId_;
     return defaultValue;
 }
@@ -432,7 +431,7 @@ void ApiKeys::setUserId(const int64_t &pUserId) noexcept
 const std::string &ApiKeys::getValueOfKeyHash() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(keyHash_)
+    if (keyHash_)
         return *keyHash_;
     return defaultValue;
 }
@@ -454,7 +453,7 @@ void ApiKeys::setKeyHash(std::string &&pKeyHash) noexcept
 const std::string &ApiKeys::getValueOfApiName() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(apiName_)
+    if (apiName_)
         return *apiName_;
     return defaultValue;
 }
@@ -476,7 +475,7 @@ void ApiKeys::setApiName(std::string &&pApiName) noexcept
 const ::trantor::Date &ApiKeys::getValueOfCreatedAt() const noexcept
 {
     static const ::trantor::Date defaultValue = ::trantor::Date();
-    if(createdAt_)
+    if (createdAt_)
         return *createdAt_;
     return defaultValue;
 }
@@ -496,20 +495,16 @@ void ApiKeys::updateId(const uint64_t id)
 
 const std::vector<std::string> &ApiKeys::insertColumns() noexcept
 {
-    static const std::vector<std::string> inCols={
-        "user_id",
-        "key_hash",
-        "api_name",
-        "created_at"
-    };
+    static const std::vector<std::string> inCols = {"user_id", "key_hash", "api_name",
+                                                    "created_at"};
     return inCols;
 }
 
 void ApiKeys::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[1])
+    if (dirtyFlag_[1])
     {
-        if(getUserId())
+        if (getUserId())
         {
             binder << getValueOfUserId();
         }
@@ -518,9 +513,9 @@ void ApiKeys::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[2])
+    if (dirtyFlag_[2])
     {
-        if(getKeyHash())
+        if (getKeyHash())
         {
             binder << getValueOfKeyHash();
         }
@@ -529,9 +524,9 @@ void ApiKeys::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[3])
+    if (dirtyFlag_[3])
     {
-        if(getApiName())
+        if (getApiName())
         {
             binder << getValueOfApiName();
         }
@@ -540,9 +535,9 @@ void ApiKeys::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[4])
+    if (dirtyFlag_[4])
     {
-        if(getCreatedAt())
+        if (getCreatedAt())
         {
             binder << getValueOfCreatedAt();
         }
@@ -556,19 +551,19 @@ void ApiKeys::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 const std::vector<std::string> ApiKeys::updateColumns() const
 {
     std::vector<std::string> ret;
-    if(dirtyFlag_[1])
+    if (dirtyFlag_[1])
     {
         ret.push_back(getColumnName(1));
     }
-    if(dirtyFlag_[2])
+    if (dirtyFlag_[2])
     {
         ret.push_back(getColumnName(2));
     }
-    if(dirtyFlag_[3])
+    if (dirtyFlag_[3])
     {
         ret.push_back(getColumnName(3));
     }
-    if(dirtyFlag_[4])
+    if (dirtyFlag_[4])
     {
         ret.push_back(getColumnName(4));
     }
@@ -577,9 +572,9 @@ const std::vector<std::string> ApiKeys::updateColumns() const
 
 void ApiKeys::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[1])
+    if (dirtyFlag_[1])
     {
-        if(getUserId())
+        if (getUserId())
         {
             binder << getValueOfUserId();
         }
@@ -588,9 +583,9 @@ void ApiKeys::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[2])
+    if (dirtyFlag_[2])
     {
-        if(getKeyHash())
+        if (getKeyHash())
         {
             binder << getValueOfKeyHash();
         }
@@ -599,9 +594,9 @@ void ApiKeys::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[3])
+    if (dirtyFlag_[3])
     {
-        if(getApiName())
+        if (getApiName())
         {
             binder << getValueOfApiName();
         }
@@ -610,9 +605,9 @@ void ApiKeys::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[4])
+    if (dirtyFlag_[4])
     {
-        if(getCreatedAt())
+        if (getCreatedAt())
         {
             binder << getValueOfCreatedAt();
         }
@@ -625,278 +620,282 @@ void ApiKeys::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 Json::Value ApiKeys::toJson() const
 {
     Json::Value ret;
-    if(getApiId())
+    if (getApiId())
     {
-        ret["api_id"]=(Json::Int64)getValueOfApiId();
+        ret["api_id"] = (Json::Int64)getValueOfApiId();
     }
     else
     {
-        ret["api_id"]=Json::Value();
+        ret["api_id"] = Json::Value();
     }
-    if(getUserId())
+    if (getUserId())
     {
-        ret["user_id"]=(Json::Int64)getValueOfUserId();
-    }
-    else
-    {
-        ret["user_id"]=Json::Value();
-    }
-    if(getKeyHash())
-    {
-        ret["key_hash"]=getValueOfKeyHash();
+        ret["user_id"] = (Json::Int64)getValueOfUserId();
     }
     else
     {
-        ret["key_hash"]=Json::Value();
+        ret["user_id"] = Json::Value();
     }
-    if(getApiName())
+    if (getKeyHash())
     {
-        ret["api_name"]=getValueOfApiName();
-    }
-    else
-    {
-        ret["api_name"]=Json::Value();
-    }
-    if(getCreatedAt())
-    {
-        ret["created_at"]=getCreatedAt()->toDbStringLocal();
+        ret["key_hash"] = getValueOfKeyHash();
     }
     else
     {
-        ret["created_at"]=Json::Value();
+        ret["key_hash"] = Json::Value();
+    }
+    if (getApiName())
+    {
+        ret["api_name"] = getValueOfApiName();
+    }
+    else
+    {
+        ret["api_name"] = Json::Value();
+    }
+    if (getCreatedAt())
+    {
+        ret["created_at"] = getCreatedAt()->toDbStringLocal();
+    }
+    else
+    {
+        ret["created_at"] = Json::Value();
     }
     return ret;
 }
 
-Json::Value ApiKeys::toMasqueradedJson(
-    const std::vector<std::string> &pMasqueradingVector) const
+Json::Value ApiKeys::toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 5)
+    if (pMasqueradingVector.size() == 5)
     {
-        if(!pMasqueradingVector[0].empty())
+        if (!pMasqueradingVector[0].empty())
         {
-            if(getApiId())
+            if (getApiId())
             {
-                ret[pMasqueradingVector[0]]=(Json::Int64)getValueOfApiId();
+                ret[pMasqueradingVector[0]] = (Json::Int64)getValueOfApiId();
             }
             else
             {
-                ret[pMasqueradingVector[0]]=Json::Value();
+                ret[pMasqueradingVector[0]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[1].empty())
+        if (!pMasqueradingVector[1].empty())
         {
-            if(getUserId())
+            if (getUserId())
             {
-                ret[pMasqueradingVector[1]]=(Json::Int64)getValueOfUserId();
+                ret[pMasqueradingVector[1]] = (Json::Int64)getValueOfUserId();
             }
             else
             {
-                ret[pMasqueradingVector[1]]=Json::Value();
+                ret[pMasqueradingVector[1]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[2].empty())
+        if (!pMasqueradingVector[2].empty())
         {
-            if(getKeyHash())
+            if (getKeyHash())
             {
-                ret[pMasqueradingVector[2]]=getValueOfKeyHash();
+                ret[pMasqueradingVector[2]] = getValueOfKeyHash();
             }
             else
             {
-                ret[pMasqueradingVector[2]]=Json::Value();
+                ret[pMasqueradingVector[2]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[3].empty())
+        if (!pMasqueradingVector[3].empty())
         {
-            if(getApiName())
+            if (getApiName())
             {
-                ret[pMasqueradingVector[3]]=getValueOfApiName();
+                ret[pMasqueradingVector[3]] = getValueOfApiName();
             }
             else
             {
-                ret[pMasqueradingVector[3]]=Json::Value();
+                ret[pMasqueradingVector[3]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[4].empty())
+        if (!pMasqueradingVector[4].empty())
         {
-            if(getCreatedAt())
+            if (getCreatedAt())
             {
-                ret[pMasqueradingVector[4]]=getCreatedAt()->toDbStringLocal();
+                ret[pMasqueradingVector[4]] = getCreatedAt()->toDbStringLocal();
             }
             else
             {
-                ret[pMasqueradingVector[4]]=Json::Value();
+                ret[pMasqueradingVector[4]] = Json::Value();
             }
         }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
-    if(getApiId())
+    if (getApiId())
     {
-        ret["api_id"]=(Json::Int64)getValueOfApiId();
+        ret["api_id"] = (Json::Int64)getValueOfApiId();
     }
     else
     {
-        ret["api_id"]=Json::Value();
+        ret["api_id"] = Json::Value();
     }
-    if(getUserId())
+    if (getUserId())
     {
-        ret["user_id"]=(Json::Int64)getValueOfUserId();
-    }
-    else
-    {
-        ret["user_id"]=Json::Value();
-    }
-    if(getKeyHash())
-    {
-        ret["key_hash"]=getValueOfKeyHash();
+        ret["user_id"] = (Json::Int64)getValueOfUserId();
     }
     else
     {
-        ret["key_hash"]=Json::Value();
+        ret["user_id"] = Json::Value();
     }
-    if(getApiName())
+    if (getKeyHash())
     {
-        ret["api_name"]=getValueOfApiName();
-    }
-    else
-    {
-        ret["api_name"]=Json::Value();
-    }
-    if(getCreatedAt())
-    {
-        ret["created_at"]=getCreatedAt()->toDbStringLocal();
+        ret["key_hash"] = getValueOfKeyHash();
     }
     else
     {
-        ret["created_at"]=Json::Value();
+        ret["key_hash"] = Json::Value();
+    }
+    if (getApiName())
+    {
+        ret["api_name"] = getValueOfApiName();
+    }
+    else
+    {
+        ret["api_name"] = Json::Value();
+    }
+    if (getCreatedAt())
+    {
+        ret["created_at"] = getCreatedAt()->toDbStringLocal();
+    }
+    else
+    {
+        ret["created_at"] = Json::Value();
     }
     return ret;
 }
 
 bool ApiKeys::validateJsonForCreation(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("api_id"))
+    if (pJson.isMember("api_id"))
     {
-        if(!validJsonOfField(0, "api_id", pJson["api_id"], err, true))
+        if (!validJsonOfField(0, "api_id", pJson["api_id"], err, true))
             return false;
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
-        if(!validJsonOfField(1, "user_id", pJson["user_id"], err, true))
-            return false;
-    }
-    else
-    {
-        err="The user_id column cannot be null";
-        return false;
-    }
-    if(pJson.isMember("key_hash"))
-    {
-        if(!validJsonOfField(2, "key_hash", pJson["key_hash"], err, true))
+        if (!validJsonOfField(1, "user_id", pJson["user_id"], err, true))
             return false;
     }
     else
     {
-        err="The key_hash column cannot be null";
+        err = "The user_id column cannot be null";
         return false;
     }
-    if(pJson.isMember("api_name"))
+    if (pJson.isMember("key_hash"))
     {
-        if(!validJsonOfField(3, "api_name", pJson["api_name"], err, true))
+        if (!validJsonOfField(2, "key_hash", pJson["key_hash"], err, true))
             return false;
     }
     else
     {
-        err="The api_name column cannot be null";
+        err = "The key_hash column cannot be null";
         return false;
     }
-    if(pJson.isMember("created_at"))
+    if (pJson.isMember("api_name"))
     {
-        if(!validJsonOfField(4, "created_at", pJson["created_at"], err, true))
+        if (!validJsonOfField(3, "api_name", pJson["api_name"], err, true))
+            return false;
+    }
+    else
+    {
+        err = "The api_name column cannot be null";
+        return false;
+    }
+    if (pJson.isMember("created_at"))
+    {
+        if (!validJsonOfField(4, "created_at", pJson["created_at"], err, true))
             return false;
     }
     return true;
 }
-bool ApiKeys::validateMasqueradedJsonForCreation(const Json::Value &pJson,
-                                                 const std::vector<std::string> &pMasqueradingVector,
-                                                 std::string &err)
+bool ApiKeys::validateMasqueradedJsonForCreation(
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector, std::string &err)
 {
-    if(pMasqueradingVector.size() != 5)
+    if (pMasqueradingVector.size() != 5)
     {
         err = "Bad masquerading vector";
         return false;
     }
-    try {
-      if(!pMasqueradingVector[0].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[0]))
-          {
-              if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, true))
-                  return false;
-          }
-      }
-      if(!pMasqueradingVector[1].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[1]))
-          {
-              if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true))
-                  return false;
-          }
-        else
-        {
-            err="The " + pMasqueradingVector[1] + " column cannot be null";
-            return false;
-        }
-      }
-      if(!pMasqueradingVector[2].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[2]))
-          {
-              if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true))
-                  return false;
-          }
-        else
-        {
-            err="The " + pMasqueradingVector[2] + " column cannot be null";
-            return false;
-        }
-      }
-      if(!pMasqueradingVector[3].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[3]))
-          {
-              if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true))
-                  return false;
-          }
-        else
-        {
-            err="The " + pMasqueradingVector[3] + " column cannot be null";
-            return false;
-        }
-      }
-      if(!pMasqueradingVector[4].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[4]))
-          {
-              if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
-                  return false;
-          }
-      }
-    }
-    catch(const Json::LogicError &e)
+    try
     {
-      err = e.what();
-      return false;
+        if (!pMasqueradingVector[0].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[0]))
+            {
+                if (!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err,
+                                      true))
+                    return false;
+            }
+        }
+        if (!pMasqueradingVector[1].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[1]))
+            {
+                if (!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[1] + " column cannot be null";
+                return false;
+            }
+        }
+        if (!pMasqueradingVector[2].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[2]))
+            {
+                if (!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[2] + " column cannot be null";
+                return false;
+            }
+        }
+        if (!pMasqueradingVector[3].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[3]))
+            {
+                if (!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[3] + " column cannot be null";
+                return false;
+            }
+        }
+        if (!pMasqueradingVector[4].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[4]))
+            {
+                if (!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err,
+                                      true))
+                    return false;
+            }
+        }
+    }
+    catch (const Json::LogicError &e)
+    {
+        err = e.what();
+        return false;
     }
     return true;
 }
 bool ApiKeys::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("api_id"))
+    if (pJson.isMember("api_id"))
     {
-        if(!validJsonOfField(0, "api_id", pJson["api_id"], err, false))
+        if (!validJsonOfField(0, "api_id", pJson["api_id"], err, false))
             return false;
     }
     else
@@ -904,24 +903,24 @@ bool ApiKeys::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
-        if(!validJsonOfField(1, "user_id", pJson["user_id"], err, false))
+        if (!validJsonOfField(1, "user_id", pJson["user_id"], err, false))
             return false;
     }
-    if(pJson.isMember("key_hash"))
+    if (pJson.isMember("key_hash"))
     {
-        if(!validJsonOfField(2, "key_hash", pJson["key_hash"], err, false))
+        if (!validJsonOfField(2, "key_hash", pJson["key_hash"], err, false))
             return false;
     }
-    if(pJson.isMember("api_name"))
+    if (pJson.isMember("api_name"))
     {
-        if(!validJsonOfField(3, "api_name", pJson["api_name"], err, false))
+        if (!validJsonOfField(3, "api_name", pJson["api_name"], err, false))
             return false;
     }
-    if(pJson.isMember("created_at"))
+    if (pJson.isMember("created_at"))
     {
-        if(!validJsonOfField(4, "created_at", pJson["created_at"], err, false))
+        if (!validJsonOfField(4, "created_at", pJson["created_at"], err, false))
             return false;
     }
     return true;
@@ -930,142 +929,143 @@ bool ApiKeys::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                const std::vector<std::string> &pMasqueradingVector,
                                                std::string &err)
 {
-    if(pMasqueradingVector.size() != 5)
+    if (pMasqueradingVector.size() != 5)
     {
         err = "Bad masquerading vector";
         return false;
     }
-    try {
-      if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
-      {
-          if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false))
-              return false;
-      }
-    else
+    try
     {
-        err = "The value of primary key must be set in the json object for update";
+        if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+        {
+            if (!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err,
+                                  false))
+                return false;
+        }
+        else
+        {
+            err = "The value of primary key must be set in the json object for update";
+            return false;
+        }
+        if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+        {
+            if (!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err,
+                                  false))
+                return false;
+        }
+        if (!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+        {
+            if (!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err,
+                                  false))
+                return false;
+        }
+        if (!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+        {
+            if (!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err,
+                                  false))
+                return false;
+        }
+        if (!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+        {
+            if (!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err,
+                                  false))
+                return false;
+        }
+    }
+    catch (const Json::LogicError &e)
+    {
+        err = e.what();
         return false;
-    }
-      if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
-      {
-          if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
-      {
-          if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
-      {
-          if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
-      {
-          if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, false))
-              return false;
-      }
-    }
-    catch(const Json::LogicError &e)
-    {
-      err = e.what();
-      return false;
     }
     return true;
 }
-bool ApiKeys::validJsonOfField(size_t index,
-                               const std::string &fieldName,
-                               const Json::Value &pJson,
-                               std::string &err,
-                               bool isForCreation)
+bool ApiKeys::validJsonOfField(size_t index, const std::string &fieldName, const Json::Value &pJson,
+                               std::string &err, bool isForCreation)
 {
-    switch(index)
+    switch (index)
     {
-        case 0:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(isForCreation)
-            {
-                err="The automatic primary key cannot be set";
-                return false;
-            }
-            if(!pJson.isInt64())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 1:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isInt64())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 2:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            if(pJson.isString() && std::strlen(pJson.asCString()) > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;
-            }
-
-            break;
-        case 3:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            if(pJson.isString() && std::strlen(pJson.asCString()) > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;
-            }
-
-            break;
-        case 4:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        default:
-            err="Internal error in the server";
+    case 0:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
             return false;
+        }
+        if (isForCreation)
+        {
+            err = "The automatic primary key cannot be set";
+            return false;
+        }
+        if (!pJson.isInt64())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    case 1:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isInt64())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    case 2:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isString())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        if (pJson.isString() && std::strlen(pJson.asCString()) > 255)
+        {
+            err = "String length exceeds limit for the " + fieldName +
+                  " field (the maximum value is 255)";
+            return false;
+        }
+
+        break;
+    case 3:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isString())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        if (pJson.isString() && std::strlen(pJson.asCString()) > 255)
+        {
+            err = "String length exceeds limit for the " + fieldName +
+                  " field (the maximum value is 255)";
+            return false;
+        }
+
+        break;
+    case 4:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isString())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    default:
+        err = "Internal error in the server";
+        return false;
     }
     return true;
 }

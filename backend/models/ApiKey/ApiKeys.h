@@ -6,25 +6,25 @@
  */
 
 #pragma once
+#include <drogon/orm/BaseBuilder.h>
+#include <drogon/orm/Field.h>
+#include <drogon/orm/Mapper.h>
 #include <drogon/orm/Result.h>
 #include <drogon/orm/Row.h>
-#include <drogon/orm/Field.h>
 #include <drogon/orm/SqlBinder.h>
-#include <drogon/orm/Mapper.h>
-#include <drogon/orm/BaseBuilder.h>
 #ifdef __cpp_impl_coroutine
 #include <drogon/orm/CoroMapper.h>
 #endif
-#include <trantor/utils/Date.h>
-#include <trantor/utils/Logger.h>
+#include <iostream>
 #include <json/json.h>
+#include <memory>
+#include <stdint.h>
 #include <string>
 #include <string_view>
-#include <memory>
-#include <vector>
+#include <trantor/utils/Date.h>
+#include <trantor/utils/Logger.h>
 #include <tuple>
-#include <stdint.h>
-#include <iostream>
+#include <vector>
 
 namespace drogon
 {
@@ -32,8 +32,8 @@ namespace orm
 {
 class DbClient;
 using DbClientPtr = std::shared_ptr<DbClient>;
-}
-}
+} // namespace orm
+} // namespace drogon
 namespace drogon_model
 {
 namespace mercury
@@ -79,71 +79,75 @@ class ApiKeys
      * @param pJson The json object to construct a new instance.
      * @param pMasqueradingVector The aliases of table columns.
      */
-    ApiKeys(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false);
+    ApiKeys(const Json::Value &pJson,
+            const std::vector<std::string> &pMasqueradingVector) noexcept(false);
 
     ApiKeys() = default;
 
     void updateByJson(const Json::Value &pJson) noexcept(false);
-    void updateByMasqueradedJson(const Json::Value &pJson,
-                                 const std::vector<std::string> &pMasqueradingVector) noexcept(false);
+    void
+    updateByMasqueradedJson(const Json::Value &pJson,
+                            const std::vector<std::string> &pMasqueradingVector) noexcept(false);
     static bool validateJsonForCreation(const Json::Value &pJson, std::string &err);
-    static bool validateMasqueradedJsonForCreation(const Json::Value &,
-                                                const std::vector<std::string> &pMasqueradingVector,
-                                                    std::string &err);
+    static bool validateMasqueradedJsonForCreation(
+        const Json::Value &, const std::vector<std::string> &pMasqueradingVector, std::string &err);
     static bool validateJsonForUpdate(const Json::Value &pJson, std::string &err);
-    static bool validateMasqueradedJsonForUpdate(const Json::Value &,
-                                          const std::vector<std::string> &pMasqueradingVector,
-                                          std::string &err);
-    static bool validJsonOfField(size_t index,
-                          const std::string &fieldName,
-                          const Json::Value &pJson,
-                          std::string &err,
-                          bool isForCreation);
+    static bool validateMasqueradedJsonForUpdate(
+        const Json::Value &, const std::vector<std::string> &pMasqueradingVector, std::string &err);
+    static bool validJsonOfField(size_t index, const std::string &fieldName,
+                                 const Json::Value &pJson, std::string &err, bool isForCreation);
 
     /**  For column api_id  */
-    ///Get the value of the column api_id, returns the default value if the column is null
+    /// Get the value of the column api_id, returns the default value if the column is null
     const int64_t &getValueOfApiId() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object
+    /// if the column is null
     const std::shared_ptr<int64_t> &getApiId() const noexcept;
-    ///Set the value of the column api_id
+    /// Set the value of the column api_id
     void setApiId(const int64_t &pApiId) noexcept;
 
     /**  For column user_id  */
-    ///Get the value of the column user_id, returns the default value if the column is null
+    /// Get the value of the column user_id, returns the default value if the column is null
     const int64_t &getValueOfUserId() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object
+    /// if the column is null
     const std::shared_ptr<int64_t> &getUserId() const noexcept;
-    ///Set the value of the column user_id
+    /// Set the value of the column user_id
     void setUserId(const int64_t &pUserId) noexcept;
 
     /**  For column key_hash  */
-    ///Get the value of the column key_hash, returns the default value if the column is null
+    /// Get the value of the column key_hash, returns the default value if the column is null
     const std::string &getValueOfKeyHash() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object
+    /// if the column is null
     const std::shared_ptr<std::string> &getKeyHash() const noexcept;
-    ///Set the value of the column key_hash
+    /// Set the value of the column key_hash
     void setKeyHash(const std::string &pKeyHash) noexcept;
     void setKeyHash(std::string &&pKeyHash) noexcept;
 
     /**  For column api_name  */
-    ///Get the value of the column api_name, returns the default value if the column is null
+    /// Get the value of the column api_name, returns the default value if the column is null
     const std::string &getValueOfApiName() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object
+    /// if the column is null
     const std::shared_ptr<std::string> &getApiName() const noexcept;
-    ///Set the value of the column api_name
+    /// Set the value of the column api_name
     void setApiName(const std::string &pApiName) noexcept;
     void setApiName(std::string &&pApiName) noexcept;
 
     /**  For column created_at  */
-    ///Get the value of the column created_at, returns the default value if the column is null
+    /// Get the value of the column created_at, returns the default value if the column is null
     const ::trantor::Date &getValueOfCreatedAt() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object
+    /// if the column is null
     const std::shared_ptr<::trantor::Date> &getCreatedAt() const noexcept;
-    ///Set the value of the column created_at
+    /// Set the value of the column created_at
     void setCreatedAt(const ::trantor::Date &pCreatedAt) noexcept;
 
-
-    static size_t getColumnNumber() noexcept {  return 5;  }
+    static size_t getColumnNumber() noexcept
+    {
+        return 5;
+    }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -162,7 +166,7 @@ class ApiKeys
     void outputArgs(drogon::orm::internal::SqlBinder &binder) const;
     const std::vector<std::string> updateColumns() const;
     void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
-    ///For mysql or sqlite3
+    /// For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<int64_t> apiId_;
     std::shared_ptr<int64_t> userId_;
@@ -180,89 +184,90 @@ class ApiKeys
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[5]={ false };
+    bool dirtyFlag_[5] = {false};
+
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="select * from " + tableName + " where api_id = $1";
+        static const std::string sql = "select * from " + tableName + " where api_id = $1";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="delete from " + tableName + " where api_id = $1";
+        static const std::string sql = "delete from " + tableName + " where api_id = $1";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
     {
-        std::string sql="insert into " + tableName + " (";
+        std::string sql = "insert into " + tableName + " (";
         size_t parametersCount = 0;
         needSelection = false;
-            sql += "api_id,";
-            ++parametersCount;
-        if(dirtyFlag_[1])
+        sql += "api_id,";
+        ++parametersCount;
+        if (dirtyFlag_[1])
         {
             sql += "user_id,";
             ++parametersCount;
         }
-        if(dirtyFlag_[2])
+        if (dirtyFlag_[2])
         {
             sql += "key_hash,";
             ++parametersCount;
         }
-        if(dirtyFlag_[3])
+        if (dirtyFlag_[3])
         {
             sql += "api_name,";
             ++parametersCount;
         }
         sql += "created_at,";
         ++parametersCount;
-        if(!dirtyFlag_[4])
+        if (!dirtyFlag_[4])
         {
-            needSelection=true;
+            needSelection = true;
         }
-        needSelection=true;
-        if(parametersCount > 0)
+        needSelection = true;
+        if (parametersCount > 0)
         {
-            sql[sql.length()-1]=')';
+            sql[sql.length() - 1] = ')';
             sql += " values (";
         }
         else
             sql += ") values (";
 
-        int placeholder=1;
+        int placeholder = 1;
         char placeholderStr[64];
-        size_t n=0;
-        sql +="default,";
-        if(dirtyFlag_[1])
+        size_t n = 0;
+        sql += "default,";
+        if (dirtyFlag_[1])
         {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[2])
+        if (dirtyFlag_[2])
         {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[3])
+        if (dirtyFlag_[3])
         {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[4])
+        if (dirtyFlag_[4])
         {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
         else
         {
-            sql +="default,";
+            sql += "default,";
         }
-        if(parametersCount > 0)
+        if (parametersCount > 0)
         {
             sql.resize(sql.length() - 1);
         }
-        if(needSelection)
+        if (needSelection)
         {
             sql.append(") returning *");
         }

@@ -15,388 +15,492 @@ using namespace drogon_model::mercury;
 
 const std::string KvTagAssociation::Cols::_kv_id = "\"kv_id\"";
 const std::string KvTagAssociation::Cols::_tag_id = "\"tag_id\"";
-const std::vector<std::string> KvTagAssociation::primaryKeyName = {"kv_id",
-                                                                   "tag_id"};
+const std::vector<std::string> KvTagAssociation::primaryKeyName = {"kv_id", "tag_id"};
 const bool KvTagAssociation::hasPrimaryKey = true;
 const std::string KvTagAssociation::tableName = "\"kv_tag_association\"";
 
-const std::vector<typename KvTagAssociation::MetaData>
-    KvTagAssociation::metaData_ = {{"kv_id", "int64_t", "bigint", 8, 0, 1, 1},
-                                   {"tag_id", "int64_t", "bigint", 8, 0, 1, 1}};
-const std::string &
-KvTagAssociation::getColumnName(size_t index) noexcept(false) {
-  assert(index < metaData_.size());
-  return metaData_[index].colName_;
+const std::vector<typename KvTagAssociation::MetaData> KvTagAssociation::metaData_ = {
+    {"kv_id", "int64_t", "bigint", 8, 0, 1, 1}, {"tag_id", "int64_t", "bigint", 8, 0, 1, 1}};
+const std::string &KvTagAssociation::getColumnName(size_t index) noexcept(false)
+{
+    assert(index < metaData_.size());
+    return metaData_[index].colName_;
 }
-KvTagAssociation::KvTagAssociation(const Row &r,
-                                   const ssize_t indexOffset) noexcept {
-  if (indexOffset < 0) {
-    if (!r["kv_id"].isNull()) {
-      kvId_ = std::make_shared<int64_t>(r["kv_id"].as<int64_t>());
+KvTagAssociation::KvTagAssociation(const Row &r, const ssize_t indexOffset) noexcept
+{
+    if (indexOffset < 0)
+    {
+        if (!r["kv_id"].isNull())
+        {
+            kvId_ = std::make_shared<int64_t>(r["kv_id"].as<int64_t>());
+        }
+        if (!r["tag_id"].isNull())
+        {
+            tagId_ = std::make_shared<int64_t>(r["tag_id"].as<int64_t>());
+        }
     }
-    if (!r["tag_id"].isNull()) {
-      tagId_ = std::make_shared<int64_t>(r["tag_id"].as<int64_t>());
+    else
+    {
+        size_t offset = (size_t)indexOffset;
+        if (offset + 2 > r.size())
+        {
+            LOG_FATAL << "Invalid SQL result for this model";
+            return;
+        }
+        size_t index;
+        index = offset + 0;
+        if (!r[index].isNull())
+        {
+            kvId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
+        }
+        index = offset + 1;
+        if (!r[index].isNull())
+        {
+            tagId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
+        }
     }
-  } else {
-    size_t offset = (size_t)indexOffset;
-    if (offset + 2 > r.size()) {
-      LOG_FATAL << "Invalid SQL result for this model";
-      return;
-    }
-    size_t index;
-    index = offset + 0;
-    if (!r[index].isNull()) {
-      kvId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
-    }
-    index = offset + 1;
-    if (!r[index].isNull()) {
-      tagId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
-    }
-  }
 }
 
 KvTagAssociation::KvTagAssociation(
-    const Json::Value &pJson,
-    const std::vector<std::string> &pMasqueradingVector) noexcept(false) {
-  if (pMasqueradingVector.size() != 2) {
-    LOG_ERROR << "Bad masquerading vector";
-    return;
-  }
-  if (!pMasqueradingVector[0].empty() &&
-      pJson.isMember(pMasqueradingVector[0])) {
-    dirtyFlag_[0] = true;
-    if (!pJson[pMasqueradingVector[0]].isNull()) {
-      kvId_ = std::make_shared<int64_t>(
-          (int64_t)pJson[pMasqueradingVector[0]].asInt64());
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
+{
+    if (pMasqueradingVector.size() != 2)
+    {
+        LOG_ERROR << "Bad masquerading vector";
+        return;
     }
-  }
-  if (!pMasqueradingVector[1].empty() &&
-      pJson.isMember(pMasqueradingVector[1])) {
-    dirtyFlag_[1] = true;
-    if (!pJson[pMasqueradingVector[1]].isNull()) {
-      tagId_ = std::make_shared<int64_t>(
-          (int64_t)pJson[pMasqueradingVector[1]].asInt64());
+    if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+    {
+        dirtyFlag_[0] = true;
+        if (!pJson[pMasqueradingVector[0]].isNull())
+        {
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
+        }
     }
-  }
+    if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+    {
+        dirtyFlag_[1] = true;
+        if (!pJson[pMasqueradingVector[1]].isNull())
+        {
+            tagId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
+        }
+    }
 }
 
-KvTagAssociation::KvTagAssociation(const Json::Value &pJson) noexcept(false) {
-  if (pJson.isMember("kv_id")) {
-    dirtyFlag_[0] = true;
-    if (!pJson["kv_id"].isNull()) {
-      kvId_ = std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
+KvTagAssociation::KvTagAssociation(const Json::Value &pJson) noexcept(false)
+{
+    if (pJson.isMember("kv_id"))
+    {
+        dirtyFlag_[0] = true;
+        if (!pJson["kv_id"].isNull())
+        {
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
+        }
     }
-  }
-  if (pJson.isMember("tag_id")) {
-    dirtyFlag_[1] = true;
-    if (!pJson["tag_id"].isNull()) {
-      tagId_ = std::make_shared<int64_t>((int64_t)pJson["tag_id"].asInt64());
+    if (pJson.isMember("tag_id"))
+    {
+        dirtyFlag_[1] = true;
+        if (!pJson["tag_id"].isNull())
+        {
+            tagId_ = std::make_shared<int64_t>((int64_t)pJson["tag_id"].asInt64());
+        }
     }
-  }
 }
 
 void KvTagAssociation::updateByMasqueradedJson(
-    const Json::Value &pJson,
-    const std::vector<std::string> &pMasqueradingVector) noexcept(false) {
-  if (pMasqueradingVector.size() != 2) {
-    LOG_ERROR << "Bad masquerading vector";
-    return;
-  }
-  if (!pMasqueradingVector[0].empty() &&
-      pJson.isMember(pMasqueradingVector[0])) {
-    if (!pJson[pMasqueradingVector[0]].isNull()) {
-      kvId_ = std::make_shared<int64_t>(
-          (int64_t)pJson[pMasqueradingVector[0]].asInt64());
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
+{
+    if (pMasqueradingVector.size() != 2)
+    {
+        LOG_ERROR << "Bad masquerading vector";
+        return;
     }
-  }
-  if (!pMasqueradingVector[1].empty() &&
-      pJson.isMember(pMasqueradingVector[1])) {
-    if (!pJson[pMasqueradingVector[1]].isNull()) {
-      tagId_ = std::make_shared<int64_t>(
-          (int64_t)pJson[pMasqueradingVector[1]].asInt64());
+    if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+    {
+        if (!pJson[pMasqueradingVector[0]].isNull())
+        {
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
+        }
     }
-  }
+    if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+    {
+        if (!pJson[pMasqueradingVector[1]].isNull())
+        {
+            tagId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
+        }
+    }
 }
 
-void KvTagAssociation::updateByJson(const Json::Value &pJson) noexcept(false) {
-  if (pJson.isMember("kv_id")) {
-    if (!pJson["kv_id"].isNull()) {
-      kvId_ = std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
+void KvTagAssociation::updateByJson(const Json::Value &pJson) noexcept(false)
+{
+    if (pJson.isMember("kv_id"))
+    {
+        if (!pJson["kv_id"].isNull())
+        {
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
+        }
     }
-  }
-  if (pJson.isMember("tag_id")) {
-    if (!pJson["tag_id"].isNull()) {
-      tagId_ = std::make_shared<int64_t>((int64_t)pJson["tag_id"].asInt64());
+    if (pJson.isMember("tag_id"))
+    {
+        if (!pJson["tag_id"].isNull())
+        {
+            tagId_ = std::make_shared<int64_t>((int64_t)pJson["tag_id"].asInt64());
+        }
     }
-  }
 }
 
-const int64_t &KvTagAssociation::getValueOfKvId() const noexcept {
-  static const int64_t defaultValue = int64_t();
-  if (kvId_)
-    return *kvId_;
-  return defaultValue;
+const int64_t &KvTagAssociation::getValueOfKvId() const noexcept
+{
+    static const int64_t defaultValue = int64_t();
+    if (kvId_)
+        return *kvId_;
+    return defaultValue;
 }
-const std::shared_ptr<int64_t> &KvTagAssociation::getKvId() const noexcept {
-  return kvId_;
+const std::shared_ptr<int64_t> &KvTagAssociation::getKvId() const noexcept
+{
+    return kvId_;
 }
-void KvTagAssociation::setKvId(const int64_t &pKvId) noexcept {
-  kvId_ = std::make_shared<int64_t>(pKvId);
-  dirtyFlag_[0] = true;
-}
-
-const int64_t &KvTagAssociation::getValueOfTagId() const noexcept {
-  static const int64_t defaultValue = int64_t();
-  if (tagId_)
-    return *tagId_;
-  return defaultValue;
-}
-const std::shared_ptr<int64_t> &KvTagAssociation::getTagId() const noexcept {
-  return tagId_;
-}
-void KvTagAssociation::setTagId(const int64_t &pTagId) noexcept {
-  tagId_ = std::make_shared<int64_t>(pTagId);
-  dirtyFlag_[1] = true;
+void KvTagAssociation::setKvId(const int64_t &pKvId) noexcept
+{
+    kvId_ = std::make_shared<int64_t>(pKvId);
+    dirtyFlag_[0] = true;
 }
 
-void KvTagAssociation::updateId(const uint64_t id) {}
-typename KvTagAssociation::PrimaryKeyType
-KvTagAssociation::getPrimaryKey() const {
-  return std::make_tuple(*kvId_, *tagId_);
+const int64_t &KvTagAssociation::getValueOfTagId() const noexcept
+{
+    static const int64_t defaultValue = int64_t();
+    if (tagId_)
+        return *tagId_;
+    return defaultValue;
+}
+const std::shared_ptr<int64_t> &KvTagAssociation::getTagId() const noexcept
+{
+    return tagId_;
+}
+void KvTagAssociation::setTagId(const int64_t &pTagId) noexcept
+{
+    tagId_ = std::make_shared<int64_t>(pTagId);
+    dirtyFlag_[1] = true;
 }
 
-const std::vector<std::string> &KvTagAssociation::insertColumns() noexcept {
-  static const std::vector<std::string> inCols = {"kv_id", "tag_id"};
-  return inCols;
+void KvTagAssociation::updateId(const uint64_t id)
+{
+}
+typename KvTagAssociation::PrimaryKeyType KvTagAssociation::getPrimaryKey() const
+{
+    return std::make_tuple(*kvId_, *tagId_);
 }
 
-void KvTagAssociation::outputArgs(
-    drogon::orm::internal::SqlBinder &binder) const {
-  if (dirtyFlag_[0]) {
-    if (getKvId()) {
-      binder << getValueOfKvId();
-    } else {
-      binder << nullptr;
+const std::vector<std::string> &KvTagAssociation::insertColumns() noexcept
+{
+    static const std::vector<std::string> inCols = {"kv_id", "tag_id"};
+    return inCols;
+}
+
+void KvTagAssociation::outputArgs(drogon::orm::internal::SqlBinder &binder) const
+{
+    if (dirtyFlag_[0])
+    {
+        if (getKvId())
+        {
+            binder << getValueOfKvId();
+        }
+        else
+        {
+            binder << nullptr;
+        }
     }
-  }
-  if (dirtyFlag_[1]) {
-    if (getTagId()) {
-      binder << getValueOfTagId();
-    } else {
-      binder << nullptr;
+    if (dirtyFlag_[1])
+    {
+        if (getTagId())
+        {
+            binder << getValueOfTagId();
+        }
+        else
+        {
+            binder << nullptr;
+        }
     }
-  }
 }
 
-const std::vector<std::string> KvTagAssociation::updateColumns() const {
-  std::vector<std::string> ret;
-  if (dirtyFlag_[0]) {
-    ret.push_back(getColumnName(0));
-  }
-  if (dirtyFlag_[1]) {
-    ret.push_back(getColumnName(1));
-  }
-  return ret;
-}
-
-void KvTagAssociation::updateArgs(
-    drogon::orm::internal::SqlBinder &binder) const {
-  if (dirtyFlag_[0]) {
-    if (getKvId()) {
-      binder << getValueOfKvId();
-    } else {
-      binder << nullptr;
+const std::vector<std::string> KvTagAssociation::updateColumns() const
+{
+    std::vector<std::string> ret;
+    if (dirtyFlag_[0])
+    {
+        ret.push_back(getColumnName(0));
     }
-  }
-  if (dirtyFlag_[1]) {
-    if (getTagId()) {
-      binder << getValueOfTagId();
-    } else {
-      binder << nullptr;
-    }
-  }
-}
-Json::Value KvTagAssociation::toJson() const {
-  Json::Value ret;
-  if (getKvId()) {
-    ret["kv_id"] = (Json::Int64)getValueOfKvId();
-  } else {
-    ret["kv_id"] = Json::Value();
-  }
-  if (getTagId()) {
-    ret["tag_id"] = (Json::Int64)getValueOfTagId();
-  } else {
-    ret["tag_id"] = Json::Value();
-  }
-  return ret;
-}
-
-Json::Value KvTagAssociation::toMasqueradedJson(
-    const std::vector<std::string> &pMasqueradingVector) const {
-  Json::Value ret;
-  if (pMasqueradingVector.size() == 2) {
-    if (!pMasqueradingVector[0].empty()) {
-      if (getKvId()) {
-        ret[pMasqueradingVector[0]] = (Json::Int64)getValueOfKvId();
-      } else {
-        ret[pMasqueradingVector[0]] = Json::Value();
-      }
-    }
-    if (!pMasqueradingVector[1].empty()) {
-      if (getTagId()) {
-        ret[pMasqueradingVector[1]] = (Json::Int64)getValueOfTagId();
-      } else {
-        ret[pMasqueradingVector[1]] = Json::Value();
-      }
+    if (dirtyFlag_[1])
+    {
+        ret.push_back(getColumnName(1));
     }
     return ret;
-  }
-  LOG_ERROR << "Masquerade failed";
-  if (getKvId()) {
-    ret["kv_id"] = (Json::Int64)getValueOfKvId();
-  } else {
-    ret["kv_id"] = Json::Value();
-  }
-  if (getTagId()) {
-    ret["tag_id"] = (Json::Int64)getValueOfTagId();
-  } else {
-    ret["tag_id"] = Json::Value();
-  }
-  return ret;
 }
 
-bool KvTagAssociation::validateJsonForCreation(const Json::Value &pJson,
-                                               std::string &err) {
-  if (pJson.isMember("kv_id")) {
-    if (!validJsonOfField(0, "kv_id", pJson["kv_id"], err, true))
-      return false;
-  } else {
-    err = "The kv_id column cannot be null";
-    return false;
-  }
-  if (pJson.isMember("tag_id")) {
-    if (!validJsonOfField(1, "tag_id", pJson["tag_id"], err, true))
-      return false;
-  } else {
-    err = "The tag_id column cannot be null";
-    return false;
-  }
-  return true;
+void KvTagAssociation::updateArgs(drogon::orm::internal::SqlBinder &binder) const
+{
+    if (dirtyFlag_[0])
+    {
+        if (getKvId())
+        {
+            binder << getValueOfKvId();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if (dirtyFlag_[1])
+    {
+        if (getTagId())
+        {
+            binder << getValueOfTagId();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+}
+Json::Value KvTagAssociation::toJson() const
+{
+    Json::Value ret;
+    if (getKvId())
+    {
+        ret["kv_id"] = (Json::Int64)getValueOfKvId();
+    }
+    else
+    {
+        ret["kv_id"] = Json::Value();
+    }
+    if (getTagId())
+    {
+        ret["tag_id"] = (Json::Int64)getValueOfTagId();
+    }
+    else
+    {
+        ret["tag_id"] = Json::Value();
+    }
+    return ret;
+}
+
+Json::Value
+KvTagAssociation::toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const
+{
+    Json::Value ret;
+    if (pMasqueradingVector.size() == 2)
+    {
+        if (!pMasqueradingVector[0].empty())
+        {
+            if (getKvId())
+            {
+                ret[pMasqueradingVector[0]] = (Json::Int64)getValueOfKvId();
+            }
+            else
+            {
+                ret[pMasqueradingVector[0]] = Json::Value();
+            }
+        }
+        if (!pMasqueradingVector[1].empty())
+        {
+            if (getTagId())
+            {
+                ret[pMasqueradingVector[1]] = (Json::Int64)getValueOfTagId();
+            }
+            else
+            {
+                ret[pMasqueradingVector[1]] = Json::Value();
+            }
+        }
+        return ret;
+    }
+    LOG_ERROR << "Masquerade failed";
+    if (getKvId())
+    {
+        ret["kv_id"] = (Json::Int64)getValueOfKvId();
+    }
+    else
+    {
+        ret["kv_id"] = Json::Value();
+    }
+    if (getTagId())
+    {
+        ret["tag_id"] = (Json::Int64)getValueOfTagId();
+    }
+    else
+    {
+        ret["tag_id"] = Json::Value();
+    }
+    return ret;
+}
+
+bool KvTagAssociation::validateJsonForCreation(const Json::Value &pJson, std::string &err)
+{
+    if (pJson.isMember("kv_id"))
+    {
+        if (!validJsonOfField(0, "kv_id", pJson["kv_id"], err, true))
+            return false;
+    }
+    else
+    {
+        err = "The kv_id column cannot be null";
+        return false;
+    }
+    if (pJson.isMember("tag_id"))
+    {
+        if (!validJsonOfField(1, "tag_id", pJson["tag_id"], err, true))
+            return false;
+    }
+    else
+    {
+        err = "The tag_id column cannot be null";
+        return false;
+    }
+    return true;
 }
 bool KvTagAssociation::validateMasqueradedJsonForCreation(
-    const Json::Value &pJson,
-    const std::vector<std::string> &pMasqueradingVector, std::string &err) {
-  if (pMasqueradingVector.size() != 2) {
-    err = "Bad masquerading vector";
-    return false;
-  }
-  try {
-    if (!pMasqueradingVector[0].empty()) {
-      if (pJson.isMember(pMasqueradingVector[0])) {
-        if (!validJsonOfField(0, pMasqueradingVector[0],
-                              pJson[pMasqueradingVector[0]], err, true))
-          return false;
-      } else {
-        err = "The " + pMasqueradingVector[0] + " column cannot be null";
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector, std::string &err)
+{
+    if (pMasqueradingVector.size() != 2)
+    {
+        err = "Bad masquerading vector";
         return false;
-      }
     }
-    if (!pMasqueradingVector[1].empty()) {
-      if (pJson.isMember(pMasqueradingVector[1])) {
-        if (!validJsonOfField(1, pMasqueradingVector[1],
-                              pJson[pMasqueradingVector[1]], err, true))
-          return false;
-      } else {
-        err = "The " + pMasqueradingVector[1] + " column cannot be null";
+    try
+    {
+        if (!pMasqueradingVector[0].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[0]))
+            {
+                if (!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[0] + " column cannot be null";
+                return false;
+            }
+        }
+        if (!pMasqueradingVector[1].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[1]))
+            {
+                if (!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[1] + " column cannot be null";
+                return false;
+            }
+        }
+    }
+    catch (const Json::LogicError &e)
+    {
+        err = e.what();
         return false;
-      }
     }
-  } catch (const Json::LogicError &e) {
-    err = e.what();
-    return false;
-  }
-  return true;
+    return true;
 }
-bool KvTagAssociation::validateJsonForUpdate(const Json::Value &pJson,
-                                             std::string &err) {
-  if (pJson.isMember("kv_id")) {
-    if (!validJsonOfField(0, "kv_id", pJson["kv_id"], err, false))
-      return false;
-  } else {
-    err = "The value of primary key must be set in the json object for update";
-    return false;
-  }
-  if (pJson.isMember("tag_id")) {
-    if (!validJsonOfField(1, "tag_id", pJson["tag_id"], err, false))
-      return false;
-  } else {
-    err = "The value of primary key must be set in the json object for update";
-    return false;
-  }
-  return true;
+bool KvTagAssociation::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
+{
+    if (pJson.isMember("kv_id"))
+    {
+        if (!validJsonOfField(0, "kv_id", pJson["kv_id"], err, false))
+            return false;
+    }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
+    if (pJson.isMember("tag_id"))
+    {
+        if (!validJsonOfField(1, "tag_id", pJson["tag_id"], err, false))
+            return false;
+    }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
+    return true;
 }
 bool KvTagAssociation::validateMasqueradedJsonForUpdate(
-    const Json::Value &pJson,
-    const std::vector<std::string> &pMasqueradingVector, std::string &err) {
-  if (pMasqueradingVector.size() != 2) {
-    err = "Bad masquerading vector";
-    return false;
-  }
-  try {
-    if (!pMasqueradingVector[0].empty() &&
-        pJson.isMember(pMasqueradingVector[0])) {
-      if (!validJsonOfField(0, pMasqueradingVector[0],
-                            pJson[pMasqueradingVector[0]], err, false))
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector, std::string &err)
+{
+    if (pMasqueradingVector.size() != 2)
+    {
+        err = "Bad masquerading vector";
         return false;
-    } else {
-      err =
-          "The value of primary key must be set in the json object for update";
-      return false;
     }
-    if (!pMasqueradingVector[1].empty() &&
-        pJson.isMember(pMasqueradingVector[1])) {
-      if (!validJsonOfField(1, pMasqueradingVector[1],
-                            pJson[pMasqueradingVector[1]], err, false))
+    try
+    {
+        if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+        {
+            if (!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err,
+                                  false))
+                return false;
+        }
+        else
+        {
+            err = "The value of primary key must be set in the json object for update";
+            return false;
+        }
+        if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+        {
+            if (!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err,
+                                  false))
+                return false;
+        }
+        else
+        {
+            err = "The value of primary key must be set in the json object for update";
+            return false;
+        }
+    }
+    catch (const Json::LogicError &e)
+    {
+        err = e.what();
         return false;
-    } else {
-      err =
-          "The value of primary key must be set in the json object for update";
-      return false;
     }
-  } catch (const Json::LogicError &e) {
-    err = e.what();
-    return false;
-  }
-  return true;
+    return true;
 }
-bool KvTagAssociation::validJsonOfField(size_t index,
-                                        const std::string &fieldName,
-                                        const Json::Value &pJson,
-                                        std::string &err, bool isForCreation) {
-  switch (index) {
-  case 0:
-    if (pJson.isNull()) {
-      err = "The " + fieldName + " column cannot be null";
-      return false;
+bool KvTagAssociation::validJsonOfField(size_t index, const std::string &fieldName,
+                                        const Json::Value &pJson, std::string &err,
+                                        bool isForCreation)
+{
+    switch (index)
+    {
+    case 0:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isInt64())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    case 1:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isInt64())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    default:
+        err = "Internal error in the server";
+        return false;
     }
-    if (!pJson.isInt64()) {
-      err = "Type error in the " + fieldName + " field";
-      return false;
-    }
-    break;
-  case 1:
-    if (pJson.isNull()) {
-      err = "The " + fieldName + " column cannot be null";
-      return false;
-    }
-    if (!pJson.isInt64()) {
-      err = "Type error in the " + fieldName + " field";
-      return false;
-    }
-    break;
-  default:
-    err = "Internal error in the server";
-    return false;
-  }
-  return true;
+    return true;
 }

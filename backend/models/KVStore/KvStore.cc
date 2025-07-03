@@ -23,14 +23,13 @@ const std::string KvStore::primaryKeyName = "kv_id";
 const bool KvStore::hasPrimaryKey = true;
 const std::string KvStore::tableName = "\"kv_store\"";
 
-const std::vector<typename KvStore::MetaData> KvStore::metaData_={
-{"kv_id","int64_t","bigint",8,1,1,1},
-{"user_id","int64_t","bigint",8,0,0,1},
-{"key_input","std::string","character varying",255,0,0,1},
-{"value_input","std::string","jsonb",0,0,0,1},
-{"previous_value","std::string","jsonb",0,0,0,0},
-{"updated_at","::trantor::Date","timestamp with time zone",0,0,0,1}
-};
+const std::vector<typename KvStore::MetaData> KvStore::metaData_ = {
+    {"kv_id", "int64_t", "bigint", 8, 1, 1, 1},
+    {"user_id", "int64_t", "bigint", 8, 0, 0, 1},
+    {"key_input", "std::string", "character varying", 255, 0, 0, 1},
+    {"value_input", "std::string", "jsonb", 0, 0, 0, 1},
+    {"previous_value", "std::string", "jsonb", 0, 0, 0, 0},
+    {"updated_at", "::trantor::Date", "timestamp with time zone", 0, 0, 0, 1}};
 const std::string &KvStore::getColumnName(size_t index) noexcept(false)
 {
     assert(index < metaData_.size());
@@ -38,182 +37,183 @@ const std::string &KvStore::getColumnName(size_t index) noexcept(false)
 }
 KvStore::KvStore(const Row &r, const ssize_t indexOffset) noexcept
 {
-    if(indexOffset < 0)
+    if (indexOffset < 0)
     {
-        if(!r["kv_id"].isNull())
+        if (!r["kv_id"].isNull())
         {
-            kvId_=std::make_shared<int64_t>(r["kv_id"].as<int64_t>());
+            kvId_ = std::make_shared<int64_t>(r["kv_id"].as<int64_t>());
         }
-        if(!r["user_id"].isNull())
+        if (!r["user_id"].isNull())
         {
-            userId_=std::make_shared<int64_t>(r["user_id"].as<int64_t>());
+            userId_ = std::make_shared<int64_t>(r["user_id"].as<int64_t>());
         }
-        if(!r["key_input"].isNull())
+        if (!r["key_input"].isNull())
         {
-            keyInput_=std::make_shared<std::string>(r["key_input"].as<std::string>());
+            keyInput_ = std::make_shared<std::string>(r["key_input"].as<std::string>());
         }
-        if(!r["value_input"].isNull())
+        if (!r["value_input"].isNull())
         {
-            valueInput_=std::make_shared<std::string>(r["value_input"].as<std::string>());
+            valueInput_ = std::make_shared<std::string>(r["value_input"].as<std::string>());
         }
-        if(!r["previous_value"].isNull())
+        if (!r["previous_value"].isNull())
         {
-            previousValue_=std::make_shared<std::string>(r["previous_value"].as<std::string>());
+            previousValue_ = std::make_shared<std::string>(r["previous_value"].as<std::string>());
         }
-        if(!r["updated_at"].isNull())
+        if (!r["updated_at"].isNull())
         {
             auto timeStr = r["updated_at"].as<std::string>();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                updatedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                updatedAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 6 > r.size())
+        if (offset + 6 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
         size_t index;
         index = offset + 0;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            kvId_=std::make_shared<int64_t>(r[index].as<int64_t>());
+            kvId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
         }
         index = offset + 1;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            userId_=std::make_shared<int64_t>(r[index].as<int64_t>());
+            userId_ = std::make_shared<int64_t>(r[index].as<int64_t>());
         }
         index = offset + 2;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            keyInput_=std::make_shared<std::string>(r[index].as<std::string>());
+            keyInput_ = std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 3;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            valueInput_=std::make_shared<std::string>(r[index].as<std::string>());
+            valueInput_ = std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 4;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
-            previousValue_=std::make_shared<std::string>(r[index].as<std::string>());
+            previousValue_ = std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 5;
-        if(!r[index].isNull())
+        if (!r[index].isNull())
         {
             auto timeStr = r[index].as<std::string>();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                updatedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                updatedAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
-
 }
 
-KvStore::KvStore(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
+KvStore::KvStore(const Json::Value &pJson,
+                 const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 6)
+    if (pMasqueradingVector.size() != 6)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
-    if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+    if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
     {
         dirtyFlag_[0] = true;
-        if(!pJson[pMasqueradingVector[0]].isNull())
+        if (!pJson[pMasqueradingVector[0]].isNull())
         {
-            kvId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
-    if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+    if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
     {
         dirtyFlag_[1] = true;
-        if(!pJson[pMasqueradingVector[1]].isNull())
+        if (!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
-    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+    if (!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
     {
         dirtyFlag_[2] = true;
-        if(!pJson[pMasqueradingVector[2]].isNull())
+        if (!pJson[pMasqueradingVector[2]].isNull())
         {
-            keyInput_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            keyInput_ = std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
-    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+    if (!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
     {
         dirtyFlag_[3] = true;
-        if(!pJson[pMasqueradingVector[3]].isNull())
+        if (!pJson[pMasqueradingVector[3]].isNull())
         {
-            valueInput_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            valueInput_ = std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    if (!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
     {
         dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
+        if (!pJson[pMasqueradingVector[4]].isNull())
         {
-            previousValue_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
+            previousValue_ =
+                std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
-    if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
+    if (!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
     {
         dirtyFlag_[5] = true;
-        if(!pJson[pMasqueradingVector[5]].isNull())
+        if (!pJson[pMasqueradingVector[5]].isNull())
         {
             auto timeStr = pJson[pMasqueradingVector[5]].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                updatedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                updatedAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
@@ -221,144 +221,145 @@ KvStore::KvStore(const Json::Value &pJson, const std::vector<std::string> &pMasq
 
 KvStore::KvStore(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("kv_id"))
+    if (pJson.isMember("kv_id"))
     {
-        dirtyFlag_[0]=true;
-        if(!pJson["kv_id"].isNull())
+        dirtyFlag_[0] = true;
+        if (!pJson["kv_id"].isNull())
         {
-            kvId_=std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
         }
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
-        dirtyFlag_[1]=true;
-        if(!pJson["user_id"].isNull())
+        dirtyFlag_[1] = true;
+        if (!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
         }
     }
-    if(pJson.isMember("key_input"))
+    if (pJson.isMember("key_input"))
     {
-        dirtyFlag_[2]=true;
-        if(!pJson["key_input"].isNull())
+        dirtyFlag_[2] = true;
+        if (!pJson["key_input"].isNull())
         {
-            keyInput_=std::make_shared<std::string>(pJson["key_input"].asString());
+            keyInput_ = std::make_shared<std::string>(pJson["key_input"].asString());
         }
     }
-    if(pJson.isMember("value_input"))
+    if (pJson.isMember("value_input"))
     {
-        dirtyFlag_[3]=true;
-        if(!pJson["value_input"].isNull())
+        dirtyFlag_[3] = true;
+        if (!pJson["value_input"].isNull())
         {
-            valueInput_=std::make_shared<std::string>(pJson["value_input"].asString());
+            valueInput_ = std::make_shared<std::string>(pJson["value_input"].asString());
         }
     }
-    if(pJson.isMember("previous_value"))
+    if (pJson.isMember("previous_value"))
     {
-        dirtyFlag_[4]=true;
-        if(!pJson["previous_value"].isNull())
+        dirtyFlag_[4] = true;
+        if (!pJson["previous_value"].isNull())
         {
-            previousValue_=std::make_shared<std::string>(pJson["previous_value"].asString());
+            previousValue_ = std::make_shared<std::string>(pJson["previous_value"].asString());
         }
     }
-    if(pJson.isMember("updated_at"))
+    if (pJson.isMember("updated_at"))
     {
-        dirtyFlag_[5]=true;
-        if(!pJson["updated_at"].isNull())
+        dirtyFlag_[5] = true;
+        if (!pJson["updated_at"].isNull())
         {
             auto timeStr = pJson["updated_at"].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                updatedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                updatedAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
 }
 
-void KvStore::updateByMasqueradedJson(const Json::Value &pJson,
-                                            const std::vector<std::string> &pMasqueradingVector) noexcept(false)
+void KvStore::updateByMasqueradedJson(
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 6)
+    if (pMasqueradingVector.size() != 6)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
-    if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+    if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
     {
-        if(!pJson[pMasqueradingVector[0]].isNull())
+        if (!pJson[pMasqueradingVector[0]].isNull())
         {
-            kvId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
-    if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+    if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
     {
         dirtyFlag_[1] = true;
-        if(!pJson[pMasqueradingVector[1]].isNull())
+        if (!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
-    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+    if (!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
     {
         dirtyFlag_[2] = true;
-        if(!pJson[pMasqueradingVector[2]].isNull())
+        if (!pJson[pMasqueradingVector[2]].isNull())
         {
-            keyInput_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            keyInput_ = std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
-    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+    if (!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
     {
         dirtyFlag_[3] = true;
-        if(!pJson[pMasqueradingVector[3]].isNull())
+        if (!pJson[pMasqueradingVector[3]].isNull())
         {
-            valueInput_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            valueInput_ = std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    if (!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
     {
         dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
+        if (!pJson[pMasqueradingVector[4]].isNull())
         {
-            previousValue_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
+            previousValue_ =
+                std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
-    if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
+    if (!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
     {
         dirtyFlag_[5] = true;
-        if(!pJson[pMasqueradingVector[5]].isNull())
+        if (!pJson[pMasqueradingVector[5]].isNull())
         {
             auto timeStr = pJson[pMasqueradingVector[5]].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                updatedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                updatedAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
@@ -366,68 +367,68 @@ void KvStore::updateByMasqueradedJson(const Json::Value &pJson,
 
 void KvStore::updateByJson(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("kv_id"))
+    if (pJson.isMember("kv_id"))
     {
-        if(!pJson["kv_id"].isNull())
+        if (!pJson["kv_id"].isNull())
         {
-            kvId_=std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
+            kvId_ = std::make_shared<int64_t>((int64_t)pJson["kv_id"].asInt64());
         }
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
         dirtyFlag_[1] = true;
-        if(!pJson["user_id"].isNull())
+        if (!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
+            userId_ = std::make_shared<int64_t>((int64_t)pJson["user_id"].asInt64());
         }
     }
-    if(pJson.isMember("key_input"))
+    if (pJson.isMember("key_input"))
     {
         dirtyFlag_[2] = true;
-        if(!pJson["key_input"].isNull())
+        if (!pJson["key_input"].isNull())
         {
-            keyInput_=std::make_shared<std::string>(pJson["key_input"].asString());
+            keyInput_ = std::make_shared<std::string>(pJson["key_input"].asString());
         }
     }
-    if(pJson.isMember("value_input"))
+    if (pJson.isMember("value_input"))
     {
         dirtyFlag_[3] = true;
-        if(!pJson["value_input"].isNull())
+        if (!pJson["value_input"].isNull())
         {
-            valueInput_=std::make_shared<std::string>(pJson["value_input"].asString());
+            valueInput_ = std::make_shared<std::string>(pJson["value_input"].asString());
         }
     }
-    if(pJson.isMember("previous_value"))
+    if (pJson.isMember("previous_value"))
     {
         dirtyFlag_[4] = true;
-        if(!pJson["previous_value"].isNull())
+        if (!pJson["previous_value"].isNull())
         {
-            previousValue_=std::make_shared<std::string>(pJson["previous_value"].asString());
+            previousValue_ = std::make_shared<std::string>(pJson["previous_value"].asString());
         }
     }
-    if(pJson.isMember("updated_at"))
+    if (pJson.isMember("updated_at"))
     {
         dirtyFlag_[5] = true;
-        if(!pJson["updated_at"].isNull())
+        if (!pJson["updated_at"].isNull())
         {
             auto timeStr = pJson["updated_at"].asString();
             struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            memset(&stm, 0, sizeof(stm));
+            auto p = strptime(timeStr.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
             time_t t = mktime(&stm);
             size_t decimalNum = 0;
-            if(p)
+            if (p)
             {
-                if(*p=='.')
+                if (*p == '.')
                 {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
+                    std::string decimals(p + 1, &timeStr[timeStr.length()]);
+                    while (decimals.length() < 6)
                     {
                         decimals += "0";
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                updatedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                updatedAt_ = std::make_shared<::trantor::Date>(t * 1000000 + decimalNum);
             }
         }
     }
@@ -436,7 +437,7 @@ void KvStore::updateByJson(const Json::Value &pJson) noexcept(false)
 const int64_t &KvStore::getValueOfKvId() const noexcept
 {
     static const int64_t defaultValue = int64_t();
-    if(kvId_)
+    if (kvId_)
         return *kvId_;
     return defaultValue;
 }
@@ -449,7 +450,7 @@ void KvStore::setKvId(const int64_t &pKvId) noexcept
     kvId_ = std::make_shared<int64_t>(pKvId);
     dirtyFlag_[0] = true;
 }
-const typename KvStore::PrimaryKeyType & KvStore::getPrimaryKey() const
+const typename KvStore::PrimaryKeyType &KvStore::getPrimaryKey() const
 {
     assert(kvId_);
     return *kvId_;
@@ -458,7 +459,7 @@ const typename KvStore::PrimaryKeyType & KvStore::getPrimaryKey() const
 const int64_t &KvStore::getValueOfUserId() const noexcept
 {
     static const int64_t defaultValue = int64_t();
-    if(userId_)
+    if (userId_)
         return *userId_;
     return defaultValue;
 }
@@ -475,7 +476,7 @@ void KvStore::setUserId(const int64_t &pUserId) noexcept
 const std::string &KvStore::getValueOfKeyInput() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(keyInput_)
+    if (keyInput_)
         return *keyInput_;
     return defaultValue;
 }
@@ -497,7 +498,7 @@ void KvStore::setKeyInput(std::string &&pKeyInput) noexcept
 const std::string &KvStore::getValueOfValueInput() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(valueInput_)
+    if (valueInput_)
         return *valueInput_;
     return defaultValue;
 }
@@ -519,7 +520,7 @@ void KvStore::setValueInput(std::string &&pValueInput) noexcept
 const std::string &KvStore::getValueOfPreviousValue() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(previousValue_)
+    if (previousValue_)
         return *previousValue_;
     return defaultValue;
 }
@@ -546,7 +547,7 @@ void KvStore::setPreviousValueToNull() noexcept
 const ::trantor::Date &KvStore::getValueOfUpdatedAt() const noexcept
 {
     static const ::trantor::Date defaultValue = ::trantor::Date();
-    if(updatedAt_)
+    if (updatedAt_)
         return *updatedAt_;
     return defaultValue;
 }
@@ -566,21 +567,16 @@ void KvStore::updateId(const uint64_t id)
 
 const std::vector<std::string> &KvStore::insertColumns() noexcept
 {
-    static const std::vector<std::string> inCols={
-        "user_id",
-        "key_input",
-        "value_input",
-        "previous_value",
-        "updated_at"
-    };
+    static const std::vector<std::string> inCols = {"user_id", "key_input", "value_input",
+                                                    "previous_value", "updated_at"};
     return inCols;
 }
 
 void KvStore::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[1])
+    if (dirtyFlag_[1])
     {
-        if(getUserId())
+        if (getUserId())
         {
             binder << getValueOfUserId();
         }
@@ -589,9 +585,9 @@ void KvStore::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[2])
+    if (dirtyFlag_[2])
     {
-        if(getKeyInput())
+        if (getKeyInput())
         {
             binder << getValueOfKeyInput();
         }
@@ -600,9 +596,9 @@ void KvStore::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[3])
+    if (dirtyFlag_[3])
     {
-        if(getValueInput())
+        if (getValueInput())
         {
             binder << getValueOfValueInput();
         }
@@ -611,9 +607,9 @@ void KvStore::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[4])
+    if (dirtyFlag_[4])
     {
-        if(getPreviousValue())
+        if (getPreviousValue())
         {
             binder << getValueOfPreviousValue();
         }
@@ -622,9 +618,9 @@ void KvStore::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[5])
+    if (dirtyFlag_[5])
     {
-        if(getUpdatedAt())
+        if (getUpdatedAt())
         {
             binder << getValueOfUpdatedAt();
         }
@@ -638,23 +634,23 @@ void KvStore::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 const std::vector<std::string> KvStore::updateColumns() const
 {
     std::vector<std::string> ret;
-    if(dirtyFlag_[1])
+    if (dirtyFlag_[1])
     {
         ret.push_back(getColumnName(1));
     }
-    if(dirtyFlag_[2])
+    if (dirtyFlag_[2])
     {
         ret.push_back(getColumnName(2));
     }
-    if(dirtyFlag_[3])
+    if (dirtyFlag_[3])
     {
         ret.push_back(getColumnName(3));
     }
-    if(dirtyFlag_[4])
+    if (dirtyFlag_[4])
     {
         ret.push_back(getColumnName(4));
     }
-    if(dirtyFlag_[5])
+    if (dirtyFlag_[5])
     {
         ret.push_back(getColumnName(5));
     }
@@ -663,9 +659,9 @@ const std::vector<std::string> KvStore::updateColumns() const
 
 void KvStore::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[1])
+    if (dirtyFlag_[1])
     {
-        if(getUserId())
+        if (getUserId())
         {
             binder << getValueOfUserId();
         }
@@ -674,9 +670,9 @@ void KvStore::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[2])
+    if (dirtyFlag_[2])
     {
-        if(getKeyInput())
+        if (getKeyInput())
         {
             binder << getValueOfKeyInput();
         }
@@ -685,9 +681,9 @@ void KvStore::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[3])
+    if (dirtyFlag_[3])
     {
-        if(getValueInput())
+        if (getValueInput())
         {
             binder << getValueOfValueInput();
         }
@@ -696,9 +692,9 @@ void KvStore::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[4])
+    if (dirtyFlag_[4])
     {
-        if(getPreviousValue())
+        if (getPreviousValue())
         {
             binder << getValueOfPreviousValue();
         }
@@ -707,9 +703,9 @@ void KvStore::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[5])
+    if (dirtyFlag_[5])
     {
-        if(getUpdatedAt())
+        if (getUpdatedAt())
         {
             binder << getValueOfUpdatedAt();
         }
@@ -722,318 +718,323 @@ void KvStore::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 Json::Value KvStore::toJson() const
 {
     Json::Value ret;
-    if(getKvId())
+    if (getKvId())
     {
-        ret["kv_id"]=(Json::Int64)getValueOfKvId();
+        ret["kv_id"] = (Json::Int64)getValueOfKvId();
     }
     else
     {
-        ret["kv_id"]=Json::Value();
+        ret["kv_id"] = Json::Value();
     }
-    if(getUserId())
+    if (getUserId())
     {
-        ret["user_id"]=(Json::Int64)getValueOfUserId();
-    }
-    else
-    {
-        ret["user_id"]=Json::Value();
-    }
-    if(getKeyInput())
-    {
-        ret["key_input"]=getValueOfKeyInput();
+        ret["user_id"] = (Json::Int64)getValueOfUserId();
     }
     else
     {
-        ret["key_input"]=Json::Value();
+        ret["user_id"] = Json::Value();
     }
-    if(getValueInput())
+    if (getKeyInput())
     {
-        ret["value_input"]=getValueOfValueInput();
-    }
-    else
-    {
-        ret["value_input"]=Json::Value();
-    }
-    if(getPreviousValue())
-    {
-        ret["previous_value"]=getValueOfPreviousValue();
+        ret["key_input"] = getValueOfKeyInput();
     }
     else
     {
-        ret["previous_value"]=Json::Value();
+        ret["key_input"] = Json::Value();
     }
-    if(getUpdatedAt())
+    if (getValueInput())
     {
-        ret["updated_at"]=getUpdatedAt()->toDbStringLocal();
+        ret["value_input"] = getValueOfValueInput();
     }
     else
     {
-        ret["updated_at"]=Json::Value();
+        ret["value_input"] = Json::Value();
+    }
+    if (getPreviousValue())
+    {
+        ret["previous_value"] = getValueOfPreviousValue();
+    }
+    else
+    {
+        ret["previous_value"] = Json::Value();
+    }
+    if (getUpdatedAt())
+    {
+        ret["updated_at"] = getUpdatedAt()->toDbStringLocal();
+    }
+    else
+    {
+        ret["updated_at"] = Json::Value();
     }
     return ret;
 }
 
-Json::Value KvStore::toMasqueradedJson(
-    const std::vector<std::string> &pMasqueradingVector) const
+Json::Value KvStore::toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 6)
+    if (pMasqueradingVector.size() == 6)
     {
-        if(!pMasqueradingVector[0].empty())
+        if (!pMasqueradingVector[0].empty())
         {
-            if(getKvId())
+            if (getKvId())
             {
-                ret[pMasqueradingVector[0]]=(Json::Int64)getValueOfKvId();
+                ret[pMasqueradingVector[0]] = (Json::Int64)getValueOfKvId();
             }
             else
             {
-                ret[pMasqueradingVector[0]]=Json::Value();
+                ret[pMasqueradingVector[0]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[1].empty())
+        if (!pMasqueradingVector[1].empty())
         {
-            if(getUserId())
+            if (getUserId())
             {
-                ret[pMasqueradingVector[1]]=(Json::Int64)getValueOfUserId();
+                ret[pMasqueradingVector[1]] = (Json::Int64)getValueOfUserId();
             }
             else
             {
-                ret[pMasqueradingVector[1]]=Json::Value();
+                ret[pMasqueradingVector[1]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[2].empty())
+        if (!pMasqueradingVector[2].empty())
         {
-            if(getKeyInput())
+            if (getKeyInput())
             {
-                ret[pMasqueradingVector[2]]=getValueOfKeyInput();
+                ret[pMasqueradingVector[2]] = getValueOfKeyInput();
             }
             else
             {
-                ret[pMasqueradingVector[2]]=Json::Value();
+                ret[pMasqueradingVector[2]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[3].empty())
+        if (!pMasqueradingVector[3].empty())
         {
-            if(getValueInput())
+            if (getValueInput())
             {
-                ret[pMasqueradingVector[3]]=getValueOfValueInput();
+                ret[pMasqueradingVector[3]] = getValueOfValueInput();
             }
             else
             {
-                ret[pMasqueradingVector[3]]=Json::Value();
+                ret[pMasqueradingVector[3]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[4].empty())
+        if (!pMasqueradingVector[4].empty())
         {
-            if(getPreviousValue())
+            if (getPreviousValue())
             {
-                ret[pMasqueradingVector[4]]=getValueOfPreviousValue();
+                ret[pMasqueradingVector[4]] = getValueOfPreviousValue();
             }
             else
             {
-                ret[pMasqueradingVector[4]]=Json::Value();
+                ret[pMasqueradingVector[4]] = Json::Value();
             }
         }
-        if(!pMasqueradingVector[5].empty())
+        if (!pMasqueradingVector[5].empty())
         {
-            if(getUpdatedAt())
+            if (getUpdatedAt())
             {
-                ret[pMasqueradingVector[5]]=getUpdatedAt()->toDbStringLocal();
+                ret[pMasqueradingVector[5]] = getUpdatedAt()->toDbStringLocal();
             }
             else
             {
-                ret[pMasqueradingVector[5]]=Json::Value();
+                ret[pMasqueradingVector[5]] = Json::Value();
             }
         }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
-    if(getKvId())
+    if (getKvId())
     {
-        ret["kv_id"]=(Json::Int64)getValueOfKvId();
+        ret["kv_id"] = (Json::Int64)getValueOfKvId();
     }
     else
     {
-        ret["kv_id"]=Json::Value();
+        ret["kv_id"] = Json::Value();
     }
-    if(getUserId())
+    if (getUserId())
     {
-        ret["user_id"]=(Json::Int64)getValueOfUserId();
-    }
-    else
-    {
-        ret["user_id"]=Json::Value();
-    }
-    if(getKeyInput())
-    {
-        ret["key_input"]=getValueOfKeyInput();
+        ret["user_id"] = (Json::Int64)getValueOfUserId();
     }
     else
     {
-        ret["key_input"]=Json::Value();
+        ret["user_id"] = Json::Value();
     }
-    if(getValueInput())
+    if (getKeyInput())
     {
-        ret["value_input"]=getValueOfValueInput();
-    }
-    else
-    {
-        ret["value_input"]=Json::Value();
-    }
-    if(getPreviousValue())
-    {
-        ret["previous_value"]=getValueOfPreviousValue();
+        ret["key_input"] = getValueOfKeyInput();
     }
     else
     {
-        ret["previous_value"]=Json::Value();
+        ret["key_input"] = Json::Value();
     }
-    if(getUpdatedAt())
+    if (getValueInput())
     {
-        ret["updated_at"]=getUpdatedAt()->toDbStringLocal();
+        ret["value_input"] = getValueOfValueInput();
     }
     else
     {
-        ret["updated_at"]=Json::Value();
+        ret["value_input"] = Json::Value();
+    }
+    if (getPreviousValue())
+    {
+        ret["previous_value"] = getValueOfPreviousValue();
+    }
+    else
+    {
+        ret["previous_value"] = Json::Value();
+    }
+    if (getUpdatedAt())
+    {
+        ret["updated_at"] = getUpdatedAt()->toDbStringLocal();
+    }
+    else
+    {
+        ret["updated_at"] = Json::Value();
     }
     return ret;
 }
 
 bool KvStore::validateJsonForCreation(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("kv_id"))
+    if (pJson.isMember("kv_id"))
     {
-        if(!validJsonOfField(0, "kv_id", pJson["kv_id"], err, true))
+        if (!validJsonOfField(0, "kv_id", pJson["kv_id"], err, true))
             return false;
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
-        if(!validJsonOfField(1, "user_id", pJson["user_id"], err, true))
-            return false;
-    }
-    else
-    {
-        err="The user_id column cannot be null";
-        return false;
-    }
-    if(pJson.isMember("key_input"))
-    {
-        if(!validJsonOfField(2, "key_input", pJson["key_input"], err, true))
+        if (!validJsonOfField(1, "user_id", pJson["user_id"], err, true))
             return false;
     }
     else
     {
-        err="The key_input column cannot be null";
+        err = "The user_id column cannot be null";
         return false;
     }
-    if(pJson.isMember("value_input"))
+    if (pJson.isMember("key_input"))
     {
-        if(!validJsonOfField(3, "value_input", pJson["value_input"], err, true))
+        if (!validJsonOfField(2, "key_input", pJson["key_input"], err, true))
             return false;
     }
     else
     {
-        err="The value_input column cannot be null";
+        err = "The key_input column cannot be null";
         return false;
     }
-    if(pJson.isMember("previous_value"))
+    if (pJson.isMember("value_input"))
     {
-        if(!validJsonOfField(4, "previous_value", pJson["previous_value"], err, true))
+        if (!validJsonOfField(3, "value_input", pJson["value_input"], err, true))
             return false;
     }
-    if(pJson.isMember("updated_at"))
+    else
     {
-        if(!validJsonOfField(5, "updated_at", pJson["updated_at"], err, true))
+        err = "The value_input column cannot be null";
+        return false;
+    }
+    if (pJson.isMember("previous_value"))
+    {
+        if (!validJsonOfField(4, "previous_value", pJson["previous_value"], err, true))
+            return false;
+    }
+    if (pJson.isMember("updated_at"))
+    {
+        if (!validJsonOfField(5, "updated_at", pJson["updated_at"], err, true))
             return false;
     }
     return true;
 }
-bool KvStore::validateMasqueradedJsonForCreation(const Json::Value &pJson,
-                                                 const std::vector<std::string> &pMasqueradingVector,
-                                                 std::string &err)
+bool KvStore::validateMasqueradedJsonForCreation(
+    const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector, std::string &err)
 {
-    if(pMasqueradingVector.size() != 6)
+    if (pMasqueradingVector.size() != 6)
     {
         err = "Bad masquerading vector";
         return false;
     }
-    try {
-      if(!pMasqueradingVector[0].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[0]))
-          {
-              if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, true))
-                  return false;
-          }
-      }
-      if(!pMasqueradingVector[1].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[1]))
-          {
-              if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true))
-                  return false;
-          }
-        else
-        {
-            err="The " + pMasqueradingVector[1] + " column cannot be null";
-            return false;
-        }
-      }
-      if(!pMasqueradingVector[2].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[2]))
-          {
-              if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true))
-                  return false;
-          }
-        else
-        {
-            err="The " + pMasqueradingVector[2] + " column cannot be null";
-            return false;
-        }
-      }
-      if(!pMasqueradingVector[3].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[3]))
-          {
-              if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true))
-                  return false;
-          }
-        else
-        {
-            err="The " + pMasqueradingVector[3] + " column cannot be null";
-            return false;
-        }
-      }
-      if(!pMasqueradingVector[4].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[4]))
-          {
-              if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
-                  return false;
-          }
-      }
-      if(!pMasqueradingVector[5].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[5]))
-          {
-              if(!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err, true))
-                  return false;
-          }
-      }
-    }
-    catch(const Json::LogicError &e)
+    try
     {
-      err = e.what();
-      return false;
+        if (!pMasqueradingVector[0].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[0]))
+            {
+                if (!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err,
+                                      true))
+                    return false;
+            }
+        }
+        if (!pMasqueradingVector[1].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[1]))
+            {
+                if (!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[1] + " column cannot be null";
+                return false;
+            }
+        }
+        if (!pMasqueradingVector[2].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[2]))
+            {
+                if (!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[2] + " column cannot be null";
+                return false;
+            }
+        }
+        if (!pMasqueradingVector[3].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[3]))
+            {
+                if (!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err,
+                                      true))
+                    return false;
+            }
+            else
+            {
+                err = "The " + pMasqueradingVector[3] + " column cannot be null";
+                return false;
+            }
+        }
+        if (!pMasqueradingVector[4].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[4]))
+            {
+                if (!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err,
+                                      true))
+                    return false;
+            }
+        }
+        if (!pMasqueradingVector[5].empty())
+        {
+            if (pJson.isMember(pMasqueradingVector[5]))
+            {
+                if (!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err,
+                                      true))
+                    return false;
+            }
+        }
+    }
+    catch (const Json::LogicError &e)
+    {
+        err = e.what();
+        return false;
     }
     return true;
 }
 bool KvStore::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("kv_id"))
+    if (pJson.isMember("kv_id"))
     {
-        if(!validJsonOfField(0, "kv_id", pJson["kv_id"], err, false))
+        if (!validJsonOfField(0, "kv_id", pJson["kv_id"], err, false))
             return false;
     }
     else
@@ -1041,29 +1042,29 @@ bool KvStore::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
-    if(pJson.isMember("user_id"))
+    if (pJson.isMember("user_id"))
     {
-        if(!validJsonOfField(1, "user_id", pJson["user_id"], err, false))
+        if (!validJsonOfField(1, "user_id", pJson["user_id"], err, false))
             return false;
     }
-    if(pJson.isMember("key_input"))
+    if (pJson.isMember("key_input"))
     {
-        if(!validJsonOfField(2, "key_input", pJson["key_input"], err, false))
+        if (!validJsonOfField(2, "key_input", pJson["key_input"], err, false))
             return false;
     }
-    if(pJson.isMember("value_input"))
+    if (pJson.isMember("value_input"))
     {
-        if(!validJsonOfField(3, "value_input", pJson["value_input"], err, false))
+        if (!validJsonOfField(3, "value_input", pJson["value_input"], err, false))
             return false;
     }
-    if(pJson.isMember("previous_value"))
+    if (pJson.isMember("previous_value"))
     {
-        if(!validJsonOfField(4, "previous_value", pJson["previous_value"], err, false))
+        if (!validJsonOfField(4, "previous_value", pJson["previous_value"], err, false))
             return false;
     }
-    if(pJson.isMember("updated_at"))
+    if (pJson.isMember("updated_at"))
     {
-        if(!validJsonOfField(5, "updated_at", pJson["updated_at"], err, false))
+        if (!validJsonOfField(5, "updated_at", pJson["updated_at"], err, false))
             return false;
     }
     return true;
@@ -1072,150 +1073,153 @@ bool KvStore::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                const std::vector<std::string> &pMasqueradingVector,
                                                std::string &err)
 {
-    if(pMasqueradingVector.size() != 6)
+    if (pMasqueradingVector.size() != 6)
     {
         err = "Bad masquerading vector";
         return false;
     }
-    try {
-      if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
-      {
-          if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false))
-              return false;
-      }
-    else
+    try
     {
-        err = "The value of primary key must be set in the json object for update";
+        if (!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+        {
+            if (!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err,
+                                  false))
+                return false;
+        }
+        else
+        {
+            err = "The value of primary key must be set in the json object for update";
+            return false;
+        }
+        if (!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+        {
+            if (!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err,
+                                  false))
+                return false;
+        }
+        if (!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+        {
+            if (!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err,
+                                  false))
+                return false;
+        }
+        if (!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+        {
+            if (!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err,
+                                  false))
+                return false;
+        }
+        if (!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+        {
+            if (!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err,
+                                  false))
+                return false;
+        }
+        if (!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
+        {
+            if (!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err,
+                                  false))
+                return false;
+        }
+    }
+    catch (const Json::LogicError &e)
+    {
+        err = e.what();
         return false;
-    }
-      if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
-      {
-          if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
-      {
-          if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
-      {
-          if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
-      {
-          if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
-      {
-          if(!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err, false))
-              return false;
-      }
-    }
-    catch(const Json::LogicError &e)
-    {
-      err = e.what();
-      return false;
     }
     return true;
 }
-bool KvStore::validJsonOfField(size_t index,
-                               const std::string &fieldName,
-                               const Json::Value &pJson,
-                               std::string &err,
-                               bool isForCreation)
+bool KvStore::validJsonOfField(size_t index, const std::string &fieldName, const Json::Value &pJson,
+                               std::string &err, bool isForCreation)
 {
-    switch(index)
+    switch (index)
     {
-        case 0:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(isForCreation)
-            {
-                err="The automatic primary key cannot be set";
-                return false;
-            }
-            if(!pJson.isInt64())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 1:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isInt64())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 2:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            if(pJson.isString() && std::strlen(pJson.asCString()) > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;
-            }
-
-            break;
-        case 3:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 4:
-            if(pJson.isNull())
-            {
-                return true;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        case 5:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isString())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
-        default:
-            err="Internal error in the server";
+    case 0:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
             return false;
+        }
+        if (isForCreation)
+        {
+            err = "The automatic primary key cannot be set";
+            return false;
+        }
+        if (!pJson.isInt64())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    case 1:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isInt64())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    case 2:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isString())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        if (pJson.isString() && std::strlen(pJson.asCString()) > 255)
+        {
+            err = "String length exceeds limit for the " + fieldName +
+                  " field (the maximum value is 255)";
+            return false;
+        }
+
+        break;
+    case 3:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isString())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    case 4:
+        if (pJson.isNull())
+        {
+            return true;
+        }
+        if (!pJson.isString())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    case 5:
+        if (pJson.isNull())
+        {
+            err = "The " + fieldName + " column cannot be null";
+            return false;
+        }
+        if (!pJson.isString())
+        {
+            err = "Type error in the " + fieldName + " field";
+            return false;
+        }
+        break;
+    default:
+        err = "Internal error in the server";
+        return false;
     }
     return true;
 }

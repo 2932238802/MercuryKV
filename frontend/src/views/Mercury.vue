@@ -5,12 +5,11 @@ import service from '../components/request';
 import { ShowCustomModal } from '../components/show';
 
 // ----------------- ------------------------------------------------
-const KvPairs = ref([
-  { tag_id: 1,kv_id: 1, key_input: "test", value_input: "right", tags: "for_tset" }
-]);
+const KvPairs = ref([]);
 const ismodalopen = ref(false);
 const isediting = ref(false);
 const currentitem = ref(null);
+const editabletags = ref('');
 const router = useRouter();
 const DATA_ALTER_METHOD = {
   CREATE: 'create',
@@ -51,8 +50,9 @@ function HandleAddNew() {
   currentitem.value = {
     key_input: '',
     value_input: '',
-    tag_name: '',
+    tags: [],
   };
+  editabletags.value = '';
   data_alter_method.value = DATA_ALTER_METHOD.CREATE;
   ismodalopen.value = true;
 }
@@ -62,8 +62,8 @@ function HandleAddNew() {
 // 打开“编辑”弹窗
 function HandleEdit(itemtoedit) {
   isediting.value = true;
-  // 创建一个副本进行编辑，确保 tag_name 存在
-  currentitem.value = { ...itemtoedit, tag_name: itemtoedit.tag_name || '' };
+  currentitem.value = JSON.parse(JSON.stringify(itemtoedit));
+  editabletags.value = itemtoedit.tags ? itemtoedit.tags.join(', ') : '';
   data_alter_method.value = DATA_ALTER_METHOD.UPDATE;
   ismodalopen.value = true;
 }
@@ -75,6 +75,7 @@ function HandleEdit(itemtoedit) {
 function CloseModal() {
   ismodalopen.value = false;
   currentitem.value = null;
+  editabletags.value = '';
 }
 // -----------------------------------------------------------------
 
@@ -85,56 +86,54 @@ async function HandleSubmit() {
   if (!currentitem.value) return;
 
   const user_id = localStorage.getItem("UserId");
-  const token = localStorage.getItem("AuthToken");
-  if (!user_id || !token) {
+  if (!user_id) {
     ShowCustomModal("User not logged in Please re-login");
     HandleReLogin();
     return;
   }
-  if(currentitem.value.key_input == "" ||  currentitem.value.value_input == "" || currentitem.value.tag_name=="")
-  {
-    ShowCustomModal("增加的key,value,tag不能为空哈！");
+  if (currentitem.value.key_input.trim() === "" || currentitem.value.value_input.trim() === "") {
+    ShowCustomModal("Key and Value cannot be empty!");
     return;
   }
 
+  // 分解标签
+  const separator = /[,\s，。.!-]+/;
+  const tags_array = [...new Set(
+    editabletags.value
+      .split(separator)
+      .filter(tag => tag.trim().length > 0)
+  )];
 
   try {
     if (data_alter_method.value === DATA_ALTER_METHOD.CREATE) {
-
       const post_info = {
         "user_id": Number(user_id),
         "key_input": currentitem.value.key_input,
         "value_input": currentitem.value.value_input,
-        "tag_name": currentitem.value.tag_name,
+        "tags": tags_array,
       };
-
       const response = await service.post(API_PATH.CREATE, post_info);
+      
+      console.log('API /Alter/adddata returned:', response.data);
 
-      console.log('Response from create:', post_info.value);
-      console.log('Response from create:', response.data);
-      KvPairs.value.unshift({
-        ...currentitem.value,
-        kv_id: response.data.kv_id,
-        tag_id: response.data.tag_id,
-        updated_at: response.data.updated_at,
-      });
-    }
+      KvPairs.value.unshift(response.data);
+      ShowCustomModal("Item created successfully!");
 
-    else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
+    } else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
       // 编辑信息
       const post_info = {
         "user_id": Number(user_id),
         "kv_id": currentitem.value.kv_id,
         "key_input": currentitem.value.key_input,
         "value_input": currentitem.value.value_input,
-        "tag_name": currentitem.value.tag_name,
+        "tags": tags_array,
       };
-
-      await service.put(API_PATH.UPDATE, post_info);
-      const index = KvPairs.value.findIndex(item => item.kv_id=== currentitem.value.kv_id);
+      const response = await service.put(API_PATH.UPDATE, post_info);
+      const index = KvPairs.value.findIndex(item => item.kv_id === currentitem.value.kv_id);
       if (index !== -1) {
-        KvPairs.value[index] = { ...currentitem.value, updated_at: new Date().toLocaleString() };
+        KvPairs.value[index] = response.data;
       }
+      ShowCustomModal("Item updated successfully!");
     }
   } catch (error) {
     console.error("Submission failed:", error);
@@ -149,17 +148,16 @@ async function HandleSubmit() {
 // 删除条目 (带确认)
 async function HandleDelete(itemtodelete) {
   if (confirm(`你确定要删除这个"${itemtodelete.key_input}"?`)) {
-    console.log('Deleting item:', itemtodelete);
     try {
       // 发送删除请求
-      string_id = String(kv_id);
-      await service.delete(`${API_PATH.DELETE}/${string_id}`);
+      const kv_id_to_delete = itemtodelete.kv_id;
+      await service.delete(`${API_PATH.DELETE}/${kv_id_to_delete}`);
 
-      KvPairs.value = KvPairs.value.filter(item => item.kv_id !== itemtodelete.kv_id);
-    }
-    catch (error) {
+      KvPairs.value = KvPairs.value.filter(item => item.kv_id !== kv_id_to_delete);
+      ShowCustomModal("Item deleted successfully.");
+    } catch (error) {
       console.error("Deletion failed:", error);
-      ShowCustomModal(error.message || "Failed to delete item.");
+      ShowCustomModal(error.response?.data?.message || "Failed to delete item.");
     }
   }
 }
@@ -173,7 +171,6 @@ const loadInitialData = async () => {
   }
   try {
     const response = await service.get(API_PATH.FETCH, { params: { user_id } });
-
     KvPairs.value = response.data || [];
   } catch (error) {
     console.error("Failed to fetch data:", error);
@@ -185,13 +182,15 @@ onMounted(() => {
   loadInitialData();
 });
 </script>
+
+
 <template>
   <!-- A: 页面根容器 -->
   <div class="kv-manager-page">
-    
+
     <!-- B_1: 主要内容卡片 -->
     <div class="content-card">
-      
+
       <!-- C_1: 返回按钮 -->
       <button class="btn-return" @click="HandleReturn" title="Go back">
         <i class="fas fa-arrow-left"></i>
@@ -248,7 +247,7 @@ onMounted(() => {
                 </button>
               </td>
             </tr>
-            <tr v-if="!KvPairs.length">
+            <tr v-if="!KvPairs || KvPairs.length === 0">
               <td colspan="5" class="empty-state">
                 No Key-Value pairs found. <a href="#" @click.prevent="HandleAddNew">Add one now!</a>
               </td>
@@ -268,7 +267,7 @@ onMounted(() => {
 
     <div class="modal-overlay" v-if="ismodalopen">
       <div class="modal-content">
-        <form @submit.prevent="HandleSubmit">
+        <form @submit.prevent="HandleSubmit" v-if="currentitem">
           <h1>{{ modaltitle }}</h1>
           <div class="form-group">
             <label for="kv-key">Key</label>
@@ -278,12 +277,11 @@ onMounted(() => {
           <div class="form-group">
             <label for="kv-value">Value</label>
             <textarea v-model="currentitem.value_input" id="kv-value" rows="5"
-              placeholder="e.g., 12345678, xyz-abc-123..."></textarea>
+              placeholder="e.g., 12345678, xyz-abc-123..." required></textarea>
           </div>
           <div class="form-group">
-            <label for="kv-tags">Tags (comma-separated)</label>
-            <input v-model="editabletags" id="kv-tags" type="text" 
-                   placeholder="e.g., Personal, Work, Project" />
+            <label for="kv-tags">Tags (separated by comma, space, etc.)</label>
+            <input v-model="editabletags" id="kv-tags" type="text" placeholder="e.g., Personal, Work, Project" />
           </div>
           <div class="modal-actions">
             <button type="button" class="btn-ghost" @click="CloseModal">Cancel</button>
@@ -294,7 +292,6 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
 
 <style scoped>
 /* 样式部分保持不变 */

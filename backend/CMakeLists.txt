@@ -18,7 +18,10 @@ add_executable(${PROJECT_NAME}
   controllers/LoginApi/Login.cc
   controllers/RegisterApi/Register.cc
   controllers/FetchDataApi/FetchData.cc
-  controllers/AlterApi/Alter.cc
+  controllers/AlterApi/AddData.cc
+  controllers/AlterApi/DeleteData.cc
+  controllers/AlterApi/UpdateData.cc
+
 )
 
 find_package(OpenSSL REQUIRED)

@@ -6,7 +6,7 @@ import { ShowCustomModal } from '../components/show';
 
 // ----------------- ------------------------------------------------
 const KvPairs = ref([
-  { "tag_id": 1, "key_id": 1, "key_input": "test", "value_input": "right", "tag_name": "for_tset" }
+  { tag_id: 1,kv_id: 1, key_input: "test", value_input: "right", tags: "for_tset" }
 ]);
 const ismodalopen = ref(false);
 const isediting = ref(false);
@@ -131,7 +131,7 @@ async function HandleSubmit() {
       };
 
       await service.put(API_PATH.UPDATE, post_info);
-      const index = KvPairs.value.findIndex(item => item.kv_id === currentitem.value.kv_id);
+      const index = KvPairs.value.findIndex(item => item.kv_id=== currentitem.value.kv_id);
       if (index !== -1) {
         KvPairs.value[index] = { ...currentitem.value, updated_at: new Date().toLocaleString() };
       }
@@ -152,13 +152,14 @@ async function HandleDelete(itemtodelete) {
     console.log('Deleting item:', itemtodelete);
     try {
       // 发送删除请求
-      await service.delete(`${API_PATH.DELETE}/${itemtodelete.kv_id}`);
+      string_id = String(kv_id);
+      await service.delete(`${API_PATH.DELETE}/${string_id}`);
 
       KvPairs.value = KvPairs.value.filter(item => item.kv_id !== itemtodelete.kv_id);
     }
     catch (error) {
       console.error("Deletion failed:", error);
-      ShowCustomModal(error.response?.data?.message || "Failed to delete item.");
+      ShowCustomModal(error.message || "Failed to delete item.");
     }
   }
 }
@@ -184,18 +185,19 @@ onMounted(() => {
   loadInitialData();
 });
 </script>
-
 <template>
-  <!-- A -->
+  <!-- A: 页面根容器 -->
   <div class="kv-manager-page">
-    <!-- B_1. 主要业务代码 -->
+    
+    <!-- B_1: 主要内容卡片 -->
     <div class="content-card">
-      <!-- C_1 这个是返回按钮 -->
+      
+      <!-- C_1: 返回按钮 -->
       <button class="btn-return" @click="HandleReturn" title="Go back">
         <i class="fas fa-arrow-left"></i>
       </button>
 
-      <!-- C_2 工具栏 -->
+      <!-- C_2: 头部和工具栏 -->
       <header class="kv-manager-header">
         <h1>KV Store</h1>
         <div class="toolbar">
@@ -208,26 +210,30 @@ onMounted(() => {
         </div>
       </header>
 
-      <!-- C_3 主要显示栏 -->
+      <!-- C_3: 数据表格 -->
       <div class="table-wrapper">
         <table class="kv-table">
           <thead>
             <tr>
-              <th class="col-key">Key(key_input)</th>
-              <th class="col-value">Value(value_input)</th>
-              <th class="col-tags">Tag(tag_name)</th>
-              <th class="col-updated">Last Updated(updated_at)</th>
+              <th class="col-key">Key</th>
+              <th class="col-value">Value</th>
+              <th class="col-tags">Tags</th>
+              <th class="col-updated">Last Updated</th>
               <th class="col-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in KvPairs" :key="item.key_id">
+            <!-- 使用 v-for 循环渲染 KvPairs 数组 -->
+            <tr v-for="item in KvPairs" :key="item.kv_id">
               <td>{{ item.key_input }}</td>
               <td class="value-cell">
                 <span class="value-text">{{ item.value_input }}</span>
               </td>
               <td>
-                <span v-if="item.tag_name" class="tag">{{ item.tag_name }}</span>
+                <span v-for="tag in item.tags" :key="tag" class="tag">
+                  {{ tag }}
+                </span>
+                <span v-if="!item.tags || item.tags.length === 0" style="color: #999;">-</span>
               </td>
               <td>{{ new Date(item.updated_at).toLocaleString() }}</td>
               <td class="actions-cell">
@@ -242,17 +248,15 @@ onMounted(() => {
                 </button>
               </td>
             </tr>
-            <!-- 空状态：当没有数据时显示 -->
             <tr v-if="!KvPairs.length">
               <td colspan="5" class="empty-state">
-                No Key-Value pairs found <a href="#" @click.prevent="HandleAddNew">Add one now!</a>
+                No Key-Value pairs found. <a href="#" @click.prevent="HandleAddNew">Add one now!</a>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- C_4 换页按钮 -->
       <footer class="kv-manager-footer">
         <div class="pagination">
           <span>Page 1 of 1</span>
@@ -262,21 +266,24 @@ onMounted(() => {
       </footer>
     </div>
 
-    <!-- B_2. 弹窗 -->
     <div class="modal-overlay" v-if="ismodalopen">
       <div class="modal-content">
         <form @submit.prevent="HandleSubmit">
           <h1>{{ modaltitle }}</h1>
           <div class="form-group">
+            <label for="kv-key">Key</label>
             <input v-model="currentitem.key_input" id="kv-key" type="text"
-              placeholder="电脑密码,工作邮箱,ssh提交密钥" required />
+              placeholder="e.g., WiFi Password, API Key" required />
           </div>
           <div class="form-group">
+            <label for="kv-value">Value</label>
             <textarea v-model="currentitem.value_input" id="kv-value" rows="5"
-              placeholder="123，123@123.com,36218631278631..."></textarea>
+              placeholder="e.g., 12345678, xyz-abc-123..."></textarea>
           </div>
           <div class="form-group">
-            <input v-model="currentitem.tag_name" id="kv-tags" type="text" placeholder="生活,工作,编程" />
+            <label for="kv-tags">Tags (comma-separated)</label>
+            <input v-model="editabletags" id="kv-tags" type="text" 
+                   placeholder="e.g., Personal, Work, Project" />
           </div>
           <div class="modal-actions">
             <button type="button" class="btn-ghost" @click="CloseModal">Cancel</button>
@@ -287,6 +294,7 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 /* 样式部分保持不变 */

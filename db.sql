@@ -16,7 +16,6 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_login_at TIMESTAMPTZ
     --------------------------------------------------------
-
 );
 
 -- 这个是 标签名字 对应用户 就是用户创建的标签
@@ -77,3 +76,4 @@ CREATE TABLE api_keys (
 
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+

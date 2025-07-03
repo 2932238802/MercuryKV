@@ -1,6 +1,7 @@
 #include "FetchData.h"
 #include "KVStore/KvStore.h"
 #include "KV_Tag/KvTagAssociation.h"
+#include "MyLog.hpp"
 #include "Tags/Tags.h"
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
@@ -16,19 +17,21 @@
  * @param req
  * @param callback 400
  */
-using namespace drogon_model::mercury; // 替换为你的模型命名空间
+using namespace drogon_model::mercury;
+using namespace MyLogNS;
 namespace {
-// 定义回调类型别名，让代码更简洁
 using CallbackType = std::function<void(const HttpResponsePtr &)>;
-} // namespace
+}
 
 void FetchData::Fetch(const HttpRequestPtr &req,
                       std::function<void(const HttpResponsePtr &)> &&callback) {
   std::string userid_str = req->getParameter("user_id");
 
-  if (userid_str.empty()) {
+  if (userid_str == "") {
+    MY_LOG_ERROR("user_id is none");
+
     Json::Value err;
-    err["error"] = "user_id is required.";
+    err["error"] = "user_id is required";
     auto resp = HttpResponse::newHttpJsonResponse(err);
     resp->setStatusCode(drogon::k400BadRequest);
     callback(resp);
@@ -39,8 +42,10 @@ void FetchData::Fetch(const HttpRequestPtr &req,
   try {
     userid = std::stoll(userid_str);
   } catch (const std::exception &e) {
+    MY_LOG_ERROR("user_id trans error");
+
     Json::Value err;
-    err["error"] = "Invalid user_id format.";
+    err["error"] = "Invalid user_id format";
     auto resp = HttpResponse::newHttpJsonResponse(err);
     resp->setStatusCode(drogon::k400BadRequest);
     callback(resp);
@@ -48,7 +53,8 @@ void FetchData::Fetch(const HttpRequestPtr &req,
   }
 
   auto dbClient = drogon::app().getDbClient();
-  drogon::orm::Mapper<KvStore> kvMapper(dbClient);
+  auto trans = dbClient->newTransaction();
+  drogon::orm::Mapper<KvStore> kvMapper(trans);
 
   // 第一次查询：获取该用户的所有 KV 记录 (使用异步)
   kvMapper.orderBy(KvStore::Cols::_updated_at, drogon::orm::SortOrder::DESC)
@@ -61,6 +67,8 @@ void FetchData::Fetch(const HttpRequestPtr &req,
           [callback, dbClient](std::vector<KvStore> kvList) {
             // 如果用户没有任何KV记录，直接返回一个空的JSON数组
             if (kvList.empty()) {
+              MY_LOG_WARN("没有任何标签 内容为空");
+
               auto resp = HttpResponse::newHttpJsonResponse(
                   Json::Value(Json::arrayValue));
               callback(resp);
@@ -92,6 +100,7 @@ void FetchData::Fetch(const HttpRequestPtr &req,
                 sql,
                 [callback, kvList = std::move(kvList)](
                     const drogon::orm::Result &result) {
+                  // 创建一个 id 和 名称映射的表
                   std::map<int64_t, std::vector<std::string>> kvidtotagmap;
                   for (const auto &row : result) {
                     auto kvId = row["kv_id"].as<int64_t>();
@@ -102,9 +111,9 @@ void FetchData::Fetch(const HttpRequestPtr &req,
                   Json::Value jsonarray(Json::arrayValue);
                   for (const auto &kv : kvList) {
                     Json::Value jsonObj;
-                    jsonObj["id"] = (Json::Int64)kv.getValueOfKvId();
-                    jsonObj["key"] = kv.getValueOfKeyInput();
-                    jsonObj["value"] = kv.getValueOfValueInput();
+                    jsonObj["kv_id"] = (Json::Int64)kv.getValueOfKvId();
+                    jsonObj["key_input"] = kv.getValueOfKeyInput();
+                    jsonObj["value_input"] = kv.getValueOfValueInput();
 
                     // 从 map 中查找这个 kv 的 tags
                     Json::Value tagsarray(Json::arrayValue);
@@ -124,8 +133,11 @@ void FetchData::Fetch(const HttpRequestPtr &req,
                     jsonarray.append(jsonObj);
                   }
                   auto resp = HttpResponse::newHttpJsonResponse(jsonarray);
+
+                  MY_LOG_SUC("数据读取成功!", jsonarray);
                   callback(resp);
                 },
+
                 [callback](const drogon::orm::DrogonDbException &e) {
                   Json::Value err;
                   //   TODO: message
@@ -141,8 +153,9 @@ void FetchData::Fetch(const HttpRequestPtr &req,
 
           // ————————————————————————————————————————————————————————————————————————
           [callback](const drogon::orm::DrogonDbException &e) {
-            Json::Value err;
+            MY_LOG_ERROR("后端抓取数据错误");
 
+            Json::Value err;
             // TODO: 前端看一眼
             //  500 message
             err["message"] = e.base().what();

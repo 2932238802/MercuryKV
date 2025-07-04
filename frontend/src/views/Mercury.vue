@@ -30,12 +30,14 @@ const modaltitle = computed(() => {
 // -----------------------------------------------------------------
 // 导航到主页或上一页
 function HandleReturn() {
-  router.push({ name: 'Index' }); // 假设你的主页路由名叫 'Index'
+  router.push({ name: 'Index' });
 }
+
 // -----------------------------------------------------------------
 
 // -----------------------------------------------------------------
-function HandleReLogin() {
+const HandleReLogin = () => {
+  // 本地存放 token
   localStorage.removeItem('AuthToken');
   localStorage.removeItem('UserId');
   router.push({ name: 'RegisterAndLogin' });
@@ -44,16 +46,20 @@ function HandleReLogin() {
 
 // -----------------------------------------------------------------
 // 打开“添加”弹窗
-function HandleAddNew() {
+const HandleAddNew = ()=> {
   isediting.value = false;
-  // 为新条目提供一个干净的模板，使
+
+  console.log("进入添加的窗口...");
+
   currentitem.value = {
-    key_input: '',
     value_input: '',
+    key_input: '',
     tags: [],
   };
   editabletags.value = '';
+
   data_alter_method.value = DATA_ALTER_METHOD.CREATE;
+
   ismodalopen.value = true;
 }
 // -----------------------------------------------------------------
@@ -72,7 +78,7 @@ function HandleEdit(itemtoedit) {
 
 // -----------------------------------------------------------------
 // 关闭弹窗并重置状态
-function CloseModal() {
+const CloseModal = () =>{
   ismodalopen.value = false;
   currentitem.value = null;
   editabletags.value = '';
@@ -82,9 +88,8 @@ function CloseModal() {
 
 // -----------------------------------------------------------------
 // 处理表单提交（添加或更新）
-async function HandleSubmit() {
+const HandleSubmit = async () => {
   if (!currentitem.value) return;
-
   const user_id = localStorage.getItem("UserId");
   if (!user_id) {
     ShowCustomModal("User not logged in Please re-login");
@@ -113,13 +118,11 @@ async function HandleSubmit() {
         "tags": tags_array,
       };
       const response = await service.post(API_PATH.CREATE, post_info);
-      
       console.log('API /Alter/adddata returned:', response.data);
-
       KvPairs.value.unshift(response.data);
       ShowCustomModal("Item created successfully!");
-
-    } else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
+    } 
+    else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
       // 编辑信息
       const post_info = {
         "user_id": Number(user_id),
@@ -139,25 +142,31 @@ async function HandleSubmit() {
     console.error("Submission failed:", error);
     ShowCustomModal(error.response?.data?.message || error.message || "An unknown error occurred.");
   }
-
   CloseModal();
 }
+
 // -----------------------------------------------------------------
 
 // -----------------------------------------------------------------
 // 删除条目 (带确认)
-async function HandleDelete(itemtodelete) {
+const HandleDelete = async (itemtodelete) => {
   if (confirm(`你确定要删除这个"${itemtodelete.key_input}"?`)) {
     try {
-      // 发送删除请求
       const kv_id_to_delete = itemtodelete.kv_id;
-      await service.delete(`${API_PATH.DELETE}/${kv_id_to_delete}`);
 
+      console.log(`删除的kv_id是: ${itemtodelete.kv_id}`)
+      console.log(`ID to delete is: ${kv_id_to_delete}, type is: ${typeof kv_id_to_delete}`);
+      console.log('First item in array has ID type:', typeof KvPairs.value[0]?.kv_id);
+      // --------------------------
+
+      const res = await service.delete(`${API_PATH.DELETE}/${kv_id_to_delete}`);
       KvPairs.value = KvPairs.value.filter(item => item.kv_id !== kv_id_to_delete);
-      ShowCustomModal("Item deleted successfully.");
-    } catch (error) {
+
+      ShowCustomModal(res.message);
+    }
+    catch (error) {
       console.error("Deletion failed:", error);
-      ShowCustomModal(error.response?.data?.message || "Failed to delete item.");
+      ShowCustomModal(error.message || "Failed to delete item.");
     }
   }
 }
@@ -182,7 +191,6 @@ onMounted(() => {
   loadInitialData();
 });
 </script>
-
 
 <template>
   <!-- A: 页面根容器 -->

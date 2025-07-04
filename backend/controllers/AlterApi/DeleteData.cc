@@ -39,6 +39,7 @@ void Alter::DeleteData(const HttpRequestPtr &req,
         Json::Value err;
         err["message"] = "客户端kv存储的id有误 客户端错误";
         auto res = HttpResponse::newHttpJsonResponse(err);
+        res->setStatusCode(drogon::k400BadRequest);
         callback(res);
         return;
     }
@@ -50,9 +51,6 @@ void Alter::DeleteData(const HttpRequestPtr &req,
     {
         // 这里是删除数据
         Mapper<KvStore> mapper(trans);
-        Mapper<KvTagAssociation> mapper_kta(trans);
-
-        mapper_kta.deleteBy(Criteria(KvTagAssociation::Cols::_kv_id, CompareOperator::EQ, kv_id));
 
         std::optional<KvStore> findone =
             mapper.findOne(Criteria(KvStore::Cols::_kv_id, CompareOperator::EQ, kv_id));
@@ -60,38 +58,24 @@ void Alter::DeleteData(const HttpRequestPtr &req,
         if (!findone)
         {
             // 日志输出
-            MY_LOG_ERROR("Data not found for kv_id: ", kv_id);
+            MY_LOG_ERROR("删除的数据不存在 ", kv_id);
             Json::Value error;
-            error["message"] = "Data not found for kv_id: " + kv_str;
+            error["message"] = "删除的数据不存在: " + kv_str;
             auto res = HttpResponse::newHttpJsonResponse(error);
             res->setStatusCode(k404NotFound);
             callback(res);
             return;
         }
+
+        Mapper<KvTagAssociation> mapper_kta(trans);
+
+        mapper_kta.deleteBy(Criteria(KvTagAssociation::Cols::_kv_id, CompareOperator::EQ, kv_id));
 
         // 删除数据库里面数据
-        size_t number = mapper.deleteByPrimaryKey(findone->getValueOfKvId());
-        if (number != 0)
-        {
-            MY_LOG_SUC("Data deleted successfully for kv_id: ", kv_id);
-        }
-        else
-        {
-            MY_LOG_WARN("找不到对应的 kv_id 删除动作无效");
+        mapper.deleteByPrimaryKey(kv_id);
 
-            Json::Value error;
-            error["message"] = "找不到对应的 kv_id 删除动作无效: " + kv_str;
-            auto res = HttpResponse::newHttpJsonResponse(error);
-
-            // TODO: 前端看一下这里 404
-            res->setStatusCode(k404NotFound);
-            callback(res);
-            return;
-        }
-
-        // TODO: 删除了也要返回信息
         Json::Value success_msg;
-        success_msg["message"] = "Data deleted successfully";
+        success_msg["message"] = "数据删除成功";
         auto res = HttpResponse::newHttpJsonResponse(success_msg);
         res->setStatusCode(k200OK);
         callback(res);

@@ -68,6 +68,10 @@ void Alter::AddData(const HttpRequestPtr &req,
     std::string key_input = (*jsonobject)["key_input"].asString();
     std::string value_input = (*jsonobject)["value_input"].asString();
     const Json::Value &tags_json = (*jsonobject)["tags"];
+
+    MY_LOG_INF("user_id:", user_id, "\nkey_input:", key_input, "\nvalue_input", value_input, "/n",
+               tags_json);
+
     if (key_input == "" || value_input == "")
     {
         MY_LOG_ERROR("key_input value_input tag_name 内容为空");
@@ -95,9 +99,15 @@ void Alter::AddData(const HttpRequestPtr &req,
         KvStore kv;
         KvTagAssociation kta;
 
+        // 中文转换
+        Json::Value value_input_json(value_input);
+        Json::StreamWriterBuilder writer;
+        std::string value_input_for_db = Json::writeString(writer, value_input_json);
+        MY_LOG_INF("中文转化之后的值是value_input_for_db:", value_input_for_db);
+
         kv.setUserId(user_id);
-        kv.setKeyInput(key_input);
-        kv.setValueInput(value_input);
+        kv.setKeyInput(value_input);
+        kv.setValueInput(value_input_for_db);
         kv.setUpdatedAt(trantor::Date::now());
         mapper_kv.insert(kv);
         MY_LOG_SUC("插入成功!");

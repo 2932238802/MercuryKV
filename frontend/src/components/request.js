@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ShowCustomModal } from '../components/show';
+import { ShowCustomModal } from './show';
 
 const service = axios.create({
   baseURL: "/api/",

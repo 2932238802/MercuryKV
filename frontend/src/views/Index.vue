@@ -13,7 +13,7 @@ const CheckTokenForLastLogin = async () => {
         const response = await service.get(API_PATH.TOKEN_CHECK);
         return response;
     } catch (error) {
-        console.error("Token verification failed in component:", error.message);
+        console.error("Token 验证失败!", error.message);
         return null;
     }
 }
@@ -24,7 +24,8 @@ const Login = async () => {
         router.push({ name: "RegisterAndLogin" });
     } else {
         router.push({ name: "Mercury" });
-        ShowCustomModal("欢迎回来");
+        const username = localStorage.getItem("UserName");
+        ShowCustomModal(`欢迎回来 ${username}`);
     }
 }
 

@@ -11,6 +11,7 @@ const isediting = ref(false);
 const currentitem = ref(null);
 const editabletags = ref('');
 const router = useRouter();
+const username = ref('');
 const DATA_ALTER_METHOD = {
   CREATE: 'create',
   UPDATE: 'update',
@@ -40,6 +41,7 @@ const HandleReLogin = () => {
   // 本地存放 token
   localStorage.removeItem('AuthToken');
   localStorage.removeItem('UserId');
+  localStorage.removeItem("UserName");
   router.push({ name: 'RegisterAndLogin' });
 }
 // -----------------------------------------------------------------
@@ -173,7 +175,9 @@ const HandleDelete = async (itemtodelete) => {
 // -----------------------------------------------------------------
 
 const loadInitialData = async () => {
+
   const user_id = localStorage.getItem("UserId");
+  username.value = localStorage.getItem("UserName");
   if (!user_id) {
     HandleReLogin();
     return;
@@ -187,6 +191,8 @@ const loadInitialData = async () => {
 };
 
 onMounted(() => {
+  console.log(`username.value ${username.value}`)
+  console.log("开始初始化!");
   loadInitialData();
 });
 </script>
@@ -205,7 +211,7 @@ onMounted(() => {
 
       <!-- C_2: 头部和工具栏 -->
       <header class="kv-manager-header">
-        <h1>KV Store</h1>
+        <h1>KV Store for {{username}}</h1>
         <div class="toolbar">
           <input type="text" class="search-input" placeholder="Search by key or tag..."
             aria-label="Search Key-Value pairs" />

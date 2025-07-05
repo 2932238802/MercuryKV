@@ -73,6 +73,7 @@ void Register::HandleRegister(const HttpRequestPtr &req,
         result["token"] = token;
         result["code"] = 201;
         result["user_id"] = user_id;
+        result["username"] = username;
 
         auto resp = HttpResponse::newHttpJsonResponse(result);
         resp->setStatusCode(k201Created);

@@ -65,7 +65,7 @@ const Login = async () => {
         return;
     }
 
-
+    console.log("即将发起登录请求...");
     // 理解一下会话： 就是手环 编号
     // 理解一下 token : 
     try {
@@ -78,16 +78,14 @@ const Login = async () => {
             API_PATHS.LOGIN,
             login_info
         )
-        
-        // TODO: 后端看一眼
-        localStorage.setItem('AuthToken', response.token);
-        localStorage.setItem('UserId', response.user_id);
-        router.push({ name: "Mercury" }).catch(err => {
-            console.error('路由跳转失败:', err);
-            ShowCustomModal(`路由跳转失败: ${err.message}`); 
-        });
 
-        ShowCustomModal(response.message || "登录成功");
+        alert("登录成功，后端返回的完整数据是:", JSON.stringify(response, null, 2));
+        localStorage.setItem('AuthToken', response.token);
+        localStorage.setItem('UserName',response.username);
+        localStorage.setItem('UserId', response.user_id);
+
+        router.push({ name: "Mercury" })
+        ShowCustomModal(response.message);
     }
     catch (error) {
         // 日志输出一下
@@ -131,10 +129,13 @@ const Register = async () => {
         )
         const token = response.token;
         const user_id = response.user_id;
+        const username = response.username;
+
         localStorage.setItem('AuthToken', token);
         localStorage.setItem('UserId', user_id);
+        localStorage.setItem('UserName',username);
         router.push({ name: "Mercury" });
-        ShowCustomModal(response.message);                        // TODO: 后端看一眼
+        ShowCustomModal(response.message);                        
     }
     catch (error) {
         console.error("注册失败:", error.message);

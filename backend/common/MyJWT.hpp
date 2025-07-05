@@ -53,21 +53,20 @@ class MyJWT
                                 .with_issuer(issuer)
                                 .allow_algorithm(jwt::algorithm::hs256{secret_key});
 
-            // 下面这行代码会抛出异常这会抛出异常
+            // 下面这行代码会抛出异常
+            // 这会抛出异常
             verifier.verify(decode);
-
             return decode.get_subject();
         }
         catch (const jwt::error::token_verification_exception &e)
         {
-            MY_LOG_WARN("JWT verification failed: ", e.what());
+            MY_LOG_ERROR("JWT 验证失败: ", e.what());
             return std::nullopt;
         }
 
         catch (const std::exception &e)
         {
-
-            MY_LOG_WARN("An unexpected error occurred during JWT verification:  ", e.what());
+            MY_LOG_ERROR("JWT验证的时候 发生错误 ", e.what());
             return std::nullopt;
         }
     }

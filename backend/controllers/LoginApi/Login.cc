@@ -9,6 +9,7 @@
 #include <drogon/orm/Mapper.h>
 #include <json/json.h>
 #include <json/value.h>
+#include <optional>
 #include <string>
 using namespace MyLogNS;
 using namespace MyJWTNS;
@@ -61,13 +62,12 @@ void Login::HandleLogin(const HttpRequestPtr &req,
                 // TODO: 前端处理
                 Json::Value result;
                 result["message"] = "登录成功!";
+                result["username"] = user.getValueOfUsername();
                 result["code"] = 200;
                 result["token"] = token;
                 result["user_id"] = std::to_string(user_id);
                 auto resp = HttpResponse::newHttpJsonResponse(result);
-
                 MY_LOG_SUC("登录成功,用户名: ", user.getValueOfUsername());
-
                 callback(resp);
             }
             else
@@ -150,15 +150,32 @@ void Login::HandCheck(const drogon::HttpRequestPtr &req,
         Json::Value res_info;
         res_info["message"] = "欢迎回来!";
         res_info["user_id"] = user_id;
-        res_info["code"] = 200;
-        auto res = HttpResponse::newHttpJsonResponse(res_info);
 
-        // 日志输出
-        MY_LOG_INF("token:", token);
-        MY_LOG_SUC("user_id:", user_id);
-        MY_LOG_SUC("认证成功!");
+        auto db_client = app().getDbClient();
+        Mapper<Users> mapper_users(db_client);
+        int64_t userid = std::stoll(user_id);
+        std::optional<Users> user = mapper_users.findByPrimaryKey(userid);
 
-        callback(res);
+        if (user)
+        {
+            res_info["username"] = user->getValueOfUsername();
+            res_info["code"] = 200;
+            auto res = HttpResponse::newHttpJsonResponse(res_info);
+            MY_LOG_SUC(res_info);
+            MY_LOG_SUC("username:", user->getValueOfUsername());
+            MY_LOG_SUC("token:", token);
+            MY_LOG_SUC("user_id:", user_id);
+            MY_LOG_SUC("认证成功!");
+            callback(res);
+        }
+        else
+        {
+            res_info["message"] = "数据库没有对应的账户";
+            res_info["code"] = 400;
+            auto res = HttpResponse::newHttpJsonResponse(res_info);
+            MY_LOG_ERROR("数据库没有对应的账户 危险!");
+            callback(res);
+        }
     }
     else
     {

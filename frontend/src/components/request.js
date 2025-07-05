@@ -2,7 +2,7 @@ import axios from "axios";
 import { ShowCustomModal } from '../components/show';
 
 const service = axios.create({
-  baseURL: "/",
+  baseURL: "/api/",
   timeout: 5000,
 });
 
@@ -24,7 +24,7 @@ service.interceptors.response.use(
   (response) => {
     const res = response.data;
     // 根据你和后端约定的成功代码进行判断
-    if (res.code !== 201 && res.code !== 200) {
+    if ( res.code !== 201 && res.code !== 200) {
       // 显示后端的业务错误信息
       return Promise.reject(new Error(res.message || "Error"));
     } else {

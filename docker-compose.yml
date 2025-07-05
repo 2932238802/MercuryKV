@@ -1,6 +1,4 @@
-# docker-compose.yml (最终修正版)
-
-version: "3.8"
+version: "1.0"
 services:
   nginx:
     image: nginx:1.25-alpine
@@ -31,7 +29,6 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_NAME=${DATABASE_NAME}
     restart: on-failure
-
   db:
     image: postgres:14-alpine
     container_name: mercury_db
@@ -43,7 +40,6 @@ services:
     networks:
       - mercury-net
     restart: always
-
 networks:
   mercury-net:
     driver: bridge

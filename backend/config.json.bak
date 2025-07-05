@@ -46,15 +46,19 @@
         "session_same_site": "Null",
         "session_cookie_key": "JSESSIONID",
         "session_max_age": -1,
-        "static_file_path": "",
-        "fallback_page": "",
-        "document_root": "",
-        "home_page": "",
+
+        "static_file_path": "../public",
+        "fallback_page": "/index.html",
+        "document_root": "../public",
+        "home_page": "index.html",
         "use_implicit_page": false,
         "implicit_page": "",
+
         "upload_path": "uploads",
-        "file_types": [],
-        "user_sendfile":false,
+        "file_types": [
+            "gif", "png", "jpg", "js", "css", "html", "ico", "swf",
+            "xap", "apk", "cur", "xml", "webp", "svg"
+        ],
         "mime": {},
         "locations": [
             {

@@ -29,11 +29,13 @@ Makefile
 /backend/test/build/
 
 *.o                
-*.a                # 静态库
-*.so               # 共享库 (Linux)
-*.so.*             # 带版本的共享库
-*.out              # 通用可执行文件输出名
+*.a                
+*.so               
+*.so.*             
+*.out              
 
 /docs
 docs
 
+logs
+logs/

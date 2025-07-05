@@ -3,7 +3,6 @@
 #include "KV_Tag/KvTagAssociation.h"
 #include "MyLog.hpp"
 #include "Tags/Tags.h"
-#include <cstddef>
 #include <cstdint>
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
@@ -61,6 +60,7 @@ void Alter::DeleteData(const HttpRequestPtr &req,
             MY_LOG_ERROR("删除的数据不存在 ", kv_id);
             Json::Value error;
             error["message"] = "删除的数据不存在: " + kv_str;
+            error["code"] = 500;
             auto res = HttpResponse::newHttpJsonResponse(error);
             res->setStatusCode(k404NotFound);
             callback(res);
@@ -72,10 +72,12 @@ void Alter::DeleteData(const HttpRequestPtr &req,
         mapper_kta.deleteBy(Criteria(KvTagAssociation::Cols::_kv_id, CompareOperator::EQ, kv_id));
 
         // 删除数据库里面数据
+        // TODO: 这里是删除数据
         mapper.deleteByPrimaryKey(kv_id);
 
         Json::Value success_msg;
         success_msg["message"] = "数据删除成功";
+        success_msg["code"] = 200;
         auto res = HttpResponse::newHttpJsonResponse(success_msg);
         res->setStatusCode(k200OK);
         callback(res);

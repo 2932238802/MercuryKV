@@ -11,7 +11,7 @@ const API_PATH = {
 const CheckTokenForLastLogin = async () => {
     try {
         const response = await service.get(API_PATH.TOKEN_CHECK);
-        return response; // 拦截器返回的是 res，所以这里直接就是后端数据
+        return response;
     } catch (error) {
         console.error("Token verification failed in component:", error.message);
         return null;

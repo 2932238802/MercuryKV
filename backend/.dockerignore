@@ -1,0 +1,13 @@
+# 忽略 Git 历史记录
+.git
+.gitignore
+
+# 忽略 IDE 配置文件
+.vscode/
+.idea/
+
+# 关键：忽略后端的构建输出目录
+backend/build/
+
+# 忽略其他可能的构建产物或日志
+*.log

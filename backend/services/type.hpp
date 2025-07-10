@@ -7,6 +7,14 @@ namespace Service
 {
 using namespace common;
 
+template <typename... Args> inline std::string build_message(Args &&...args)
+{
+    std::stringstream ss;
+    // 使用折叠表达式完成拼接
+    (ss << ... << std::forward<Args>(args));
+    return ss.str();
+}
+
 // typename...: 这里的 ... 是关键，它告诉编译器，这里接受的不是一个类型
 // 而是一包（零个或多个）类型
 // Args: 这是我们给这一包类型起的名字
@@ -18,61 +26,61 @@ using namespace common;
 // 类生成一系列的**“转发构造函数”**
 // 每一个生成的构造函数都和父类的某个构造函数有完全相同的参数列表。
 // 自动调用：这些生成的构造函数内部会自动调用父类对应的构造函数
-template <typename... Args> class BaseException : public std::runtime_error
+class BaseException : public std::runtime_error
 {
   public:
-    using std::runtime_error::runtime_error;
-
-  public:
-    std::string build_message(Args &&...args)
+    BaseException(const std::string &message) : std::runtime_error(message)
     {
-        std::stringstream ss;
-        // C++17 折叠表达式：将所有参数依次送入 stringstream
-        // (ss << ... << args) 是一种写法，下面的写法更通用，可以处理分隔符
-        (ss << ... << std::forward<Args>(args));
-        std::string message = ss.str();
-        MY_LOG_ERROR(message);
-        return message;
+        MY_LOG_ERROR("Service Exception Captured: ", message);
     }
 };
 
 // 服务器错误 500
-class DBOperatorWrong : public BaseException
+class DBOperatorWrong : public Service::BaseException
 {
   public:
-    DBOperatorWrong(const std::string &str) : BaseException(str)
+    // 模板构造函数，可以接收任意参数
+    template <typename... Args>
+    explicit DBOperatorWrong(Args &&...args)
+        // 1. 调用辅助函数拼接字符串
+        // 2. 调用基类构造函数，传入拼接好的字符串，基类会自动记录日志
+        : Service::BaseException(build_message(std::forward<Args>(args)...))
     {
-        MY_LOG_ERROR(str);
     }
 };
 
 // 认证失败 401
-class AuthException : public std::runtime_error
+class AuthException : public Service::BaseException
 {
   public:
-    explicit AuthException(const std::string &str) : std::runtime_error(str)
+    template <typename... Args>
+    explicit AuthException(Args &&...args)
+        // 1. 调用辅助函数拼接字符串
+        // 2. 调用基类构造函数，传入拼接好的字符串，基类会自动记录日志
+        : Service::BaseException(build_message(std::forward<Args>(args)...))
     {
-        MY_LOG_ERROR(str);
     }
 };
 
 // 请求错误 400
-class RequestWrong : public std::runtime_error
+class RequestWrong : public Service::BaseException
 {
   public:
-    RequestWrong(const std::string &str) : std::runtime_error(str)
+    template <typename... Args>
+    explicit RequestWrong(Args &&...args)
+        : Service::BaseException(build_message(std::forward<Args>(args)...))
     {
-        MY_LOG_ERROR(str);
     }
 };
 
 // 服务器未知错误 501
-template <typename... Args> class UnKownWrong : public std::runtime_error
+class UnkownWrong : public Service::BaseException
 {
   public:
-    UnKownWrong(Args &&...args) : std::runtime_error(build_message(std::forward<Args>(args)...))
+    template <typename... Args>
+    explicit UnkownWrong(Args &&...args)
+        : Service::BaseException(build_message(std::forward<Args>(args)...))
     {
-        MY_LOG_ERROR(std::forward<Args>(args)...);
     }
 };
 

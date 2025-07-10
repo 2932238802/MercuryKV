@@ -34,16 +34,15 @@ drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(cons
     // 之前的数据 之后处理
 
     auto trans = co_await db_client->newTransactionCoro();
-
     try
     {
     }
     catch (const drogon::orm::DrogonDbException &e)
     {
-        throw Service::DBOperatorWrong("数据库操作错误");
+        throw Service::DBOperatorWrong("数据库操作错误", e.base().what());
     }
     catch (const std::exception &e)
     {
-        throw Service::UnKownWrong("处理修改函数中 发生未知错误", e.what());
+        throw Service::UnkownWrong("处理修改函数中 发生未知错误", e.what());
     }
 }

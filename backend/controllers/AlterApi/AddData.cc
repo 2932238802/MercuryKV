@@ -1,4 +1,5 @@
 #include "Alter.h"
+#include "type.hpp"
 
 using namespace drogon;
 using namespace drogon_model::mercury;
@@ -42,24 +43,45 @@ drogon::Task<drogon::HttpResponsePtr> Alter::AddData(const HttpRequestPtr &req)
         res->setStatusCode(drogon::k201Created);
         co_return res;
     }
-    catch (const Service::DBOperatorWrong &)
+    catch (const Service::BaseException &e)
     {
         Json::Value error;
-        error["code"] = 500;
-        error["message"] = "服务器内部错误，请稍后重试";
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(drogon::k500InternalServerError);
-        co_return resp;
+        if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
+        {
+            error["code"] = 500;
+            error["message"] = "服务器内部错误，请稍后重试";
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
+        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        {
+            error["code"] = 500;
+            error["message"] = "服务器发生未知错误";
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
     }
-    catch (const Service::UnKownWrong &e)
-    {
-        Json::Value error;
-        error["code"] = 500;
-        error["message"] = "服务器发生未知错误";
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(drogon::k500InternalServerError);
-        co_return resp;
-    }
+
+    // catch (const Service::DBOperatorWrong &)
+    // {
+    //     Json::Value error;
+    //     error["code"] = 500;
+    //     error["message"] = "服务器内部错误，请稍后重试";
+    //     auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+    //     resp->setStatusCode(drogon::k500InternalServerError);
+    //     co_return resp;
+    // }
+    // catch (const Service::UnKownWrong &e)
+    // {
+    //     Json::Value error;
+    //     error["code"] = 500;
+    //     error["message"] = "服务器发生未知错误";
+    //     auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+    //     resp->setStatusCode(drogon::k500InternalServerError);
+    //     co_return resp;
+    // }
 
     // // -----------------------------------
     // // 检查请求体是否存在以及字段是否完整

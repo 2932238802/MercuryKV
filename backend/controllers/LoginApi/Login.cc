@@ -1,27 +1,20 @@
 #include "Login.h"
-#include "MyCrypt.hpp"
-#include "MyJWT.hpp"
+#include "CheckTokenService/CheckTokenService.hpp"
+#include "LoginService/LoginService.hpp"
 #include "MyLog.hpp"
 #include "Users/Users.h"
-#include <cstdint>
+#include "type.hpp"
 #include <drogon/HttpResponse.h>
 #include <drogon/orm/Criteria.h>
 #include <drogon/orm/Mapper.h>
+#include <drogon/utils/coroutine.h>
 #include <json/json.h>
 #include <json/value.h>
-#include <optional>
 #include <string>
-using namespace MyLogNS;
-using namespace MyJWTNS;
-using namespace MyCryptNS;
-using namespace drogon_model::mercury;
-using namespace drogon::orm;
-using namespace drogon;
 
-// ---------------------------------------------------------------------------------------------------------
-
-void Login::HandleLogin(const HttpRequestPtr &req,
-                        std::function<void(const HttpResponsePtr &)> &&callback)
+using namespace common;
+// drogon::Task<drogon::HttpResponsePtr> Login::HandleLogin(const drogon::HttpRequestPtr &req)
+drogon::Task<drogon::HttpResponsePtr> Login::HandleLogin(drogon::HttpRequestPtr req)
 {
     auto requestjson = req->getJsonObject();
 
@@ -32,10 +25,9 @@ void Login::HandleLogin(const HttpRequestPtr &req,
     {
         Json::Value error;
         error["message"] = "无效的请求,缺少JSON数据";
-        auto resp = HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(k400BadRequest);
-        callback(resp);
-        return;
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(drogon::k400BadRequest);
+        co_return resp;
     }
 
     // 账号密码 获取
@@ -43,149 +35,110 @@ void Login::HandleLogin(const HttpRequestPtr &req,
     std::string username = (*requestjson).get("username", "").asString();
     std::string password = (*requestjson).get("password", "").asString();
 
-    auto db_client = app().getDbClient();
-    Mapper<Users> mapper(db_client);
+    try
+    {
+        auto db_client = drogon::app().getDbClient();
+        Service::LoginService::ptr ptr = Service::LoginServiceFactory::MakeService(db_client);
 
-    Criteria criteria("username", CompareOperator::EQ, username);
+        // 当你调用一个返回 drogon::Task<T> 的函数时
+        // 你得到的不是最终结果 T，而是这个“包裹”
+        // 这个包裹告诉你：“我里面最终会有一个类型为 T 的东西，但现在可能还在路
+        Service::LoginResult ret = co_await ptr->LoginVerify(username, password);
 
-    mapper.findOne(
-        criteria,
-        [callback, password](const Users &user)
-        {
-            std::string salt = user.getValueOfSalt();
-            auto password_stored = user.getPasswordHash();
-            int64_t user_id = user.getValueOfUserId();
-            if (MyCrypt::VerifyPassword(password, salt, *password_stored))
-            {
-                std::string token = MyJWT::GetJWT(std::to_string(user.getValueOfUserId()));
+        Json::Value res_json;
+        res_json["code"] = ret.code;
+        res_json["email"] = ret.email;
+        res_json["message"] = ret.message;
+        res_json["token"] = ret.token;
+        res_json["user_id"] = ret.user_id;
+        res_json["username"] = username;
 
-                // TODO: 前端处理
-                Json::Value result;
-                result["message"] = "登录成功!";
-                result["username"] = user.getValueOfUsername();
-                result["code"] = 200;
-                result["token"] = token;
-                result["user_id"] = std::to_string(user_id);
-                auto resp = HttpResponse::newHttpJsonResponse(result);
-                MY_LOG_SUC("登录成功,用户名: ", user.getValueOfUsername());
-                callback(resp);
-            }
-            else
-            {
-                Json::Value error;
-                // TODO: 前端处理 message
-                error["message"] = "密码错误";
-                error["code"] = 400;
-                auto resp = HttpResponse::newHttpJsonResponse(error);
-                resp->setStatusCode(k401Unauthorized);
-                callback(resp);
-            }
-        },
-
-        [callback](const DrogonDbException &e)
-        {
-            if (typeid(e) == typeid(UnexpectedRows))
-            {
-                Json::Value error;
-                // TODO: 前端处理 message
-                error["message"] = "用户名或密码错误";
-                error["code"] = 400;
-                auto resp = HttpResponse::newHttpJsonResponse(error);
-                resp->setStatusCode(k401Unauthorized);
-                callback(resp);
-            }
-            else
-            {
-                // TODO: 前端处理 message
-                MY_LOG_ERROR("数据库查询异常: ", e.base().what());
-
-                // 形成json文件
-                Json::Value error;
-                error["message"] = "服务器内部错误，请稍后重试";
-                error["code"] = 500;
-                auto resp = HttpResponse::newHttpJsonResponse(error);
-                resp->setStatusCode(k500InternalServerError);
-
-                callback(resp);
-            }
-        });
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(res_json);
+        co_return resp;
+    }
+    catch (const Service::AuthException &e)
+    {
+        Json::Value error;
+        error["code"] = 401;
+        error["message"] = e.what();
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(drogon::k401Unauthorized);
+        co_return resp;
+    }
+    catch (const Service::DBOperatorWrong &)
+    {
+        Json::Value error;
+        error["code"] = 500;
+        error["message"] = "服务器内部错误，请稍后重试";
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(drogon::k500InternalServerError);
+        co_return resp;
+    }
+    catch (const Service::UnKownWrong &e)
+    {
+        Json::Value error;
+        error["code"] = 500;
+        error["message"] = "服务器发生未知错误";
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(drogon::k500InternalServerError);
+        co_return resp;
+    }
 }
 
-// ---------------------------------------------------------------------------------------------------------
+// ----- ----- ----- ----- -----
 /**
  * @brief 处理前端的token请求 这样 登录之后 就不用在登陆了 直接进入
  *
  * @param req
  * @param callback
  */
-void Login::HandCheck(const drogon::HttpRequestPtr &req,
-                      std::function<void(const drogon::HttpResponsePtr &)> &&callback)
+// drogon::Task<drogon::HttpResponsePtr> Login::HandCheck(const drogon::HttpRequestPtr &req)
+drogon::Task<drogon::HttpResponsePtr> Login::HandCheck(drogon::HttpRequestPtr req)
 {
     // 从 URL 查询参数中获取 "token"
     std::string header = req->getHeader("Authorization");
-    const std::string bearer_prefix = "Bearer ";
-    std::string token = "";
+    auto db_client = drogon::app().getDbClient();
 
-    if (!header.empty() && header.find(bearer_prefix, 0) == 0)
+    Service::CheckTokenService::ptr service =
+        Service::CheckTokenServiceFactory::MakeService(db_client);
+
+    try
     {
-        token = header.substr(bearer_prefix.length());
+        auto ret = co_await service->Check(std::move(header));
+
+        Json::Value res_json;
+        res_json["code"] = ret.code;
+        res_json["message"] = ret.message;
+        res_json["user_id"] = ret.user_id;
+        res_json["username"] = ret.username;
+        MY_LOG_INF("code:", ret.code, "message:", ret.message, "user_id:", ret.user_id,
+                   "username:", ret.username);
+        auto rep = drogon::HttpResponse::newHttpJsonResponse(res_json);
+        co_return rep;
     }
-    // 检查 token 是否为空
-    if (token.empty())
+    catch (const Service::DBOperatorWrong &e)
     {
         Json::Value error;
-        error["code"] = 400;
-        error["message"] = "无效的请求,缺少 token 参数";
-        auto resp = HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(k400BadRequest);
-        callback(resp);
-        return;
+        error["code"] = 500;
+        error["message"] = "库错误";
+        auto rep = drogon::HttpResponse::newHttpJsonResponse(error);
+        co_return rep;
     }
-    // 获取token 然后验证一下
-    auto user_id_optional = MyJWT::Verufyjwt(token);
-    if (user_id_optional)
-    {
-        // 生成token
-        std::string user_id = *user_id_optional;
-        Json::Value res_info;
-        res_info["message"] = "欢迎回来!";
-        res_info["user_id"] = user_id;
-
-        auto db_client = app().getDbClient();
-        Mapper<Users> mapper_users(db_client);
-        int64_t userid = std::stoll(user_id);
-        std::optional<Users> user = mapper_users.findByPrimaryKey(userid);
-
-        if (user)
-        {
-            res_info["username"] = user->getValueOfUsername();
-            res_info["code"] = 200;
-            auto res = HttpResponse::newHttpJsonResponse(res_info);
-            MY_LOG_SUC(res_info);
-            MY_LOG_SUC("username:", user->getValueOfUsername());
-            MY_LOG_SUC("token:", token);
-            MY_LOG_SUC("user_id:", user_id);
-            MY_LOG_SUC("认证成功!");
-            callback(res);
-        }
-        else
-        {
-            res_info["message"] = "数据库没有对应的账户";
-            res_info["code"] = 400;
-            auto res = HttpResponse::newHttpJsonResponse(res_info);
-            MY_LOG_ERROR("数据库没有对应的账户 危险!");
-            callback(res);
-        }
-    }
-    else
+    catch (const Service::AuthException &e)
     {
         Json::Value error;
-        error["code"] = 400;
+        error["code"] = 401;
         error["message"] = "认证失败,请重新登录";
-
-        auto res = HttpResponse::newHttpJsonResponse(error);
-        MY_LOG_ERROR("认证失败!");
-
-        callback(res);
+        auto res = drogon::HttpResponse::newHttpJsonResponse(error);
+        co_return res;
+    }
+    catch (const Service::UnKownWrong &e)
+    {
+        Json::Value error;
+        error["code"] = 500;
+        error["message"] = "服务器发生未知错误";
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(drogon::k500InternalServerError);
+        co_return resp;
     }
 }

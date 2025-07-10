@@ -1,17 +1,19 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { debounce } from 'lodash'; // 防抖
 import { useRouter } from 'vue-router';
 import service from '../components/request';
 import { ShowCustomModal } from '../components/show';
 
 // ----------------- ------------------------------------------------
 const KvPairs = ref([]);
+const router = useRouter();
 const ismodalopen = ref(false);
 const isediting = ref(false);
 const currentitem = ref(null);
 const editabletags = ref('');
-const router = useRouter();
 const username = ref('');
+const search_content = ref(""); // 输入搜索框的内容
 const DATA_ALTER_METHOD = {
   CREATE: 'create',
   UPDATE: 'update',
@@ -20,7 +22,7 @@ const API_PATH = {
   FETCH: "/FetchData/fetch",
   CREATE: "/Alter/adddata",
   UPDATE: "/Alter/alterdata",
-  DELETE: "/Alter/deletedata",
+  DELETE: "/Alter/deletedata"
 };
 const data_alter_method = ref(DATA_ALTER_METHOD.CREATE);
 const modaltitle = computed(() => {
@@ -48,7 +50,7 @@ const HandleReLogin = () => {
 
 // -----------------------------------------------------------------
 // 打开“添加”弹窗
-const HandleAddNew = ()=> {
+const HandleAddNew = () => {
   isediting.value = false;
 
   console.log("进入添加的窗口...");
@@ -59,9 +61,7 @@ const HandleAddNew = ()=> {
     tags: [],
   };
   editabletags.value = '';
-
   data_alter_method.value = DATA_ALTER_METHOD.CREATE;
-
   ismodalopen.value = true;
 }
 // -----------------------------------------------------------------
@@ -78,9 +78,10 @@ function HandleEdit(itemtoedit) {
 // -----------------------------------------------------------------
 
 
+
 // -----------------------------------------------------------------
 // 关闭弹窗并重置状态
-const CloseModal = () =>{
+const CloseModal = () => {
   ismodalopen.value = false;
   currentitem.value = null;
   editabletags.value = '';
@@ -119,11 +120,11 @@ const HandleSubmit = async () => {
         "value_input": currentitem.value.value_input,
         "tags": tags_array,
       };
-      const response = await service.post(API_PATH.CREATE, post_info);
-      console.log('API /Alter/adddata returned:', response.data);
-      KvPairs.value.unshift(response.data);
-      ShowCustomModal("Item created successfully!");
-    } 
+      const response = await service.post(API_PATH.CREATE, post_info); // 发送请求
+      console.log('API /Alter/adddata returned:', response.data); // 打印日志输出
+      KvPairs.value.unshift(response.data); // 修改内容 
+      ShowCustomModal("Item created successfully!"); // 创造
+    }
     else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
       // 编辑信息
       const post_info = {
@@ -146,8 +147,8 @@ const HandleSubmit = async () => {
   }
   CloseModal();
 }
-
 // -----------------------------------------------------------------
+
 
 // -----------------------------------------------------------------
 // 删除条目 (带确认)
@@ -173,6 +174,22 @@ const HandleDelete = async (itemtodelete) => {
   }
 }
 // -----------------------------------------------------------------
+
+const filterkvpairs = computed(() => {
+  const search = search_content.value.toLowerCase().trim(); // 获取搜索词并清理格式
+  if (!search) {
+    return KvPairs.value;
+  }
+  return KvPairs.value.filter(item => { // 如果有搜索词，就过滤
+    const key_match = item.key_input.toLowerCase().includes(search);
+    const tag_match = item.tags && item.tags.some(tag =>
+      tag.toLowerCase().includes(search)
+    );
+    const value = item.value_input.toLowerCase().includes(search);
+    return key_match || tag_match || value;
+  });
+});
+
 
 const loadInitialData = async () => {
 
@@ -201,7 +218,7 @@ onMounted(() => {
   <!-- A: 页面根容器 -->
   <div class="kv-manager-page">
 
-    <!-- B_1: 主要内容卡片 -->
+    <!-- B_1: 主要内容 -->
     <div class="content-card">
 
       <!-- C_1: 返回按钮 -->
@@ -211,14 +228,17 @@ onMounted(() => {
 
       <!-- C_2: 头部和工具栏 -->
       <header class="kv-manager-header">
-        <h1>KV Store for {{username}}</h1>
+        <h1>KV Store for {{ username }}</h1>
         <div class="toolbar">
-          <input type="text" class="search-input" placeholder="Search by key or tag..."
-            aria-label="Search Key-Value pairs" />
-          <button class="btn-primary" @click="HandleAddNew">+ Add New</button>
+          <input type="text" class="search-input" placeholder="输入搜索内容 自动显示"
+            aria-label="Search Key-Value pairs" v-model="search_content" /> <!-- 搜索内容  -->
+
+          <button class="btn-primary" @click="HandleAddNew">+ Add New</button> <!-- 增加新的任务 -->
+
           <button class="btn-ghost" @click="HandleReLogin" title="Logout and login again">
             <i class="fas fa-sign-out-alt"></i> Re-Login
           </button>
+
         </div>
       </header>
 
@@ -236,7 +256,7 @@ onMounted(() => {
           </thead>
           <tbody>
             <!-- 使用 v-for 循环渲染 KvPairs 数组 -->
-            <tr v-for="item in KvPairs" :key="item.kv_id">
+            <tr v-for="item in filterkvpairs" :key="item.kv_id">
               <td>{{ item.key_input }}</td>
               <td class="value-cell">
                 <span class="value-text">{{ item.value_input }}</span>
@@ -284,13 +304,13 @@ onMounted(() => {
           <h1>{{ modaltitle }}</h1>
           <div class="form-group">
             <label for="kv-key">Key</label>
-            <input v-model="currentitem.key_input" id="kv-key" type="text"
-              placeholder="e.g., WiFi Password, API Key" required />
+            <input v-model="currentitem.key_input" id="kv-key" type="text" placeholder="e.g., WiFi Password, API Key"
+              required />
           </div>
           <div class="form-group">
             <label for="kv-value">Value</label>
-            <textarea v-model="currentitem.value_input" id="kv-value" rows="5"
-              placeholder="e.g., 对应key的值..." required></textarea>
+            <textarea v-model="currentitem.value_input" id="kv-value" rows="5" placeholder="e.g., 对应key的值..."
+              required></textarea>
           </div>
           <div class="form-group">
             <label for="kv-tags">Tags (separated by comma, space, etc.)</label>
@@ -311,4 +331,7 @@ onMounted(() => {
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 @import "../static/Mercury.css";
+@import "../static/Common.css";
+
+
 </style>

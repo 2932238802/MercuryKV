@@ -7,12 +7,10 @@
 #include <drogon/orm/Exception.h>
 #include <json/value.h>
 
-using namespace MyLogNS;
-using namespace MyCryptNS;
+using namespace common;
 using namespace drogon_model::mercury;
 using namespace drogon::orm;
 using namespace drogon;
-using namespace MyJWTNS;
 
 void Register::HandleRegister(const HttpRequestPtr &req,
                               std::function<void(const HttpResponsePtr &)> &&callback)
@@ -74,7 +72,7 @@ void Register::HandleRegister(const HttpRequestPtr &req,
         result["code"] = 201;
         result["user_id"] = user_id;
         result["username"] = username;
-
+        result["eamil"] = email;
         auto resp = HttpResponse::newHttpJsonResponse(result);
         resp->setStatusCode(k201Created);
         MY_LOG_SUC("用户插入成功", username);

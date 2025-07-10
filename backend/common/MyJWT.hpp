@@ -7,8 +7,8 @@
 #include <string>
 
 using namespace drogon;
-using namespace MyLogNS;
-namespace MyJWTNS
+
+namespace common
 {
 
 class MyJWT
@@ -72,4 +72,4 @@ class MyJWT
     }
 };
 
-} // namespace MyJWTNS
+} // namespace common

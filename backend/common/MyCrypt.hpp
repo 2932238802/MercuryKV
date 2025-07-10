@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace MyCryptNS
+namespace common
 {
 /**
  * @brief
@@ -18,7 +18,6 @@ namespace MyCryptNS
  * 1. 处理哈希加密
  */
 
-using namespace MyLogNS;
 class MyCrypt
 {
     /** --------------------------------------------------
@@ -130,4 +129,4 @@ class MyCrypt
     }
     // --------------------------------------------------
 };
-} // namespace MyCryptNS
+} // namespace common

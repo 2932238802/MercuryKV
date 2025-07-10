@@ -18,7 +18,7 @@
  * @param callback 400
  */
 using namespace drogon_model::mercury;
-using namespace MyLogNS;
+using namespace common;
 namespace
 {
 using CallbackType = std::function<void(const HttpResponsePtr &)>;

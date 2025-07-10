@@ -1,13 +1,10 @@
 #pragma once
-
 #include <cstdio>
 #include <cstring>
 #include <ctime>
-
 #include <iostream>
 #include <string>
-
-namespace MyLogNS
+namespace common
 {
 #define RESET "\033[0m"
 #define BLACK "\033[30m"   /* Black */
@@ -93,4 +90,4 @@ class MyLog
 #define MY_LOG_ERROR(...) MyLog::Log(__FILE__, __LINE__, G::ERR, ##__VA_ARGS__)
 #define MY_LOG_SUC(...) MyLog::Log(__FILE__, __LINE__, G::SUC, ##__VA_ARGS__)
 
-} // namespace MyLogNS
+} // namespace common

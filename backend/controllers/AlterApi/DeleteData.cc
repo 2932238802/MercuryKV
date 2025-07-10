@@ -1,21 +1,9 @@
 #include "Alter.h"
-#include "KVStore/KvStore.h"
-#include "KV_Tag/KvTagAssociation.h"
-#include "MyLog.hpp"
-#include "Tags/Tags.h"
-#include <cstdint>
-#include <drogon/HttpResponse.h>
-#include <drogon/HttpTypes.h>
-#include <drogon/orm/Criteria.h>
-#include <json/value.h>
-#include <optional>
-#include <string>
-#include <trantor/utils/Date.h>
 
 using namespace drogon;
 using namespace drogon_model::mercury;
 using namespace drogon::orm;
-using namespace MyLogNS;
+using namespace common;
 
 /**
  * @brief 删除数据

@@ -11,6 +11,7 @@ const password_register = ref("");
 const username_login = ref("");
 const password_login = ref("");
 const email_register = ref("");
+
 const show_login_warning_for_user_name = ref(false)
 const show_login_warning_for_password = ref(false)
 const show_register_warning_for_user_name = ref(false)
@@ -83,7 +84,7 @@ const Login = async () => {
         localStorage.setItem('AuthToken', response.token);
         localStorage.setItem('UserName',response.username);
         localStorage.setItem('UserId', response.user_id);
-
+        localStorage.setItem('Email',response.email)
         router.push({ name: "Mercury" })
         ShowCustomModal(response.message);
     }
@@ -130,10 +131,12 @@ const Register = async () => {
         const token = response.token;
         const user_id = response.user_id;
         const username = response.username;
+        const email = response.email;
 
         localStorage.setItem('AuthToken', token);
         localStorage.setItem('UserId', user_id);
         localStorage.setItem('UserName',username);
+        localStorage.setItem('Email',email);
         router.push({ name: "Mercury" });
         ShowCustomModal(response.message);                        
     }

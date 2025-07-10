@@ -1,0 +1,147 @@
+
+.form-section {
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #f3f4f6; 
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  max-width: 500px; 
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+}
+
+.danger-zone {
+  margin-top: 3rem;
+  border: 2px solid #fee2e2;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fef2f2;
+  flex-wrap: wrap; 
+  gap: 1rem;
+}
+
+.danger-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #b91c1c;
+  margin: 0;
+}
+
+.danger-text {
+  font-size: 0.9rem;
+  color: #ef4444; 
+  margin: 0.25rem 0 0 0;
+}
+
+
+.verification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(31, 31, 31, 0.8); 
+    backdrop-filter: blur(8px); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 1rem; 
+}
+
+.verification-modal {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    color: #10b981;
+    margin-bottom: 1.5rem;
+}
+
+.verification-modal h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+}
+
+.info-text {
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.info-text strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.input-group {
+    display: flex;
+    width: 100%;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.input-group .form-input {
+    flex-grow: 1; 
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+}
+
+.input-group .btn-ghost {
+    flex-shrink: 0; 
+    white-space: nowrap; 
+}
+
+.api-error-text {
+    color: #ef4444; /* 醒目的红色 */
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    min-height: 1.25rem; /* 预留高度，防止错误信息出现时布局跳动 */
+}
+
+/* 弹窗底部的“取消”和“确认”按钮组 */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 1rem;
+    margin-top: 1rem;
+}

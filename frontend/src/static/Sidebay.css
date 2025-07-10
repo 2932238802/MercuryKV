@@ -1,0 +1,128 @@
+.app-sidebar {
+  width: 240px;
+  background-color: #111827; 
+  color: #9CA3AF;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-right: 1px solid #374151;
+  z-index: 1000;
+  font-family: 'Inter', sans-serif; 
+}
+
+.sidebar-header {
+  padding: 1.8rem 1.5rem;
+  text-align: center;
+}
+
+.sidebar-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+  color: #FFFFFF;
+  letter-spacing: 1px;
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+  padding-top: 1rem;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li {
+  margin: 0 1rem 0.25rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.2rem;
+  text-decoration: none;
+  border-radius: 6px; 
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #D1D5DB; 
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}
+
+.router-link-active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.router-link-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 3px;
+  background-color: #FFFFFF;
+  border-radius: 3px;
+}
+
+.nav-icon {
+  margin-right: 1rem;
+  width: 20px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.sidebar-footer {
+  padding: 1.5rem;
+  text-align: left;
+  border-top: 1px solid #374151;
+}
+
+.sidebar-footer p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.85rem;
+  color: #9CA3AF;
+}
+
+.btn-logout {
+  background-color: #374151;
+  border: none;
+  color: #D1D5DB;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.btn-logout:hover {
+  background-color: #4B5563; 
+  color: #FFFFFF;
+}
+
+.btn-logout .fa-sign-out-alt {
+  margin-right: 0.75rem;
+}
+
+/* 选中标签高亮 */
+.router-link-active {
+  background-color: #4a5568;
+  color: #fff;
+  font-weight: bold;
+}

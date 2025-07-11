@@ -166,7 +166,6 @@ void FetchData::Fetch(const HttpRequestPtr &req,
                     kvidsstring);
             },
 
-            // ————————————————————————————————————————————————————————————————————————
             [callback](const drogon::orm::DrogonDbException &e)
             {
                 MY_LOG_ERROR("后端抓取数据错误");

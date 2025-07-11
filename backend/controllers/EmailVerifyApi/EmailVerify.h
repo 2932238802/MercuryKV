@@ -23,9 +23,3 @@ class EmailVerify : public drogon::HttpController<EmailVerify>
                    std::function<void(const drogon::HttpResponsePtr &)> &&callback,
                    std::string email_address) const;
 };
-
-// get 请求一般发送形式
-// const url = `/api/v1/send_email/${email.value}`;
-// const response = await axios.get(url);
-// const userData = { name: 'Alice', age: 30 };
-// await axios.post('/api/users', userData);

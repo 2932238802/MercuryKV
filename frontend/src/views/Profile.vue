@@ -14,18 +14,7 @@ const isSaving = ref(false);
 const isSendingCode = ref(false);
 const countdown = ref(0);
 
-onMounted(() => {
-    const email = localStorage.getItem("Email");
-    const userName = localStorage.getItem("UserName");
 
-    if (!email || !userName) {
-        ShowCustomModal("数据本地读取错误!");
-        return;
-    }
-    cur_email.value = email;
-    cur_user_name.value = userName;
-    original_email.value = email;
-});
 
 const HandleReturn = () => {
     router.push({ name: 'Index' });
@@ -50,6 +39,7 @@ const HandleSendCode = () => {
     console.log("将发送验证码到:", original_email.value);
 
     // TODO: 假设API调用成功...
+    // 这里发送 邮件
 
     countdown.value = 60; 
     const timer = setInterval(() => {
@@ -76,7 +66,20 @@ const HandleConfirmAndSave = () => {
 
 const sendCodeButtonText = computed(() => {
     if (countdown.value > 0) return `Resend in (${countdown.value}s)`;
-    return 'Send Code';
+    return '发送验证码';
+});
+
+onMounted(() => {
+    const email = localStorage.getItem("Email");
+    const userName = localStorage.getItem("UserName");
+
+    if (!email || !userName) {
+        ShowCustomModal("数据本地读取错误!");
+        return;
+    }
+    cur_email.value = email;
+    cur_user_name.value = userName;
+    original_email.value = email;
 });
 
 </script>

@@ -59,6 +59,7 @@ const HandleAddNew = () => {
     value_input: '',
     key_input: '',
     tags: [],
+    kv_id: '',
   };
   editabletags.value = '';
   data_alter_method.value = DATA_ALTER_METHOD.CREATE;
@@ -71,13 +72,14 @@ const HandleAddNew = () => {
 function HandleEdit(itemtoedit) {
   isediting.value = true;
   currentitem.value = JSON.parse(JSON.stringify(itemtoedit));
-  editabletags.value = itemtoedit.tags ? itemtoedit.tags.join(', ') : '';
+  editabletags.value = itemtoedit.tags ? itemtoedit.tags.join(', ') : "";
+
+  console.log("进入编辑的窗口...");
+
   data_alter_method.value = DATA_ALTER_METHOD.UPDATE;
   ismodalopen.value = true;
 }
 // -----------------------------------------------------------------
-
-
 
 // -----------------------------------------------------------------
 // 关闭弹窗并重置状态
@@ -112,21 +114,31 @@ const HandleSubmit = async () => {
       .filter(tag => tag.trim().length > 0)
   )];
 
-  try {
-    if (data_alter_method.value === DATA_ALTER_METHOD.CREATE) {
-      const post_info = {
-        "user_id": Number(user_id),
-        "key_input": currentitem.value.key_input,
-        "value_input": currentitem.value.value_input,
-        "tags": tags_array,
-      };
-      const response = await service.post(API_PATH.CREATE, post_info); // 发送请求
-      console.log('API /Alter/adddata returned:', response.data); // 打印日志输出
-      KvPairs.value.unshift(response.data); // 修改内容 
-      ShowCustomModal("Item created successfully!"); // 创造
-    }
-    else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
+  if (data_alter_method.value === DATA_ALTER_METHOD.CREATE) {
+    const post_info = {
+      "user_id": Number(user_id),
+      "key_input": currentitem.value.key_input,
+      "value_input": currentitem.value.value_input,
+      "tags": tags_array,
+    };
+    const response = await service.post(API_PATH.CREATE, post_info); // 发送请求
+    CloseModal();
+    const newItem = {
+      ...response.data,
+      kv_id: String(response.data.kv_id)
+    };
+    alert(response.data.kv_id);
+    KvPairs.value.unshift(newItem);
+    ShowCustomModal("数据创建成功");
+  }
+  else if (data_alter_method.value === DATA_ALTER_METHOD.UPDATE) {
+
+    try {
       // 编辑信息
+      console.log("Searching for kv_id:", currentitem.value.kv_id);
+      console.log("Type of search kv_id:", typeof currentitem.value.kv_id);
+      console.log("KvPairs array sample:", KvPairs.value.slice(0, 3));
+
       const post_info = {
         "user_id": Number(user_id),
         "kv_id": currentitem.value.kv_id,
@@ -135,17 +147,34 @@ const HandleSubmit = async () => {
         "tags": tags_array,
       };
       const response = await service.put(API_PATH.UPDATE, post_info);
+
+
+
       const index = KvPairs.value.findIndex(item => item.kv_id == currentitem.value.kv_id);
+
       if (index !== -1) {
-        KvPairs.value[index] = response.data;
+        if (response && response.data && typeof response.data === 'object') {
+          const updatedItem = {
+            ...response.data,
+            kv_id: String(response.data.kv_id)
+          };
+          KvPairs.value[index] = updatedItem;
+        } else {
+          console.warn("Backend did not return a valid data object on update. Using local data for UI.", response);
+          KvPairs.value[index] = {
+            ...currentitem.value,
+            tags: tags_array,
+            updated_at: new Date().toISOString(), // 伪造一个更新时间
+          };
+        }
       }
-      ShowCustomModal("Item updated successfully!");
+      CloseModal();
+      ShowCustomModal("数据修改成功");
+    } catch (error) {
+      console.error("Submission failed:", error);
+      ShowCustomModal(error.response?.data?.message || error.message || "An unknown error occurred");
     }
-  } catch (error) {
-    console.error("Submission failed:", error);
-    ShowCustomModal(error.response?.data?.message || error.message || "An unknown error occurred.");
   }
-  CloseModal();
 }
 // -----------------------------------------------------------------
 
@@ -156,16 +185,12 @@ const HandleDelete = async (itemtodelete) => {
   if (confirm(`你确定要删除这个"${itemtodelete.key_input}"?`)) {
     try {
       const kv_id_to_delete = itemtodelete.kv_id;
-
       console.log(`删除的kv_id是: ${itemtodelete.kv_id}`)
       console.log(`ID to delete is: ${kv_id_to_delete}, type is: ${typeof kv_id_to_delete}`);
       console.log('First item in array has ID type:', typeof KvPairs.value[0]?.kv_id);
-      // --------------------------
-
       const res = await service.delete(`${API_PATH.DELETE}/${kv_id_to_delete}`);
       KvPairs.value = KvPairs.value.filter(item => item.kv_id != kv_id_to_delete);
-
-      ShowCustomModal(res.message);
+      ShowCustomModal(res.message || "删除成功");
     }
     catch (error) {
       console.error("Deletion failed:", error);
@@ -201,7 +226,13 @@ const loadInitialData = async () => {
   }
   try {
     const response = await service.get(API_PATH.FETCH, { params: { user_id } });
-    KvPairs.value = response.data || [];
+    const rawdata = response.data || [];  // KvPairs.value
+    KvPairs.value = rawdata.map(item => (
+      {
+        ...item,
+        kv_id: String(item.kv_id)
+      }
+    ))
   } catch (error) {
     console.error("Failed to fetch data:", error);
   }
@@ -230,8 +261,8 @@ onMounted(() => {
       <header class="kv-manager-header">
         <h1>KV Store for {{ username }}</h1>
         <div class="toolbar">
-          <input type="text" class="search-input" placeholder="输入搜索内容 自动显示"
-            aria-label="Search Key-Value pairs" v-model="search_content" /> <!-- 搜索内容  -->
+          <input type="text" class="search-input" placeholder="输入搜索内容 自动显示" aria-label="Search Key-Value pairs"
+            v-model="search_content" /> <!-- 搜索内容  -->
 
           <button class="btn-primary" @click="HandleAddNew">+ Add New</button> <!-- 增加新的任务 -->
 
@@ -332,6 +363,4 @@ onMounted(() => {
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 @import "../static/Mercury.css";
 @import "../static/Common.css";
-
-
 </style>

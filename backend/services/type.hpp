@@ -31,7 +31,6 @@ class BaseException : public std::runtime_error
   public:
     BaseException(const std::string &message) : std::runtime_error(message)
     {
-        MY_LOG_ERROR("Service Exception Captured: ", message);
     }
 };
 
@@ -85,3 +84,6 @@ class UnkownWrong : public Service::BaseException
 };
 
 } // namespace Service
+
+// 创造 201
+// 通过 200

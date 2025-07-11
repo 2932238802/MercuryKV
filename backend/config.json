@@ -114,6 +114,13 @@
             "secret_key" :"bDgKP1c&C8g4t8+gUG)ZeWdS?C!zHMD)2NGw0e-3$A3q34ckqUxK7[A808:+h(f$",
             "issuer":"mercury_kv",
             "expiry_hours":48
+        },
+        "smtp": {
+            "host": "smtp.qq.com",
+            "port": 465,
+            "username": "19857198709@163.com",
+            "password": "DJvJUuCNYWCR9VZc"
         }
     }
+
 }

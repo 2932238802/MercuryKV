@@ -21,6 +21,10 @@ class AddDataServiceFactory;
 struct AlterDataReturn
 {
     int64_t code;
+    int64_t kv_id;
+    std::string key_input;
+    std::string value_input;
+    std::string updated_at;
 };
 
 class AlterDataService
@@ -50,5 +54,4 @@ class AlterDataServiceFactory
         return std::make_shared<Enable>(db_out);
     }
 };
-
 } // namespace Service

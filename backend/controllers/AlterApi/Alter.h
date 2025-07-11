@@ -1,6 +1,7 @@
 #pragma once
 #include "AlterService/AddDataService.hpp"
 #include "AlterService/AlterDataService.hpp"
+#include "AlterService/DeleteDataService.hpp"
 #include <drogon/HttpController.h>
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
@@ -21,11 +22,9 @@ class Alter : public drogon::HttpController<Alter>
     METHOD_ADD(Alter::DeleteData, "/deletedata/{id}", Delete);
     METHOD_LIST_END
 
-    drogon::Task<drogon::HttpResponsePtr> AddData(const HttpRequestPtr &req);
+    drogon::Task<drogon::HttpResponsePtr> AddData(HttpRequestPtr req);
 
-    drogon::Task<drogon::HttpResponsePtr> AlterData(const HttpRequestPtr &req);
+    drogon::Task<drogon::HttpResponsePtr> AlterData(HttpRequestPtr req);
 
-    void DeleteData(const HttpRequestPtr &req,
-                    std::function<void(const HttpResponsePtr &)> &&callback,
-                    const std::string &kv_id);
+    drogon::Task<drogon::HttpResponsePtr> DeleteData(HttpRequestPtr req, const std::string &kv_id);
 };

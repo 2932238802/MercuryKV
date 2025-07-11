@@ -1,9 +1,8 @@
 #include "Alter.h"
-
-using namespace drogon;
-using namespace drogon_model::mercury;
-using namespace drogon::orm;
-using namespace common;
+#include "type.hpp"
+#include <drogon/HttpAppFramework.h>
+#include <drogon/HttpResponse.h>
+#include <json/value.h>
 
 /**
  * @brief 删除数据
@@ -12,72 +11,50 @@ using namespace common;
  * @param callback
  * @param kv_id
  */
-void Alter::DeleteData(const HttpRequestPtr &req,
-                       std::function<void(const HttpResponsePtr &)> &&callback,
-                       const std::string &kv_str)
+drogon::Task<drogon::HttpResponsePtr> Alter::DeleteData(HttpRequestPtr req,
+                                                        const std::string &kv_str)
 {
-    int64_t kv_id;
-    try
-    {
-        kv_id = std::stoll(kv_str);
-    }
-    catch (const std::exception &e)
-    {
-        Json::Value err;
-        err["message"] = "客户端kv存储的id有误 客户端错误";
-        auto res = HttpResponse::newHttpJsonResponse(err);
-        res->setStatusCode(drogon::k400BadRequest);
-        callback(res);
-        return;
-    }
 
     auto db_client = app().getDbClient();
-    auto trans = db_client->newTransaction();
+
+    Service::DeleteDataService::ptr service =
+        Service::DeleteDataServiceFactory::MakeService(db_client);
 
     try
     {
-        // 这里是删除数据
-        Mapper<KvStore> mapper(trans);
-
-        std::optional<KvStore> findone =
-            mapper.findOne(Criteria(KvStore::Cols::_kv_id, CompareOperator::EQ, kv_id));
-
-        if (!findone)
-        {
-            // 日志输出
-            MY_LOG_ERROR("删除的数据不存在 ", kv_id);
-            Json::Value error;
-            error["message"] = "删除的数据不存在: " + kv_str;
-            error["code"] = 500;
-            auto res = HttpResponse::newHttpJsonResponse(error);
-            res->setStatusCode(k404NotFound);
-            callback(res);
-            return;
-        }
-
-        Mapper<KvTagAssociation> mapper_kta(trans);
-
-        mapper_kta.deleteBy(Criteria(KvTagAssociation::Cols::_kv_id, CompareOperator::EQ, kv_id));
-
-        // 删除数据库里面数据
-        // TODO: 这里是删除数据
-        mapper.deleteByPrimaryKey(kv_id);
-
-        Json::Value success_msg;
-        success_msg["message"] = "数据删除成功";
-        success_msg["code"] = 200;
-        auto res = HttpResponse::newHttpJsonResponse(success_msg);
-        res->setStatusCode(k200OK);
-        callback(res);
+        auto ret = co_await service->DeleteData(kv_str);
+        Json::Value res_json;
+        res_json["code"] = ret.code;
+        res_json["message"] = ret.message;
+        auto res = drogon::HttpResponse::newHttpJsonResponse(res_json);
+        co_return res;
     }
-
-    catch (const drogon::orm::DrogonDbException &e)
+    catch (const Service::BaseException &e)
     {
         Json::Value error;
-        error["message"] = "Database deletion failed: " + std::string(e.base().what());
-        auto res = HttpResponse::newHttpJsonResponse(error);
-        res->setStatusCode(k500InternalServerError);
-        callback(res);
-        return;
+        if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
+        {
+            error["code"] = 500;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
+        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        {
+            error["code"] = 501;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
+        else if (dynamic_cast<const Service::RequestWrong *>(&e))
+        {
+            error["code"] = 400;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
     }
 }

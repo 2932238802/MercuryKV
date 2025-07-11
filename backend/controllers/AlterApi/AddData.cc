@@ -17,13 +17,11 @@ using namespace common;
  * @param req
  * @param callback
  */
-drogon::Task<drogon::HttpResponsePtr> Alter::AddData(const HttpRequestPtr &req)
+drogon::Task<drogon::HttpResponsePtr> Alter::AddData(HttpRequestPtr req)
 {
 
     auto jsonobject = req->getJsonObject();
-
     auto db_client = app().getDbClient();
-
     Service::AddDataService::ptr service = Service::AddDataServiceFactory::MakeService(db_client);
 
     try
@@ -32,7 +30,7 @@ drogon::Task<drogon::HttpResponsePtr> Alter::AddData(const HttpRequestPtr &req)
         const Json::Value &tags_json = (*jsonobject)["tags"];
         Json::Value success_resp;
         Json::Value data;
-        success_resp["code"] = 201;
+        success_resp["code"] = ret.code;
         data["key_input"] = ret.key_input;
         data["value_input"] = ret.value_input;
         data["kv_id"] = ret.kv_id;
@@ -56,7 +54,7 @@ drogon::Task<drogon::HttpResponsePtr> Alter::AddData(const HttpRequestPtr &req)
         }
         else if (dynamic_cast<const Service::UnkownWrong *>(&e))
         {
-            error["code"] = 500;
+            error["code"] = 501;
             error["message"] = "服务器发生未知错误";
             auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
             resp->setStatusCode(drogon::k500InternalServerError);

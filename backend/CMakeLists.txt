@@ -29,12 +29,16 @@ add_executable(${PROJECT_NAME}
   services/LoginService/LoginService.cc
   services/RegisterService/RegisterService.cc
   services/CheckTokenService/CheckTokenService.cc
+  services/AlterService/AddDataService.cc
+  services/AlterService/AlterDataService.cc
+  services/AlterService/DeleteDataService.cc
 )
 
 find_package(OpenSSL REQUIRED)
 find_package(Drogon CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 find_package(jwt-cpp CONFIG REQUIRED)
+find_package(CURL REQUIRED)
 find_package(Poco REQUIRED COMPONENTS
   Foundation
   Net
@@ -53,6 +57,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   Poco::Net
   Poco::XML
   Poco::Util
+  CURL::libcurl
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)

@@ -6,7 +6,6 @@
 #include <drogon/HttpResponse.h>
 #include <drogon/orm/DbClient.h>
 #include <drogon/utils/coroutine.h>
-#include <json/value.h>
 #include <memory>
 #include <string>
 #include <sys/types.h>

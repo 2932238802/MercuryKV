@@ -56,32 +56,34 @@ drogon::Task<drogon::HttpResponsePtr> Login::HandleLogin(drogon::HttpRequestPtr 
         auto resp = drogon::HttpResponse::newHttpJsonResponse(res_json);
         co_return resp;
     }
-    catch (const Service::AuthException &e)
+    catch (const Service::BaseException &e)
     {
         Json::Value error;
-        error["code"] = 401;
-        error["message"] = e.what();
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(drogon::k401Unauthorized);
-        co_return resp;
-    }
-    catch (const Service::DBOperatorWrong &)
-    {
-        Json::Value error;
-        error["code"] = 500;
-        error["message"] = "服务器内部错误，请稍后重试";
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(drogon::k500InternalServerError);
-        co_return resp;
-    }
-    catch (const Service::UnKownWrong &e)
-    {
-        Json::Value error;
-        error["code"] = 500;
-        error["message"] = "服务器发生未知错误";
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(drogon::k500InternalServerError);
-        co_return resp;
+        if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
+        {
+            error["code"] = 500;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
+        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        {
+            error["code"] = 500;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
+        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        {
+            Json::Value error;
+            error["code"] = 401;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k401Unauthorized);
+            co_return resp;
+        }
     }
 }
 
@@ -116,29 +118,33 @@ drogon::Task<drogon::HttpResponsePtr> Login::HandCheck(drogon::HttpRequestPtr re
         auto rep = drogon::HttpResponse::newHttpJsonResponse(res_json);
         co_return rep;
     }
-    catch (const Service::DBOperatorWrong &e)
+    catch (const Service::BaseException &e)
     {
         Json::Value error;
-        error["code"] = 500;
-        error["message"] = "库错误";
-        auto rep = drogon::HttpResponse::newHttpJsonResponse(error);
-        co_return rep;
-    }
-    catch (const Service::AuthException &e)
-    {
-        Json::Value error;
-        error["code"] = 401;
-        error["message"] = "认证失败,请重新登录";
-        auto res = drogon::HttpResponse::newHttpJsonResponse(error);
-        co_return res;
-    }
-    catch (const Service::UnKownWrong &e)
-    {
-        Json::Value error;
-        error["code"] = 500;
-        error["message"] = "服务器发生未知错误";
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-        resp->setStatusCode(drogon::k500InternalServerError);
-        co_return resp;
+        if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
+        {
+            error["code"] = 500;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
+        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        {
+            error["code"] = 501;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
+            co_return resp;
+        }
+        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        {
+            Json::Value error;
+            error["code"] = 401;
+            error["message"] = e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k401Unauthorized);
+            co_return resp;
+        }
     }
 }

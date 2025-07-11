@@ -1,5 +1,7 @@
 #pragma once
 #include "AddDataService.hpp"
+#include "MyLog.hpp"
+#include <trantor/utils/Date.h>
 
 drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json::Value &json)
 {
@@ -35,23 +37,24 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
 
     try
     {
-        drogon::orm::Mapper<drogon_model::mercury::KvStore> mapper_kv(trans); // kv 的表
-        drogon::orm ::Mapper<drogon_model::mercury::Tags> mapper_tags(trans); // 标签的表
-        drogon::orm ::Mapper<drogon_model::mercury::KvTagAssociation> mapper_kta(
-            trans); // 这个是标签和kv的联系表
-        drogon_model::mercury::KvStore kv;
-
         // 中文转换
         Json::Value value_input_json(value_input);
         Json::StreamWriterBuilder writer;
         std::string value_input_for_db = Json::writeString(writer, value_input_json);
-        MY_LOG_INF("中文转化之后的值是 value_input_for_db:", value_input_for_db);
-        kv.setUserId(user_id);
-        kv.setKeyInput(key_input);
-        kv.setValueInput(value_input_for_db);
-        kv.setUpdatedAt(trantor::Date::now());
-        mapper_kv.insert(kv);
-        int64_t kv_id = kv.getValueOfKvId();
+
+        auto now = trantor::Date::now();
+
+        std::string sql = "INSERT INTO kv_store(user_id,key_input,value_input,updated_at) "
+                          "values(\$1,\$2,\$3,\$4) RETURNING kv_id";
+
+        auto result_kv =
+            co_await trans->execSqlCoro(sql, user_id, key_input, value_input_for_db, now);
+
+        if (result_kv.empty())
+        {
+            throw Service::DBOperatorWrong("插入kv_store失败");
+        }
+        int64_t kv_id = result_kv[0]["kv_id"].as<int64_t>();
 
         for (const auto &tag_json : tags_json)
         {
@@ -60,47 +63,48 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
             std::string tag_name = tag_json.asString();
             if (tag_name.empty())
                 continue;
-
             int64_t tag_id;
-
             std::string sql =
                 "SELECT tag_id from tags where user_id = \$1 And tag_name = \$2 limit 1";
-
             auto result = co_await trans->execSqlCoro(sql, user_id, tag_name);
-
             if (!result.empty())
             {
                 tag_id = result[0]["tag_id"].as<int64_t>();
             }
             else
             {
-                drogon_model::mercury::Tags new_tag;
-                new_tag.setUserId(user_id);
-                new_tag.setTagName(tag_name);
-                mapper_tags.insert(new_tag);
-                tag_id = new_tag.getValueOfTagId();
+                std::string insert_tag_sql =
+                    "INSERT INTO tags (user_id, tag_name) VALUES (\$1, \$2) RETURNING tag_id";
+                auto result_tag_insert =
+                    co_await trans->execSqlCoro(insert_tag_sql, user_id, tag_name);
+
+                if (result_tag_insert.empty())
+                {
+                    throw Service::DBOperatorWrong("插入新tag失败");
+                }
+                tag_id = result_tag_insert[0]["tag_id"].as<int64_t>();
             }
-
-            drogon_model::mercury::KvTagAssociation kta;
-            kta.setKvId(kv_id);
-            kta.setTagId(tag_id);
-            mapper_kta.insert(kta);
+            std::string insert_kta_sql =
+                "INSERT INTO kv_tag_association (kv_id, tag_id) VALUES (\$1, \$2)";
+            co_await trans->execSqlCoro(insert_kta_sql, kv_id, tag_id);
         }
-
         AddDataReturn ret;
         ret.code = 201;
         ret.key_input = key_input;
         ret.value_input = value_input;
         ret.kv_id = kv_id;
-        ret.updated_at = kv.getValueOfUpdatedAt().toDbStringLocal();
+        ret.updated_at = now.toDbStringLocal();
+        MY_LOG_INF("kv_id:", ret.kv_id);
         co_return ret;
     }
     catch (const drogon::orm::DrogonDbException &e)
     {
-        throw DBOperatorWrong("数据库出错");
+        MY_LOG_ERROR("DrogonDbException Captured: ", e.base().what());
+        throw Service::DBOperatorWrong("数据库出错");
     }
     catch (const std::exception &e)
     {
-        throw UnKownWrong("插入数据时候 发生未知错误");
+        MY_LOG_ERROR("exception Captured: ", e.what());
+        throw Service::UnkownWrong("插入数据时候 发生未知错误");
     }
 }

@@ -82,9 +82,9 @@ const Login = async () => {
 
         alert("登录成功，后端返回的完整数据是:", JSON.stringify(response, null, 2));
         localStorage.setItem('AuthToken', response.token);
-        localStorage.setItem('UserName',response.username);
+        localStorage.setItem('UserName', response.username);
         localStorage.setItem('UserId', response.user_id);
-        localStorage.setItem('Email',response.email)
+        localStorage.setItem('Email', response.email)
         router.push({ name: "Mercury" })
         ShowCustomModal(response.message);
     }
@@ -104,17 +104,33 @@ const Register = async () => {
     show_register_warning_for_password.value = false;
     show_register_warning_for_email.value = false;
 
-     if (!user_name_register.value) {
-        show_register_warning_for_user_name.value = true;
-        return; 
+    if (!user_name_register.value) {
+        ShowCustomModal("用户名不能为空！");
+        return;
     }
-    if (!password_register.value) {
-        show_register_warning_for_password.value = true;
-        return; 
+    if (user_name_register.value.length < 8 || user_name_register.value.length > 14) {
+        ShowCustomModal("用户名长度必须在8到14位之间！");
+        return;
     }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email_register.value) {
-        show_register_warning_for_email.value = true
-        return; 
+        ShowCustomModal("邮箱不能为空！");
+        return;
+    }
+    if (!emailPattern.test(email_register.value)) {
+        ShowCustomModal("请输入有效的邮箱格式！例如12345678@qq.com");
+        return;
+    }
+
+    const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
+    if (!password_register.value) {
+        ShowCustomModal("密码不能为空！");
+        return;
+    }
+    if (!passwordPattern.test(password_register.value)) {
+        ShowCustomModal("密码必须是8-20位，且同时包含字母和数字！");
+        return;
     }
 
     try {
@@ -135,10 +151,10 @@ const Register = async () => {
 
         localStorage.setItem('AuthToken', token);
         localStorage.setItem('UserId', user_id);
-        localStorage.setItem('UserName',username);
-        localStorage.setItem('Email',email);
+        localStorage.setItem('UserName', username);
+        localStorage.setItem('Email', email);
         router.push({ name: "Mercury" });
-        ShowCustomModal(response.message);                        
+        ShowCustomModal(response.message);
     }
     catch (error) {
         console.error("注册失败:", error.message);
@@ -156,11 +172,9 @@ const Register = async () => {
                 <div class="return-button" @click="ReturnIndex"> Return </div>
                 <form @submit.prevent>
                     <h1>创建账户</h1>
-                    <input type="text" placeholder="用户名" v-model="user_name_register" minlength="8" maxlength="14"
-                        required />
+                    <input type="text" placeholder="用户名" v-model="user_name_register" required />
                     <input type="email" placeholder="邮箱" v-model="email_register" required />
-                    <input type="password" placeholder="密码" v-model="password_register" minlength="8" maxlength="20"
-                        pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$" required />
+                    <input type="password" placeholder="密码" v-model="password_register" required />
                     <!-- 
                     
                     (1) : 是 v-bind: 的简写 
@@ -185,11 +199,10 @@ const Register = async () => {
                 <div class="return-button" @click="ReturnIndex"> Return </div>
                 <form @submit.prevent>
                     <h1>登 录</h1>
-                    <input type="text" placeholder="用户名" v-model="username_login" />
-                    <input type="password" placeholder="密码" v-model="password_login" />
+                    <input type="text" placeholder="用户名" v-model="username_login" required />
+                    <input type="password" placeholder="密码" v-model="password_login" required />
                     <div v-if="show_login_warning_for_user_name" class="warning_word">用户名输入格式错误!</div>
                     <div v-if="show_login_warning_for_password" class="warning_word">密码输入格式错误!</div>
-
                     <button @click="Login">登 录</button>
                 </form>
             </div>
@@ -218,7 +231,6 @@ const Register = async () => {
 </template>
 
 <style scoped>
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 @import '../static/RegisterAndLogin.css';

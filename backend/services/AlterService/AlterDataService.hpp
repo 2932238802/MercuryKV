@@ -1,4 +1,4 @@
-
+#pragma once
 #include "KVStore/KvStore.h"
 #include "KV_Tag/KvTagAssociation.h"
 #include "Tags/Tags.h"

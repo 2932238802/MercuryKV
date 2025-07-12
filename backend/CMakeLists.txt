@@ -32,6 +32,11 @@ add_executable(${PROJECT_NAME}
   services/AlterService/AddDataService.cc
   services/AlterService/AlterDataService.cc
   services/AlterService/DeleteDataService.cc
+  services/EmailService/EmailService.cc
+  services/AlterPersonInfo/AlterPersonInfo.cc
+
+  plugins/SmptPlugin/SmptPlugin.cc
+
 )
 
 find_package(OpenSSL REQUIRED)
@@ -67,6 +72,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   models
   controllers
   services
+  plugins
 )
 
 # 启用 Drogon 协程支持（根据 Drogon 文档，某些版本需要此宏）

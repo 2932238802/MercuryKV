@@ -48,6 +48,20 @@ class DBOperatorWrong : public Service::BaseException
     }
 };
 
+// 服务器错误 500
+class RedisOperatorWrong : public Service::BaseException
+{
+  public:
+    // 模板构造函数，可以接收任意参数
+    template <typename... Args>
+    explicit RedisOperatorWrong(Args &&...args)
+        // 1. 调用辅助函数拼接字符串
+        // 2. 调用基类构造函数，传入拼接好的字符串，基类会自动记录日志
+        : Service::BaseException(build_message(std::forward<Args>(args)...))
+    {
+    }
+};
+
 // 认证失败 401
 class AuthException : public Service::BaseException
 {
@@ -67,6 +81,17 @@ class RequestWrong : public Service::BaseException
   public:
     template <typename... Args>
     explicit RequestWrong(Args &&...args)
+        : Service::BaseException(build_message(std::forward<Args>(args)...))
+    {
+    }
+};
+
+// 请求错误 500
+class StmpWrong : public Service::BaseException
+{
+  public:
+    template <typename... Args>
+    explicit StmpWrong(Args &&...args)
         : Service::BaseException(build_message(std::forward<Args>(args)...))
     {
     }

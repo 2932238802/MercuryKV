@@ -54,7 +54,7 @@
         "implicit_page": "",
         "upload_path": "uploads",
         "file_types": [],
-        "user_sendfile":false,
+        "user_sendfile": false,
         "mime": {},
         "locations": [
             {
@@ -69,7 +69,9 @@
         "max_connections": 100000,
         "max_connections_per_ip": 0,
         "load_dynamic_views": false,
-        "dynamic_views_path": [ "./views" ],
+        "dynamic_views_path": [
+            "./views"
+        ],
         "dynamic_views_output_path": "",
         "json_parser_stack_limit": 1000,
         "enable_unicode_escaping_in_json": true,
@@ -107,20 +109,23 @@
         "enable_request_stream": false
     },
     "plugins": [
- 
+        {
+            "name": "Plugin::SmtpPlugin",
+            "config": {
+                "host": "smtp.example.com",
+                "port": 587,
+                "username": "19857198709@example.com",
+                "password": "DJvJUuCNYWCR9VZc",
+                "from_address": "19857198709@example.com",
+                "from_name": "MercuryKV"
+            }
+        }
     ],
     "custom_config": {
-        "jwt":{
-            "secret_key" :"bDgKP1c&C8g4t8+gUG)ZeWdS?C!zHMD)2NGw0e-3$A3q34ckqUxK7[A808:+h(f$",
-            "issuer":"mercury_kv",
-            "expiry_hours":48
-        },
-        "smtp": {
-            "host": "smtp.qq.com",
-            "port": 465,
-            "username": "19857198709@163.com",
-            "password": "DJvJUuCNYWCR9VZc"
+        "jwt": {
+            "secret_key": "bDgKP1c&C8g4t8+gUG)ZeWdS?C!zHMD)2NGw0e-3$A3q34ckqUxK7[A808:+h(f$",
+            "issuer": "mercury_kv",
+            "expiry_hours": 48
         }
     }
-
 }

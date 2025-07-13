@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'; // 引入 computed
 import { useRouter } from 'vue-router';
 import { ShowCustomModal } from '../components/show';
+import service from '../components/request';
 
 const router = useRouter();
 const cur_email = ref('');
@@ -26,6 +27,10 @@ const HandleSaveChangesClick = () => {
 const closeModal = () => {
     ismodalvisible.value = false;
 };
+const API_PATHS = {
+    VERIFYANDMODIFY: '/EmailVerify/verifyandmodify',
+    SENDEMAIL: '/EmailVerify/sendemail'
+};
 
 
 /**
@@ -40,10 +45,25 @@ const HandleSendCode = () => {
 
     // TODO: 假设API调用成功...
     // 这里发送 邮件
+    const sendemailinfo = {
 
-    countdown.value = 60; 
+    };
+
+    try {
+        const response = await service.post(
+
+
+        )
+    }
+    catch (error) {
+
+    }
+
+
+
+    countdown.value = 60;
     const timer = setInterval(() => {
-        countdown.value--; 
+        countdown.value--;
         if (countdown.value <= 0) {
             clearInterval(timer);
         }
@@ -88,7 +108,7 @@ onMounted(() => {
     <div class="page-container">
         <div class="content-card">
             <button class="btn-return" @click="HandleReturn" title="返回首页~">
-                <i class="fas fa-arrow-left"></i>  <!-- 返回的图标 -->
+                <i class="fas fa-arrow-left"></i> <!-- 返回的图标 -->
             </button>
 
             <header class="card-header">
@@ -135,22 +155,14 @@ onMounted(() => {
                 <i class="fas fa-envelope-open-text modal-icon"></i>
                 <h2>Confirm Changes</h2>
                 <p class="info-text">
-                    For your security, please enter the code sent to your <strong>current email address</strong> ({{ original_email }}).
+                    For your security, please enter the code sent to your <strong>current email address</strong> ({{
+                        original_email }}).
                 </p>
-                
+
                 <div class="input-group">
-                    <input
-                        v-model="verificationCode"
-                        type="text"
-                        class="form-input"
-                        placeholder="Enter code"
-                        maxlength="6"
-                    />
-                    <button
-                        @click="HandleSendCode"
-                        class="btn btn-ghost"
-                        :disabled="isSendingCode || countdown > 0"
-                    >
+                    <input v-model="verificationCode" type="text" class="form-input" placeholder="Enter code"
+                        maxlength="6" />
+                    <button @click="HandleSendCode" class="btn btn-ghost" :disabled="isSendingCode || countdown > 0">
                         {{ sendCodeButtonText }}
                     </button>
                 </div>
@@ -159,11 +171,7 @@ onMounted(() => {
 
                 <div class="modal-actions">
                     <button @click="closeModal" class="btn btn-ghost">Cancel</button>
-                    <button 
-                        @click="HandleConfirmAndSave" 
-                        class="btn btn-primary"
-                        :disabled="isSaving"
-                    >
+                    <button @click="HandleConfirmAndSave" class="btn btn-primary" :disabled="isSaving">
                         <span v-if="isSaving">Saving...</span>
                         <span v-else>Confirm & Save</span>
                     </button>

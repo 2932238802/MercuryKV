@@ -137,9 +137,8 @@ drogon::Task<drogon::HttpResponsePtr> Login::HandCheck(drogon::HttpRequestPtr re
             resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
-        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        else if (dynamic_cast<const Service::AuthException *>(&e))
         {
-            Json::Value error;
             error["code"] = 401;
             error["message"] = e.what();
             auto resp = drogon::HttpResponse::newHttpJsonResponse(error);

@@ -11,7 +11,6 @@ Service::AlterPersonInfo::AlterInfo(const std::string &username, const std::stri
 {
     // 1. 数据库的修改
     // 2. 返回是不是修改成功
-
     try
     {
         auto db_client = drogon::app().getDbClient();
@@ -28,6 +27,8 @@ Service::AlterPersonInfo::AlterInfo(const std::string &username, const std::stri
         {
             Service::AlterPersonInfoReturn ret;
             ret.message = "修改成功!";
+            ret.code = 200;
+            ret.username = username;
             co_return ret;
         }
         else

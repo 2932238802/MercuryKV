@@ -1383,7 +1383,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "[/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libcrypto.a][/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/include][c ][v3.5.0(3)]"
+			"value" : "[/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libcrypto.a][/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/include][cfound components: SSL ][v3.5.0()]"
 		},
 		{
 			"name" : "FIND_PACKAGE_MESSAGE_DETAILS_PCRE2",
@@ -2038,6 +2038,18 @@
 			"value" : "/usr/bin/pkg-config"
 		},
 		{
+			"name" : "PocoCrypto_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for PocoCrypto."
+				}
+			],
+			"type" : "PATH",
+			"value" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco"
+		},
+		{
 			"name" : "PocoFoundation_DIR",
 			"properties" : 
 			[
@@ -2056,6 +2068,18 @@
 				{
 					"name" : "HELPSTRING",
 					"value" : "The directory containing a CMake configuration file for PocoJSON."
+				}
+			],
+			"type" : "PATH",
+			"value" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco"
+		},
+		{
+			"name" : "PocoNetSSL_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for PocoNetSSL."
 				}
 			],
 			"type" : "PATH",
@@ -2096,6 +2120,18 @@
 			],
 			"type" : "PATH",
 			"value" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco"
+		},
+		{
+			"name" : "Poco[COMPONENTS;<libs>...]_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for Poco[COMPONENTS;<libs>...]."
+				}
+			],
+			"type" : "PATH",
+			"value" : "Poco[COMPONENTS;<libs>...]_DIR-NOTFOUND"
 		},
 		{
 			"name" : "Poco_DIR",

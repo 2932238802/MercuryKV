@@ -26,12 +26,10 @@ void Plugin::SmptPlugin::initAndStart(const Json::Value &config)
         MY_LOG_WARN("配置信息 不完整");
     }
 }
-
 void Plugin::SmptPlugin::shutdown()
 {
     MY_LOG_INF("stmp 服务安全退出");
 }
-
 const Plugin::SmtpConfig &Plugin::SmptPlugin::getConfig() const
 {
     if (!is_confured)

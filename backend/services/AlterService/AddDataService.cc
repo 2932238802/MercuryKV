@@ -38,17 +38,13 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
     try
     {
         // 中文转换
-        Json::Value value_input_json(value_input);
-        Json::StreamWriterBuilder writer;
-        std::string value_input_for_db = Json::writeString(writer, value_input_json);
 
         auto now = trantor::Date::now();
 
         std::string sql = "INSERT INTO kv_store(user_id,key_input,value_input,updated_at) "
                           "values(\$1,\$2,\$3,\$4) RETURNING kv_id";
 
-        auto result_kv =
-            co_await trans->execSqlCoro(sql, user_id, key_input, value_input_for_db, now);
+        auto result_kv = co_await trans->execSqlCoro(sql, user_id, key_input, value_input, now);
 
         if (result_kv.empty())
         {

@@ -46,6 +46,8 @@
 			"/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/expat/vcpkg-cmake-wrapper.cmake",
 			"/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco/PocoUtilTargets.cmake",
 			"/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco/PocoUtilConfig.cmake",
+			"/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco/PocoNetSSLTargets.cmake",
+			"/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco/PocoNetSSLConfig.cmake",
 			"/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco/PocoFoundationTargets.cmake",
 			"/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/share/poco/PocoFoundationConfig.cmake"
 		],
@@ -69,13 +71,13 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 53,
+				"line" : 55,
 				"parent" : 0
 			},
 			{
 				"command" : 6,
 				"file" : 1,
-				"line" : 41,
+				"line" : 43,
 				"parent" : 0
 			},
 			{
@@ -263,7 +265,7 @@
 			{
 				"command" : 6,
 				"file" : 1,
-				"line" : 45,
+				"line" : 47,
 				"parent" : 0
 			},
 			{
@@ -407,7 +409,7 @@
 			{
 				"command" : 4,
 				"file" : 20,
-				"line" : 9,
+				"line" : 7,
 				"parent" : 64
 			},
 			{
@@ -417,8 +419,40 @@
 			{
 				"command" : 3,
 				"file" : 19,
-				"line" : 61,
+				"line" : 60,
 				"parent" : 66
+			},
+			{
+				"command" : 6,
+				"file" : 13,
+				"line" : 35,
+				"parent" : 40
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 896,
+				"parent" : 68
+			},
+			{
+				"file" : 22,
+				"parent" : 69
+			},
+			{
+				"command" : 4,
+				"file" : 22,
+				"line" : 9,
+				"parent" : 70
+			},
+			{
+				"file" : 21,
+				"parent" : 71
+			},
+			{
+				"command" : 3,
+				"file" : 21,
+				"line" : 61,
+				"parent" : 72
 			},
 			{
 				"command" : 9,
@@ -429,25 +463,25 @@
 			{
 				"command" : 10,
 				"file" : 1,
-				"line" : 81,
+				"line" : 84,
 				"parent" : 0
 			},
 			{
 				"command" : 11,
 				"file" : 1,
-				"line" : 77,
+				"line" : 80,
 				"parent" : 0
 			},
 			{
 				"command" : 12,
 				"file" : 1,
-				"line" : 68,
+				"line" : 71,
 				"parent" : 0
 			},
 			{
 				"command" : 13,
 				"file" : 1,
-				"line" : 66,
+				"line" : 69,
 				"parent" : 0
 			}
 		]
@@ -461,15 +495,15 @@
 					"fragment" : "-g -std=c++20"
 				},
 				{
-					"backtrace" : 68,
+					"backtrace" : 74,
 					"fragment" : "-fcoroutines"
 				},
 				{
-					"backtrace" : 69,
+					"backtrace" : 75,
 					"fragment" : "-Wall"
 				},
 				{
-					"backtrace" : 69,
+					"backtrace" : 75,
 					"fragment" : "-Wextra"
 				}
 			],
@@ -508,7 +542,7 @@
 					"define" : "POCO_UNBUNDLED"
 				},
 				{
-					"backtrace" : 70,
+					"backtrace" : 76,
 					"define" : "USE_COROUTINE"
 				},
 				{
@@ -547,23 +581,23 @@
 			"includes" : 
 			[
 				{
-					"backtrace" : 71,
+					"backtrace" : 77,
 					"path" : "/home/losangelous/LosAngelous/Project/MercuryKV/backend/common"
 				},
 				{
-					"backtrace" : 71,
+					"backtrace" : 77,
 					"path" : "/home/losangelous/LosAngelous/Project/MercuryKV/backend/models"
 				},
 				{
-					"backtrace" : 71,
+					"backtrace" : 77,
 					"path" : "/home/losangelous/LosAngelous/Project/MercuryKV/backend/controllers"
 				},
 				{
-					"backtrace" : 71,
+					"backtrace" : 77,
 					"path" : "/home/losangelous/LosAngelous/Project/MercuryKV/backend/services"
 				},
 				{
-					"backtrace" : 71,
+					"backtrace" : 77,
 					"path" : "/home/losangelous/LosAngelous/Project/MercuryKV/backend/plugins"
 				},
 				{
@@ -577,7 +611,7 @@
 			{
 				"backtraces" : 
 				[
-					72,
+					78,
 					3,
 					3,
 					3
@@ -607,7 +641,8 @@
 				18,
 				19,
 				20,
-				21
+				21,
+				22
 			]
 		}
 	],
@@ -662,6 +697,11 @@
 			{
 				"backtrace" : 3,
 				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libPocoUtild.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libPocoNetSSLd.a",
 				"role" : "libraries"
 			},
 			{
@@ -726,6 +766,16 @@
 			},
 			{
 				"backtrace" : 3,
+				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libPocoNetd.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libPocoUtild.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
 				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libPocoXMLd.a",
 				"role" : "libraries"
 			},
@@ -745,27 +795,32 @@
 				"role" : "libraries"
 			},
 			{
+				"backtrace" : 67,
+				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libPocoCryptod.a",
+				"role" : "libraries"
+			},
+			{
 				"backtrace" : 3,
 				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libPocoFoundationd.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 67,
+				"backtrace" : 73,
 				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libpcre2-8.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 67,
+				"backtrace" : 73,
 				"fragment" : "/home/losangelous/LosAngelous/dev/vcpkg/installed/x64-linux/debug/lib/libutf8proc.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 67,
+				"backtrace" : 73,
 				"fragment" : "-lpthread",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 67,
+				"backtrace" : 73,
 				"fragment" : "-lrt",
 				"role" : "libraries"
 			},
@@ -826,7 +881,8 @@
 				18,
 				19,
 				20,
-				21
+				21,
+				22
 			]
 		}
 	],
@@ -913,7 +969,7 @@
 		{
 			"backtrace" : 2,
 			"compileGroupIndex" : 0,
-			"path" : "controllers/EmailVerifyApi/Verify.cc",
+			"path" : "controllers/EmailVerifyApi/VerifyAndModify.cc",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -956,6 +1012,12 @@
 			"backtrace" : 2,
 			"compileGroupIndex" : 0,
 			"path" : "services/EmailService/EmailService.cc",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "services/AlterPersonInfoService/AlterPersonInfo.cc",
 			"sourceGroupIndex" : 0
 		},
 		{

@@ -24,7 +24,7 @@ add_executable(${PROJECT_NAME}
   controllers/AlterApi/DeleteData.cc
   controllers/AlterApi/UpdateData.cc
   controllers/EmailVerifyApi/SendEmail.cc
-  controllers/EmailVerifyApi/Verify.cc
+  controllers/EmailVerifyApi/VerifyAndModify.cc
 
   services/LoginService/LoginService.cc
   services/RegisterService/RegisterService.cc
@@ -33,7 +33,7 @@ add_executable(${PROJECT_NAME}
   services/AlterService/AlterDataService.cc
   services/AlterService/DeleteDataService.cc
   services/EmailService/EmailService.cc
-  services/AlterPersonInfo/AlterPersonInfo.cc
+  services/AlterPersonInfoService/AlterPersonInfo.cc
 
   plugins/SmptPlugin/SmptPlugin.cc
 
@@ -49,8 +49,8 @@ find_package(Poco REQUIRED COMPONENTS
   Net
   XML
   Util
+  NetSSL
 )
-
 # 链接库
 target_link_libraries(${PROJECT_NAME} PUBLIC
   Drogon::Drogon
@@ -62,6 +62,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   Poco::Net
   Poco::XML
   Poco::Util
+  Poco::NetSSL
   CURL::libcurl
 )
 

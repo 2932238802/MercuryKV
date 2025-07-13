@@ -1,7 +1,7 @@
 #include "EmailVerify.hpp"
 
-drogon::Task<drogon::HttpResponsePtr> SendEmail(const drogon::HttpRequestPtr &req,
-                                                std::string email_address)
+drogon::Task<drogon::HttpResponsePtr> EmailVerify::SendEmail(drogon::HttpRequestPtr req,
+                                                             const std::string &email_address)
 {
     Json::Value ret;
     try

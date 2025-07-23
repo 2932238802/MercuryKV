@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.15)
+project(run CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Poco CONFIG REQUIRED COMPONENTS NetSSL Foundation)
+add_executable(run_test test.cc)
+target_link_libraries(run_test PRIVATE Poco::NetSSL Poco::Foundation)

@@ -2,11 +2,17 @@
 #include "AlterService/AddDataService.hpp"
 #include "AlterService/AlterDataService.hpp"
 #include "AlterService/DeleteDataService.hpp"
+#include "MyLog.hpp"
+#include "Type.hpp"
+#include <cstdint>
+#include <drogon/HttpAppFramework.h>
 #include <drogon/HttpController.h>
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
 #include <drogon/orm/Criteria.h>
+#include <drogon/orm/Exception.h>
 #include <drogon/utils/coroutine.h>
+#include <exception>
 #include <json/value.h>
 #include <optional>
 #include <string>

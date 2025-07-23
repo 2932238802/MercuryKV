@@ -3,7 +3,7 @@
 #include "KVStore/KvStore.h"
 #include "KV_Tag/KvTagAssociation.h"
 #include "Tags/Tags.h"
-#include "type.hpp"
+#include "Type.hpp"
 #include <cstdint>
 #include <drogon/HttpResponse.h>
 #include <drogon/orm/DbClient.h>
@@ -16,6 +16,7 @@
 namespace Service
 {
 using db_t = drogon::orm::DbClientPtr;
+using namespace common;
 class AddDataServiceFactory;
 
 struct AddDataReturn

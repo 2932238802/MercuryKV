@@ -1,17 +1,20 @@
 #include "EmailVerify.hpp"
+#include "MyLog.hpp"
 
 drogon::Task<drogon::HttpResponsePtr> EmailVerify::VerifyAndModify(drogon::HttpRequestPtr req)
 {
-    // 一个是负责 修改数据库的内容 一个是验证一下是不是对的
-    auto req_json = req->getJsonObject();
-    std::string username = (*req_json)["username"].asString();
-    std::string password = (*req_json)["password"].asString();
-    std::string email = (*req_json)["email"].asString();
-    std::string user_id_string = (*req_json)["user_id"].asString();
-    std::string user_code = (*req_json)["user_code"].asString();
-    int64_t user_id = std::stoll(user_id_string);
     try
     {
+        // 一个是负责 修改数据库的内容 一个是验证一下是不是对的
+        auto req_json = req->getJsonObject();
+        MY_LOG_INF(*req_json);
+        std::string username = (*req_json)["username"].asString();
+        std::string password = (*req_json)["password"].asString();
+        std::string email = (*req_json)["email"].asString();
+        std::string user_id_string = (*req_json)["user_id"].asString();
+        std::string user_code = (*req_json)["user_code"].asString();
+        int64_t user_id = std::stoll(user_id_string);
+
         auto verify_ret = co_await Service::EmailService::Verify(email, user_code);
         if (verify_ret.code == 400)
         {
@@ -27,6 +30,7 @@ drogon::Task<drogon::HttpResponsePtr> EmailVerify::VerifyAndModify(drogon::HttpR
         res_json["code"] = ret.code;
         res_json["message"] = ret.message;
         res_json["username"] = ret.username;
+        res_json["email"] = ret.email;
         auto res = drogon::HttpResponse::newHttpJsonResponse(res_json);
         co_return res;
     }
@@ -39,7 +43,7 @@ drogon::Task<drogon::HttpResponsePtr> EmailVerify::VerifyAndModify(drogon::HttpR
         res->setStatusCode(drogon::k500InternalServerError);
         co_return res;
     }
-    catch (const Service::RequestWrong &e) // 请求错误
+    catch (const common::RequestWrong &e) // 请求错误
     {
         Json::Value error;
         MY_LOG_ERROR(e.what());
@@ -48,7 +52,7 @@ drogon::Task<drogon::HttpResponsePtr> EmailVerify::VerifyAndModify(drogon::HttpR
         res->setStatusCode(drogon::k500InternalServerError);
         co_return res;
     }
-    catch (const Service::DBOperatorWrong &e)
+    catch (const common::DBOperatorWrong &e)
     {
         Json::Value error;
         MY_LOG_ERROR(e.what());

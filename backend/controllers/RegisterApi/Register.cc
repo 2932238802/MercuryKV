@@ -1,8 +1,14 @@
 #include "Register.h"
-#include <json/value.h>
 
 using namespace common;
 
+// ----- ----- ----- ----- -----
+/**
+ * @brief 这个就是简单的注册函数
+ *
+ * @param req
+ * @return drogon::Task<drogon::HttpResponsePtr>
+ */
 drogon::Task<drogon::HttpResponsePtr> Register::HandleRegister(HttpRequestPtr req)
 {
 

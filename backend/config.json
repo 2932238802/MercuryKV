@@ -108,24 +108,19 @@
         "enabled_compressed_request": false,
         "enable_request_stream": false
     },
-    "plugins": [
-        {
-            "name": "Plugin::SmtpPlugin",
-            "config": {
-                "host": "smtp.example.com",
-                "port": 587,
-                "username": "19857198709@example.com",
-                "password": "DJvJUuCNYWCR9VZc",
-                "from_address": "19857198709@example.com",
-                "from_name": "MercuryKV"
-            }
-        }
-    ],
     "custom_config": {
         "jwt": {
             "secret_key": "bDgKP1c&C8g4t8+gUG)ZeWdS?C!zHMD)2NGw0e-3$A3q34ckqUxK7[A808:+h(f$",
             "issuer": "mercury_kv",
             "expiry_hours": 48
+        },
+        "smtp": {
+            "host": "smtp.163.com",
+            "port": 465,
+            "username": "19857198709@163.com",
+            "password": "GCp8vxVmisrQd4iE",
+            "from_address": "19857198709@163.com",
+            "from_name": "MercuryKV"
         }
     }
 }

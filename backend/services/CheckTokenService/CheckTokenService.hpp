@@ -2,8 +2,8 @@
 
 #include "MyJWT.hpp"
 #include "MyLog.hpp"
+#include "Type.hpp"
 #include "Users/Users.h"
-#include "type.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <drogon/HttpResponse.h>

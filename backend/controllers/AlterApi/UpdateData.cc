@@ -1,7 +1,4 @@
 #include "Alter.h"
-#include "MyLog.hpp"
-#include <drogon/HttpResponse.h>
-#include <json/value.h>
 
 using namespace drogon;
 using namespace drogon_model::mercury;
@@ -49,19 +46,19 @@ drogon::Task<drogon::HttpResponsePtr> Alter::AlterData(HttpRequestPtr req)
         MY_LOG_SUC("信息更新成功!", success_resp);
         co_return res;
     }
-    catch (const Service::BaseException &e)
+    catch (const common::BaseException &e)
     {
         Json::Value error;
         auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
 
-        if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
+        if (dynamic_cast<const common::DBOperatorWrong *>(&e))
         {
             error["code"] = 500;
             error["message"] = e.what();
             resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
-        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        else if (dynamic_cast<const common::UnkownWrong *>(&e))
         {
             error["code"] = 501;
             error["message"] = e.what();

@@ -7,14 +7,14 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
 {
     if (!json)
     {
-        throw Service::RequestWrong("请求体数据错误");
+        throw RequestWrong("请求体数据错误");
     }
     if (!(json).isMember("user_id") || !(json)["user_id"].isInt64() ||
         !(json).isMember("key_input") || !(json)["key_input"].isString() ||
         !(json).isMember("value_input") || !(json)["value_input"].isString() ||
         !(json).isMember("tags") || !(json)["tags"].isArray())
     {
-        throw Service::RequestWrong("请求体数据缺失");
+        throw RequestWrong("请求体数据缺失");
     }
 
     uint64_t user_id = (json)["user_id"].asInt64();
@@ -29,7 +29,7 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
     if (key_input == "" || value_input == "")
     {
         MY_LOG_ERROR("key_input value_input tag_name 内容为空");
-        throw Service::RequestWrong("key_input value_input tag_name 内容为空");
+        throw RequestWrong("key_input value_input tag_name 内容为空");
     }
 
     // 插入对应的表
@@ -48,7 +48,7 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
 
         if (result_kv.empty())
         {
-            throw Service::DBOperatorWrong("插入kv_store失败");
+            throw DBOperatorWrong("插入kv_store失败");
         }
         int64_t kv_id = result_kv[0]["kv_id"].as<int64_t>();
 
@@ -76,7 +76,7 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
 
                 if (result_tag_insert.empty())
                 {
-                    throw Service::DBOperatorWrong("插入新tag失败");
+                    throw DBOperatorWrong("插入新tag失败");
                 }
                 tag_id = result_tag_insert[0]["tag_id"].as<int64_t>();
             }
@@ -96,11 +96,11 @@ drogon::Task<Service::AddDataReturn> Service::AddDataService::AddData(const Json
     catch (const drogon::orm::DrogonDbException &e)
     {
         MY_LOG_ERROR("DrogonDbException Captured: ", e.base().what());
-        throw Service::DBOperatorWrong("数据库出错");
+        throw DBOperatorWrong("数据库出错");
     }
     catch (const std::exception &e)
     {
         MY_LOG_ERROR("exception Captured: ", e.what());
-        throw Service::UnkownWrong("插入数据时候 发生未知错误");
+        throw UnkownWrong("插入数据时候 发生未知错误");
     }
 }

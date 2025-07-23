@@ -3,9 +3,9 @@
 #include "MyJWT.hpp"
 #include "MyLog.hpp"
 #include "RegisterService.hpp"
+#include "Type.hpp"
 #include "Users/Users.h"
 #include "drogon/orm/DbClient.h"
-#include "type.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <drogon/orm/Exception.h>
@@ -15,6 +15,8 @@
 
 namespace Service
 {
+using namespace common;
+
 // ----- ----- ----- ----- -----
 // 设置成功返回的数据结构
 struct RegisterResult

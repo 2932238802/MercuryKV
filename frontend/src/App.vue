@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="js">
 import { isModalVisible, modalMessage, CloseCustomModal } from './components/show'; 
 </script>
 

@@ -1,12 +1,16 @@
 #pragma once
 #include "KVStore/KvStore.h"
 #include "KV_Tag/KvTagAssociation.h"
+#include "MyLog.hpp"
 #include "Tags/Tags.h"
-#include "type.hpp"
+#include "Type.hpp"
 #include <cstdint>
 #include <drogon/HttpResponse.h>
+#include <drogon/orm/Criteria.h>
 #include <drogon/orm/DbClient.h>
+#include <drogon/orm/Exception.h>
 #include <drogon/utils/coroutine.h>
+#include <exception>
 #include <json/value.h>
 #include <memory>
 #include <string>
@@ -16,8 +20,9 @@
 namespace Service
 {
 using db_t = drogon::orm::DbClientPtr;
-class AddDataServiceFactory;
+using namespace common;
 
+class AddDataServiceFactory;
 struct AlterDataReturn
 {
     int64_t code;

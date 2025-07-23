@@ -1,19 +1,14 @@
 #include "Login.h"
-#include "CheckTokenService/CheckTokenService.hpp"
-#include "LoginService/LoginService.hpp"
-#include "MyLog.hpp"
-#include "Users/Users.h"
-#include "type.hpp"
-#include <drogon/HttpResponse.h>
-#include <drogon/orm/Criteria.h>
-#include <drogon/orm/Mapper.h>
-#include <drogon/utils/coroutine.h>
-#include <json/json.h>
-#include <json/value.h>
-#include <string>
 
 using namespace common;
-// drogon::Task<drogon::HttpResponsePtr> Login::HandleLogin(const drogon::HttpRequestPtr &req)
+
+// ----- ----- ----- ----- -----
+/**
+ * @brief 登录函数
+ *
+ * @param req
+ * @return drogon::Task<drogon::HttpResponsePtr>
+ */
 drogon::Task<drogon::HttpResponsePtr> Login::HandleLogin(drogon::HttpRequestPtr req)
 {
     auto requestjson = req->getJsonObject();
@@ -75,13 +70,12 @@ drogon::Task<drogon::HttpResponsePtr> Login::HandleLogin(drogon::HttpRequestPtr 
             resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
-        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        else
         {
-            Json::Value error;
-            error["code"] = 401;
-            error["message"] = e.what();
+            error["code"] = 500;
+            error["message"] = std::string("An unexpected internal error occurred: ") + e.what();
             auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-            resp->setStatusCode(drogon::k401Unauthorized);
+            resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
     }
@@ -94,7 +88,6 @@ drogon::Task<drogon::HttpResponsePtr> Login::HandleLogin(drogon::HttpRequestPtr 
  * @param req
  * @param callback
  */
-// drogon::Task<drogon::HttpResponsePtr> Login::HandCheck(const drogon::HttpRequestPtr &req)
 drogon::Task<drogon::HttpResponsePtr> Login::HandCheck(drogon::HttpRequestPtr req)
 {
     // 从 URL 查询参数中获取 "token"
@@ -143,6 +136,14 @@ drogon::Task<drogon::HttpResponsePtr> Login::HandCheck(drogon::HttpRequestPtr re
             error["message"] = e.what();
             auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
             resp->setStatusCode(drogon::k401Unauthorized);
+            co_return resp;
+        }
+        else
+        {
+            error["code"] = 500;
+            error["message"] = std::string("An unexpected internal error occurred: ") + e.what();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+            resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
     }

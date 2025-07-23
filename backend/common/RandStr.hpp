@@ -32,6 +32,8 @@ inline std::string RandStr(size_t number)
     std::string result(number, '\0');
     // 多次调用这个函数
     std::generate_n(result.begin(), number, [&]() { return const_char[dist(gen)]; });
+
+    return result;
 }
 
 } // namespace common

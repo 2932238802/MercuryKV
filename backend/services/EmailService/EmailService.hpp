@@ -1,22 +1,37 @@
 
 #pragma once
+#include "ConfigManage/ConfigManage.hpp"
 #include "MyLog.hpp"
 #include "Poco/Net/MailMessage.h"
 #include "Poco/Net/MailRecipient.h"
 #include "Poco/Net/NetException.h"
 #include "Poco/Net/SecureSMTPClientSession.h"
+#include "Poco/Net/SecureStreamSocket.h"
 #include "Poco/Poco.h"
-#include "SmptPlugin/SmptPlugin.hpp"
-#include "type.hpp"
+#include "SmptUtil/SmptUtil.hpp"
+#include "Type.hpp"
 #include <Poco/Net/MailMessage.h>
 #include <Poco/Net/MailRecipient.h>
 #include <cstdint>
 #include <drogon/HttpAppFramework.h>
+#include <drogon/HttpResponse.h>
 #include <drogon/utils/coroutine.h>
 #include <exception>
+#include <functional>
+#include <future>
+#include <json/value.h>
+
+// Poco 相关
+#include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/MailMessage.h>
+#include <Poco/Net/NetException.h>
+#include <Poco/Net/SMTPClientSession.h>
+#include <Poco/Net/SSLManager.h>
+#include <Poco/Net/SecureSMTPClientSession.h>
 
 namespace Service
 {
+using namespace common;
 struct EmailServiceReturn
 {
     int64_t code;

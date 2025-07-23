@@ -1,25 +1,18 @@
 
 
 #include "AlterService/AlterDataService.hpp"
-#include "MyLog.hpp"
-#include "type.hpp"
-#include <cstdint>
-#include <drogon/orm/Criteria.h>
-#include <drogon/orm/Exception.h>
-#include <exception>
-#include <string>
 
 drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(const Json::Value &json)
 {
     if (!json)
     {
-        throw Service::RequestWrong("请求内容或者格式错误");
+        throw common::RequestWrong("请求内容或者格式错误");
     }
     if (!(json).isMember("user_id") || !(json).isMember("kv_id") || !(json).isMember("key_input") ||
         !(json)["key_input"].isString() || !(json).isMember("value_input") ||
         !(json)["value_input"].isString() || !(json).isMember("tags") || !(json)["tags"].isArray())
     {
-        throw Service::RequestWrong("请求内容不完整 或者 内部类型错误");
+        throw common::RequestWrong("请求内容不完整 或者 内部类型错误");
     }
     std::string kv_id_str = (json)["kv_id"].asString(); // kv的id
     int64_t kv_id = std::stoll(kv_id_str);
@@ -30,7 +23,7 @@ drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(cons
     const Json::Value &tags_json = (json)["tags"];
     if (key_input == "" || value_input == "")
     {
-        throw Service::RequestWrong("请求内容不完整 或者 内部类型错误");
+        throw common::RequestWrong("请求内容不完整 或者 内部类型错误");
     }
 
     // 之前的数据 之后处理
@@ -46,7 +39,7 @@ drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(cons
         {
             // 如果查询结果为空
             // 应该是前端传入参数错误 默认这个id的格式不正确 或者 传输过程中发生错误
-            throw Service::UnkownWrong("可能是传输过程中发生未知错误");
+            throw common::UnkownWrong("可能是传输过程中发生未知错误");
         }
 
         // 如果不为空 那么就是对这个
@@ -54,7 +47,7 @@ drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(cons
         auto value_previous = kv_store_result[0]["value_input"].as<std::string>();
         if (user_id_store != user_id)
         {
-            throw AuthException("用户信息和其资源不匹配 请重新登录!");
+            throw common::AuthException("用户信息和其资源不匹配 请重新登录!");
         }
         co_await trans->execSqlCoro("UPDATE kv_store SET key_input=\$1, value_input=\$2, "
                                     "previous_value=\$3, updated_at=\$4 WHERE kv_id=\$5",
@@ -96,11 +89,11 @@ drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(cons
     catch (const drogon::orm::DrogonDbException &e)
     {
         MY_LOG_ERROR("DrogonDbException Captured: ", e.base().what());
-        throw Service::DBOperatorWrong("数据库操作错误", e.base().what());
+        throw common::DBOperatorWrong("数据库操作错误", e.base().what());
     }
     catch (const std::exception &e)
     {
         MY_LOG_ERROR("exception Captured: ", e.what());
-        throw Service::UnkownWrong("处理修改函数中 发生未知错误", e.what());
+        throw common::UnkownWrong("处理修改函数中 发生未知错误", e.what());
     }
 }

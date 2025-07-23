@@ -1,6 +1,10 @@
-#include "SmptPlugin.hpp"
+#include "SmptUtil.hpp"
+#include <drogon/drogon.h>
+#include <drogon/plugins/Plugin.h>
+#include <json/value.h>
+#include <stdexcept>
 
-void Plugin::SmptPlugin::initAndStart(const Json::Value &config)
+Utils::SmptUtil::SmptUtil(const Json::Value &config)
 {
     MY_LOG_INF("准备开始初始化 stmp 配置信息");
     stmp_config.host = config.get("host", "").asString();
@@ -14,7 +18,7 @@ void Plugin::SmptPlugin::initAndStart(const Json::Value &config)
     {
         is_confured = true;
         MY_LOG_SUC("stmp 配置初始化成功");
-        MY_LOG_SUC("username： ", stmp_config.username);
+        MY_LOG_SUC("username: ", stmp_config.username);
         MY_LOG_SUC("password: ", stmp_config.password);
         MY_LOG_SUC("from_address: ", stmp_config.from_address);
         MY_LOG_SUC("from_name: ", stmp_config.from_name);
@@ -26,11 +30,8 @@ void Plugin::SmptPlugin::initAndStart(const Json::Value &config)
         MY_LOG_WARN("配置信息 不完整");
     }
 }
-void Plugin::SmptPlugin::shutdown()
-{
-    MY_LOG_INF("stmp 服务安全退出");
-}
-const Plugin::SmtpConfig &Plugin::SmptPlugin::getConfig() const
+
+const Utils::SmtpConfig &Utils::SmptUtil::GetConfig() const
 {
     if (!is_confured)
     {

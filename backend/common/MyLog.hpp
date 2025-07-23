@@ -2,7 +2,10 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <iostream>
+#include <mutex>
+#include <sstream>
 #include <string>
 namespace common
 {
@@ -46,8 +49,26 @@ inline const char *GetFile(const char *str)
 class MyLog
 {
   public:
-    template <class... Args> static void Log(const char *file, int line, G grade, Args... args)
+    // 获取单例实例
+    static MyLog &GetInstance()
     {
+        static MyLog instance;
+        return instance;
+    }
+
+    void Init(const std::string &logfilepath)
+    {
+        logfile.open(logfilepath, std::ios::app); // 以追加模式打开
+        if (!logfile.is_open())
+        {
+            std::cerr << "打开指定文件失败" << logfilepath << std::endl;
+        }
+    }
+
+    template <class... Args> void Log(const char *file, int line, G grade, Args... args)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
         std::string grade_str = "";
         std::string color_str = "";
         switch (grade)
@@ -78,16 +99,40 @@ class MyLog
         char time_buffer[80];
         strftime(time_buffer, sizeof(time_buffer), "%Y-%m-%d %H:%M:%S", tm_now);
 
+        std::stringstream ss_content;
+        (ss_content << ... << args);
+        std::string content_str = ss_content.str();
+
+        if (logfile.is_open())
+        {
+            logfile << "[" << time_buffer << "] " << "[" << grade_str << "] " << "["
+                    << GetFile(file) << ":" << line << "] >>> " << content_str << std::endl;
+        }
+
         std::cout << "[" << time_buffer << "]" << " ";
         std::cout << "[" << color_str << grade_str << RESET << "]" << " ";
         std::cout << "[" << BLUE << GetFile(file) << ":" << line << RESET << " @LosAngelous]>>> ";
-        (std::cout << ... << args) << std::endl;
+        std::cout << content_str << std::endl;
     }
+
+  private:
+    MyLog() = default;
+    ~MyLog()
+    {
+        if (logfile.is_open())
+        {
+            logfile.close();
+        }
+    }
+    MyLog(const MyLog &) = delete;
+    MyLog &operator=(const MyLog &) = delete;
+    std::ofstream logfile;
+    std::mutex mutex_;
 };
 
-#define MY_LOG_INF(...) MyLog::Log(__FILE__, __LINE__, G::INF, ##__VA_ARGS__)
-#define MY_LOG_WARN(...) MyLog::Log(__FILE__, __LINE__, G::WAR, ##__VA_ARGS__)
-#define MY_LOG_ERROR(...) MyLog::Log(__FILE__, __LINE__, G::ERR, ##__VA_ARGS__)
-#define MY_LOG_SUC(...) MyLog::Log(__FILE__, __LINE__, G::SUC, ##__VA_ARGS__)
+#define MY_LOG_INF(...) MyLog::GetInstance().Log(__FILE__, __LINE__, G::INF, ##__VA_ARGS__)
+#define MY_LOG_WARN(...) MyLog::GetInstance().Log(__FILE__, __LINE__, G::WAR, ##__VA_ARGS__)
+#define MY_LOG_ERROR(...) MyLog::GetInstance().Log(__FILE__, __LINE__, G::ERR, ##__VA_ARGS__)
+#define MY_LOG_SUC(...) MyLog::GetInstance().Log(__FILE__, __LINE__, G::SUC, ##__VA_ARGS__)
 
 } // namespace common

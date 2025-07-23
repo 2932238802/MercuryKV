@@ -1,9 +1,18 @@
 #pragma once
+#include "MyCrypt.hpp"
+#include "MyJWT.hpp"
+#include "MyLog.hpp"
+#include "Type.hpp"
+#include "Users/Users.h"
 #include "drogon/orm/DbClient.h"
 #include <cstddef>
 #include <cstdint>
+#include <drogon/HttpAppFramework.h>
+#include <drogon/orm/Criteria.h>
+#include <drogon/orm/DbClient.h>
+#include <drogon/orm/Mapper.h>
+#include <drogon/utils/coroutine.h>
 #include <memory>
-
 namespace Service
 {
 

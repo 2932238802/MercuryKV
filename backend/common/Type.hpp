@@ -3,7 +3,7 @@
 #include "stdexcept"
 #include <sstream>
 
-namespace Service
+namespace common
 {
 using namespace common;
 
@@ -34,22 +34,19 @@ class BaseException : public std::runtime_error
     }
 };
 
-// 服务器错误 500
-class DBOperatorWrong : public Service::BaseException
+// 服务器错误 500 配置信息读取错误
+class DBOperatorWrong : public common::BaseException
 {
   public:
-    // 模板构造函数，可以接收任意参数
     template <typename... Args>
     explicit DBOperatorWrong(Args &&...args)
-        // 1. 调用辅助函数拼接字符串
-        // 2. 调用基类构造函数，传入拼接好的字符串，基类会自动记录日志
-        : Service::BaseException(build_message(std::forward<Args>(args)...))
+        : common::BaseException(build_message(std::forward<Args>(args)...))
     {
     }
 };
 
 // 服务器错误 500
-class RedisOperatorWrong : public Service::BaseException
+class RedisOperatorWrong : public common::BaseException
 {
   public:
     // 模板构造函数，可以接收任意参数
@@ -57,58 +54,78 @@ class RedisOperatorWrong : public Service::BaseException
     explicit RedisOperatorWrong(Args &&...args)
         // 1. 调用辅助函数拼接字符串
         // 2. 调用基类构造函数，传入拼接好的字符串，基类会自动记录日志
-        : Service::BaseException(build_message(std::forward<Args>(args)...))
+        : common::BaseException(build_message(std::forward<Args>(args)...))
     {
     }
 };
 
 // 认证失败 401
-class AuthException : public Service::BaseException
+class AuthException : public common::BaseException
 {
   public:
     template <typename... Args>
     explicit AuthException(Args &&...args)
         // 1. 调用辅助函数拼接字符串
         // 2. 调用基类构造函数，传入拼接好的字符串，基类会自动记录日志
-        : Service::BaseException(build_message(std::forward<Args>(args)...))
+        : common::BaseException(build_message(std::forward<Args>(args)...))
     {
     }
 };
 
 // 请求错误 400
-class RequestWrong : public Service::BaseException
+class RequestWrong : public common::BaseException
 {
   public:
     template <typename... Args>
     explicit RequestWrong(Args &&...args)
-        : Service::BaseException(build_message(std::forward<Args>(args)...))
+        : common::BaseException(build_message(std::forward<Args>(args)...))
     {
     }
 };
 
 // 请求错误 500
-class StmpWrong : public Service::BaseException
+class StmpWrong : public common::BaseException
 {
   public:
     template <typename... Args>
     explicit StmpWrong(Args &&...args)
-        : Service::BaseException(build_message(std::forward<Args>(args)...))
+        : common::BaseException(build_message(std::forward<Args>(args)...))
+    {
+    }
+};
+
+// 请求错误 500
+class PocoNetWrong : public common::BaseException
+{
+  public:
+    template <typename... Args>
+    explicit PocoNetWrong(Args &&...args)
+        : common::BaseException(build_message(std::forward<Args>(args)...))
     {
     }
 };
 
 // 服务器未知错误 501
-class UnkownWrong : public Service::BaseException
+class UnkownWrong : public common::BaseException
 {
   public:
     template <typename... Args>
     explicit UnkownWrong(Args &&...args)
-        : Service::BaseException(build_message(std::forward<Args>(args)...))
+        : common::BaseException(build_message(std::forward<Args>(args)...))
     {
     }
 };
 
-} // namespace Service
+class ConfigWrong : public common::BaseException
+{
+  public:
+    template <typename... Args>
+    explicit ConfigWrong(Args &&...args)
+        : common::BaseException(build_message(std::forward<Args>(args)...))
+    {
+    }
+};
+} // namespace common
 
 // 创造 201
 // 通过 200

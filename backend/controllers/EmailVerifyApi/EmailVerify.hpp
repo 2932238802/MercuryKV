@@ -4,7 +4,7 @@
 #include "EmailService/EmailService.hpp"
 #include "MyLog.hpp"
 #include "RandStr.hpp"
-#include "type.hpp"
+#include "Type.hpp"
 #include <cstdint>
 #include <drogon/HttpController.h>
 #include <drogon/HttpResponse.h>
@@ -28,9 +28,8 @@ class EmailVerify : public drogon::HttpController<EmailVerify>
   public:
     METHOD_LIST_BEGIN
     METHOD_ADD(EmailVerify::VerifyAndModify, "/verifyandmodify", drogon::Post);
-    METHOD_ADD(EmailVerify::SendEmail, "/sendemail/{1}", drogon::Get);
+    METHOD_ADD(EmailVerify::SendEmail, "/sendemail", drogon::Get);
     METHOD_LIST_END
     drogon::Task<drogon::HttpResponsePtr> VerifyAndModify(drogon::HttpRequestPtr req);
-    drogon::Task<drogon::HttpResponsePtr> SendEmail(drogon::HttpRequestPtr req,
-                                                    const std::string &email_address);
+    drogon::Task<drogon::HttpResponsePtr> SendEmail(drogon::HttpRequestPtr req);
 };

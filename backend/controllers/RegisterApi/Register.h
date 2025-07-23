@@ -5,8 +5,8 @@
 #include "MyLog.hpp"
 #include "Register.h"
 #include "RegisterService/RegisterService.hpp"
+#include "Type.hpp"
 #include "Users/Users.h"
-#include "type.hpp"
 #include <drogon/HttpController.h>
 #include <drogon/HttpRequest.h>
 #include <drogon/HttpResponse.h>
@@ -14,6 +14,7 @@
 #include <drogon/HttpTypes.h>
 #include <drogon/orm/Exception.h>
 #include <json/value.h>
+
 using namespace drogon;
 
 class Register : public drogon::HttpController<Register>

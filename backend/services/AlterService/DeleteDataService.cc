@@ -1,10 +1,7 @@
 
 
 #include "AlterApi/Alter.h"
-#include "type.hpp"
-#include <cstdint>
-#include <drogon/orm/Exception.h>
-#include <exception>
+
 drogon::Task<Service::DeleteDataReturn>
 Service::DeleteDataService::DeleteData(const std::string &kv_str)
 {

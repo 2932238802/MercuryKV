@@ -1,8 +1,4 @@
 #include "Alter.h"
-#include "type.hpp"
-#include <drogon/HttpAppFramework.h>
-#include <drogon/HttpResponse.h>
-#include <json/value.h>
 
 /**
  * @brief 删除数据
@@ -29,10 +25,10 @@ drogon::Task<drogon::HttpResponsePtr> Alter::DeleteData(HttpRequestPtr req,
         auto res = drogon::HttpResponse::newHttpJsonResponse(res_json);
         co_return res;
     }
-    catch (const Service::BaseException &e)
+    catch (const common::BaseException &e)
     {
         Json::Value error;
-        if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
+        if (dynamic_cast<const common::DBOperatorWrong *>(&e))
         {
             error["code"] = 500;
             error["message"] = e.what();
@@ -40,7 +36,7 @@ drogon::Task<drogon::HttpResponsePtr> Alter::DeleteData(HttpRequestPtr req,
             resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
-        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        else if (dynamic_cast<const common::UnkownWrong *>(&e))
         {
             error["code"] = 501;
             error["message"] = e.what();
@@ -48,7 +44,7 @@ drogon::Task<drogon::HttpResponsePtr> Alter::DeleteData(HttpRequestPtr req,
             resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
-        else if (dynamic_cast<const Service::RequestWrong *>(&e))
+        else if (dynamic_cast<const common::RequestWrong *>(&e))
         {
             error["code"] = 400;
             error["message"] = e.what();

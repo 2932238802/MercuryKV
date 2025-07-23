@@ -1,14 +1,27 @@
 
 #include "EmailService.hpp"
 #include "MyLog.hpp"
-#include "type.hpp"
-#include <drogon/HttpAppFramework.h>
-#include <drogon/HttpResponse.h>
-#include <drogon/utils/coroutine.h>
-#include <exception>
-#include <functional>
-#include <future>
-#include <json/value.h>
+static std::once_flag poco_ssl_init_flag;
+void InitializePocoSSLOnce()
+{
+    try
+    {
+        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertHandler =
+            new Poco::Net::AcceptCertificateHandler(false);
+        const std::string caLocation = "/etc/ssl/certs/ca-certificates.crt";
+
+        Poco::Net::Context::Ptr pcontext = new Poco::Net::Context(
+            Poco::Net::Context::CLIENT_USE, "", "",
+            caLocation, // caLocation
+            Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+
+        Poco::Net::SSLManager::instance().initializeClient(nullptr, pCertHandler, pcontext);
+    }
+    catch (const Poco::Exception &e)
+    {
+        throw common::UnkownWrong("Poco SSL/TLS context initialization failed: " + e.displayText());
+    }
+}
 
 std::string Service::EmailService::BuildeEmailBodyForModifyPersonInfo(const std::string &code)
 {
@@ -44,77 +57,72 @@ std::string Service::EmailService::BuildeEmailBodyForModifyPersonInfo(const std:
  */
 void Service::EmailService::SendEmail(const std::string &to, const std::string &code)
 {
-    // to 发送给谁
-    // code 验证码
 
-    std::thread(
-        [=]()
-        {
-            auto smtp = drogon::app().getPlugin<Plugin::SmptPlugin>();
+    std::call_once(poco_ssl_init_flag, InitializePocoSSLOnce);
 
-            if (!smtp)
-            {
-                MY_LOG_ERROR("stmp 内部服务错误");
-            }
+    const auto &smtpconfig = Utils::ConfigManage::GetInstance().GetSmtpConfig();
+    MY_LOG_INF(smtpconfig);
 
-            // 说明服务正常解析信息
-            const auto &smtp_config = smtp->getConfig();
-            Poco::Net::MailMessage message;
+    Utils::SmptUtil sc(smtpconfig);
 
-            std::string sender{smtp_config.from_address}, recipient{to}, subject{"Mercury 验证码"},
-                content{BuildeEmailBodyForModifyPersonInfo(code)}, auth_code{smtp_config.password};
+    if (!sc.IsConfigured())
+    {
+        throw ConfigWrong("stmp 配置错误");
+    }
 
-            try
-            {
-                Poco::Net::MailMessage message;
-                message.setSender(sender);
-                message.addRecipient(Poco::Net::MailRecipient(
-                    Poco::Net::MailRecipient::PRIMARY_RECIPIENT, recipient));
-                message.setSubject(subject);
-                message.setContent(content);
-                Poco::Net::SecureSMTPClientSession session(smtp_config.host, smtp_config.port);
+    // 说明服务正常解析信息
+    const auto &smtp_config = sc.GetConfig();
 
-                session.login();
-
-                if (session.startTLS())
-                {
-                    session.login(Poco::Net::SMTPClientSession::AUTH_LOGIN, smtp_config.username,
-                                  smtp_config.password);
-                }
-                else
-                {
-                    MY_LOG_WARN("tls 加密失败 进入普通话");
-                    session.login(Poco::Net::SMTPClientSession::AUTH_LOGIN, smtp_config.username,
-                                  smtp_config.password);
-                }
-                session.sendMessage(message);
-                session.close();
-            }
-            catch (const Poco::Net::NetException &e)
-            {
-                MY_LOG_ERROR("后台邮件线程发生Poco网络异常: {}", e.what());
-            }
-            catch (const std::exception &e)
-            {
-                MY_LOG_ERROR("后台邮件线程发生未知异常: {}", e.what());
-            }
-        })
-        .detach();
+    try
+    {
+        Poco::Net::SocketAddress sa(smtp_config.host, smtp_config.port);
+        Poco::Net::SecureStreamSocket socket(
+            sa, Poco::Net::SSLManager::instance().defaultClientContext());
+        Poco::Net::SMTPClientSession session(socket);
+        session.login(Poco::Net::SMTPClientSession::AUTH_LOGIN, smtp_config.username,
+                      smtp_config.password);
+        Poco::Net::MailMessage message;
+        std::string from_string = smtp_config.from_name + " <" + smtp_config.from_address + ">";
+        message.setSender(from_string);
+        message.addRecipient(
+            Poco::Net::MailRecipient(Poco::Net::MailRecipient::PRIMARY_RECIPIENT, to));
+        message.setSubject(Poco::Net::MailMessage::encodeWord("Mercury 验证码", "UTF-8"));
+        message.setContent(BuildeEmailBodyForModifyPersonInfo(code));
+        message.setContentType("text/html; charset=UTF-8");
+        session.sendMessage(message);
+        session.close();
+    }
+    catch (const Poco::Net::SMTPException &e)
+    {
+        throw common::StmpWrong("后台邮件线程发生Poco SMTP异常: ",
+                                e.displayText()); // 向上抛出异常，让调用者知道失败了
+    }
+    catch (const Poco::Net::NetException &e)
+    {
+        throw common::PocoNetWrong("后台邮件线程发生Poco网络异常: ", e.displayText());
+    }
+    catch (const std::exception &e)
+    {
+        throw common::UnkownWrong("后台邮件线程发生未知异常: ", e.what());
+    }
 }
 
 drogon::Task<Service::EmailServiceReturn> Service::EmailService::Verify(std::string email_address,
                                                                         std::string user_code)
 {
     std::string rediskey = "verify:code:" + email_address;
+    auto redis_client = drogon::app().getRedisClient();
+
     try
     {
-        auto redis_client = drogon::app().getRedisClient();
-        auto trans = co_await redis_client->newTransactionCoro();
 
         auto result = co_await redis_client->execCommandCoro("GET %s", rediskey.c_str());
         if (result.type() == drogon::nosql::RedisResultType::kNil)
         {
-            throw RequestWrong("请求内容错误");
+            EmailServiceReturn ret;
+            ret.code = 400;
+            ret.message = "验证码错误或已过期";
+            co_return ret;
         }
 
         std::string correct_code = result.asString();
@@ -137,10 +145,10 @@ drogon::Task<Service::EmailServiceReturn> Service::EmailService::Verify(std::str
     }
     catch (const drogon::nosql::RedisException &e)
     {
-        throw RedisOperatorWrong("Redis 操作失败:", e.what());
+        throw common::RedisOperatorWrong("Redis 操作失败:", e.what());
     }
     catch (const std::exception &e)
     {
-        throw UnkownWrong(e.what());
+        throw common::UnkownWrong(e.what());
     }
 }

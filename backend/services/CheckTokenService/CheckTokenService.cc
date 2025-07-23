@@ -17,14 +17,14 @@ drogon::Task<Service::CheckTokenReturn> Service::CheckTokenService::Check(std::s
 
     if (token.empty())
     {
-        throw Service::RequestWrong("token 内容为空 请求错误");
+        throw common::RequestWrong("token 内容为空 请求错误");
     }
 
     auto user_id_optional = common::MyJWT::Verufyjwt(token);
 
     if (!user_id_optional)
     {
-        throw Service::AuthException("认证失败，Token 无效或已过期");
+        throw common::AuthException("认证失败，Token 无效或已过期");
     }
 
     try
@@ -38,7 +38,7 @@ drogon::Task<Service::CheckTokenReturn> Service::CheckTokenService::Check(std::s
         if (result.empty())
         {
             // 如果是空的
-            throw Service::AuthException("认证失败，用户不存在");
+            throw common::AuthException("认证失败，用户不存在");
         }
 
         drogon_model::mercury::Users user(result[0]);
@@ -53,11 +53,11 @@ drogon::Task<Service::CheckTokenReturn> Service::CheckTokenService::Check(std::s
     catch (const drogon::orm::DrogonDbException &e)
     {
         MY_LOG_ERROR("数据库查询异常: ", e.base().what());
-        throw Service::DBOperatorWrong("数据库服务异常");
+        throw common::DBOperatorWrong("数据库服务异常");
     }
     catch (const std::exception &e)
     {
         MY_LOG_ERROR("Token 验证服务发生内部错误: ", e.what());
-        throw Service::DBOperatorWrong("服务内部错误");
+        throw common::DBOperatorWrong("服务内部错误");
     }
 }

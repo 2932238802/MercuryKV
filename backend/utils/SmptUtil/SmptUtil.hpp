@@ -1,12 +1,12 @@
 
 #pragma once
 #include "MyLog.hpp"
-#include "type.hpp"
+#include "Type.hpp"
 #include <drogon/drogon.h>
 #include <drogon/plugins/Plugin.h>
 #include <stdexcept>
 
-namespace Plugin
+namespace Utils
 {
 
 using namespace common;
@@ -20,17 +20,19 @@ struct SmtpConfig
     std::string host; // 主机名字
 };
 
-class SmptPlugin : public drogon::Plugin<SmptPlugin>
+class SmptUtil
 {
   public:
-    SmptPlugin() = default;
-    void initAndStart(const Json::Value &config) override;
-    void shutdown() override;
-    const SmtpConfig &getConfig() const;
+    SmptUtil(const Json::Value &config);
+    const SmtpConfig &GetConfig() const;
+    bool IsConfigured() const
+    {
+        return is_confured;
+    }
 
   private:
     SmtpConfig stmp_config;
-    bool is_confured;
+    bool is_confured = false;
 };
 
-} // namespace Plugin
+} // namespace Utils

@@ -1,15 +1,6 @@
 
 #include "LoginService.hpp"
-#include "MyCrypt.hpp"
-#include "MyJWT.hpp"
-#include "MyLog.hpp"
-#include "Users/Users.h"
-#include "type.hpp"
-#include <drogon/HttpAppFramework.h>
-#include <drogon/orm/Criteria.h>
-#include <drogon/orm/DbClient.h>
-#include <drogon/orm/Mapper.h>
-#include <drogon/utils/coroutine.h>
+
 using namespace common;
 /**
  * @brief 初始化 数据库操作台 不用反复创建
@@ -39,13 +30,13 @@ drogon::Task<Service::LoginResult> Service::LoginService::LoginVerify(const std:
         if (result.empty())
         {
             MY_LOG_WARN("登录尝试失败: 用户 '" + username + "' 不存在");
-            throw Service::AuthException("登录尝试失败: 用户 '" + username + "' 不存在");
+            throw AuthException("登录尝试失败: 用户 '" + username + "' 不存在");
         }
 
         if (result.size() > 1)
         {
             MY_LOG_ERROR("数据异常: 用户名 '" + username + "' 存在多个记录");
-            throw Service::DBOperatorWrong("数据异常: 用户名 '" + username + "' 存在多个记录");
+            throw DBOperatorWrong("数据异常: 用户名 '" + username + "' 存在多个记录");
         }
 
         drogon_model::mercury::Users user(result[0]);
@@ -53,7 +44,7 @@ drogon::Task<Service::LoginResult> Service::LoginService::LoginVerify(const std:
         if (!password_stored_opt)
         {
             MY_LOG_ERROR("数据异常: 用户 '" + username + "' 缺少密码哈希");
-            throw Service::DBOperatorWrong("数据异常: 用户 '" + username + "' 缺少密码哈希");
+            throw DBOperatorWrong("数据异常: 用户 '" + username + "' 缺少密码哈希");
         }
 
         std::string salt = user.getValueOfSalt();
@@ -73,17 +64,17 @@ drogon::Task<Service::LoginResult> Service::LoginService::LoginVerify(const std:
         else
         {
             MY_LOG_ERROR("密码错误");
-            throw Service::AuthException("密码错误");
+            throw AuthException("密码错误");
         }
     }
     catch (const drogon::orm::UnexpectedRows &e)
     {
         MY_LOG_ERROR("没有找到对应的用户!");
-        throw Service::AuthException("没有找到对应的用户!");
+        throw AuthException("没有找到对应的用户!");
     }
     catch (const drogon::orm::DrogonDbException &e)
     {
         MY_LOG_ERROR("数据库操作失败!");
-        throw Service::DBOperatorWrong("数据库操作失败!");
+        throw DBOperatorWrong("数据库操作失败!");
     }
 }

@@ -1,7 +1,19 @@
 #pragma once
 
+#include "CheckTokenService/CheckTokenService.hpp"
+#include "LoginService/LoginService.hpp"
+#include "MyLog.hpp"
+#include "Type.hpp"
+#include "Users/Users.h"
+#include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
 #include <drogon/drogon.h>
+#include <drogon/orm/Criteria.h>
+#include <drogon/orm/Mapper.h>
+#include <drogon/utils/coroutine.h>
+#include <json/json.h>
+#include <json/value.h>
+#include <string>
 
 class Login : public drogon::HttpController<Login>
 {

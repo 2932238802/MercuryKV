@@ -1,5 +1,4 @@
 #include "Alter.h"
-#include "type.hpp"
 
 using namespace drogon;
 using namespace drogon_model::mercury;
@@ -41,10 +40,10 @@ drogon::Task<drogon::HttpResponsePtr> Alter::AddData(HttpRequestPtr req)
         res->setStatusCode(drogon::k201Created);
         co_return res;
     }
-    catch (const Service::BaseException &e)
+    catch (const common::BaseException &e)
     {
         Json::Value error;
-        if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
+        if (dynamic_cast<const common::DBOperatorWrong *>(&e))
         {
             error["code"] = 500;
             error["message"] = "服务器内部错误，请稍后重试";
@@ -52,7 +51,7 @@ drogon::Task<drogon::HttpResponsePtr> Alter::AddData(HttpRequestPtr req)
             resp->setStatusCode(drogon::k500InternalServerError);
             co_return resp;
         }
-        else if (dynamic_cast<const Service::UnkownWrong *>(&e))
+        else if (dynamic_cast<const common::UnkownWrong *>(&e))
         {
             error["code"] = 501;
             error["message"] = "服务器发生未知错误";

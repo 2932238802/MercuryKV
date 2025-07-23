@@ -2,21 +2,18 @@ cmake_minimum_required(VERSION 3.20)
 project(mercury_kv VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_TOOLCHAIN_FILE "/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-add_compile_options(-fcoroutines)
-add_executable(${PROJECT_NAME}
-  main.cc
+set(CMAKE_TOOLCHAIN_FILE "/home/losangelous/LosAngelous/dev/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 
+set(APP_SOURCES
+  main.cc
   models/Users/Users.cc
   models/ApiKey/ApiKeys.cc
   models/KV_Tag/KvTagAssociation.cc
   models/KVStore/KvStore.cc
   models/Tags/Tags.cc
-
   controllers/LoginApi/Login.cc
   controllers/RegisterApi/Register.cc
   controllers/FetchDataApi/FetchData.cc
@@ -25,7 +22,6 @@ add_executable(${PROJECT_NAME}
   controllers/AlterApi/UpdateData.cc
   controllers/EmailVerifyApi/SendEmail.cc
   controllers/EmailVerifyApi/VerifyAndModify.cc
-
   services/LoginService/LoginService.cc
   services/RegisterService/RegisterService.cc
   services/CheckTokenService/CheckTokenService.cc
@@ -34,24 +30,31 @@ add_executable(${PROJECT_NAME}
   services/AlterService/DeleteDataService.cc
   services/EmailService/EmailService.cc
   services/AlterPersonInfoService/AlterPersonInfo.cc
-
-  plugins/SmptPlugin/SmptPlugin.cc
-
+  utils/ConfigManage/ConfigManage.cc
+  utils/SmptUtil/SmptUtil.cc
 )
 
-find_package(OpenSSL REQUIRED)
+
 find_package(Drogon CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 find_package(jwt-cpp CONFIG REQUIRED)
 find_package(CURL REQUIRED)
-find_package(Poco REQUIRED COMPONENTS
-  Foundation
-  Net
-  XML
-  Util
-  NetSSL
+find_package(Poco REQUIRED COMPONENTS Foundation Net XML Util NetSSL)
+
+add_executable(${PROJECT_NAME} ${APP_SOURCES})
+
+target_compile_options(${PROJECT_NAME} PRIVATE -fcoroutines)
+target_compile_definitions(${PROJECT_NAME} PRIVATE USE_COROUTINE)
+target_include_directories(${PROJECT_NAME} PUBLIC
+  common
+  models
+  controllers
+  services
+  plugins 
+  utils
 )
-# 链接库
+
 target_link_libraries(${PROJECT_NAME} PUBLIC
   Drogon::Drogon
   yaml-cpp::yaml-cpp
@@ -66,20 +69,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   CURL::libcurl
 )
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-  common
-  models
-  controllers
-  services
-  plugins
-)
+# if(NOT MSVC)
+#   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+# endif()
 
-# 启用 Drogon 协程支持（根据 Drogon 文档，某些版本需要此宏）
-target_compile_definitions(${PROJECT_NAME} PRIVATE USE_COROUTINE)
 
-# 非 MSVC 平台添加警告选项
 if(NOT MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+  add_compile_options(-march=x86-64)
+  add_compile_options(-mno-avx -mno-avx2 -mno-avx512f)
+  add_compile_options(-msse2)  # 只使用 SSE2，这在几乎所有现代 CPU 上都支持
 endif()

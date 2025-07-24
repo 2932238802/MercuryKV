@@ -2,7 +2,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import service from '../components/request';
+import { SENDCODE, SEND_EMAIL_FORPROFILE } from '@/utils/api.js'
+import { ShowCustomModal } from '../../utils/show';
 
 const router = useRouter();
 const cur_email = ref('');
@@ -10,7 +11,6 @@ const cur_user_name = ref('');
 const new_password = ref('');
 const original_email = ref('');
 const original_username = ref('');
-
 const is_modal_visible = ref(false);
 const verification_code = ref('');
 const api_error = ref('');
@@ -19,16 +19,9 @@ const is_sending_code = ref(false);
 const countdown = ref(0);
 let countdown_timer = null;
 
-const API_PATHS = {
-    VERIFYANDMODIFY: '/EmailVerify/verifyandmodify',
-    SENDEMAIL: '/EmailVerify/sendemail'
-};
-
-// --- Functions (PascalCase) ---
 const HandleReturn = () => {
     router.push({ name: 'Index' });
 };
-
 const HandleSaveChangesClick = () => {
     if (!cur_user_name.value.trim() || !cur_email.value.trim()) {
         ElMessage.error('用户名和邮箱不能为空');
@@ -43,17 +36,14 @@ const HandleSaveChangesClick = () => {
         ElMessage.error('新密码长度不能少于6位');
         return;
     }
-
     const hasChanges =
         cur_user_name.value !== original_username.value ||
         cur_email.value !== original_email.value ||
         new_password.value.trim() !== '';
-
     if (!hasChanges) {
         ElMessage.info('信息未发生任何变更');
         return;
     }
-
     is_modal_visible.value = true;
 };
 
@@ -71,26 +61,19 @@ const HandleSendCode = async () => {
     if (is_sending_code.value || countdown.value > 0) {
         return;
     }
-
     is_sending_code.value = true;
     api_error.value = '';
     try {
         console.log(original_email.value);
-        const response = await service.get(API_PATHS.SENDEMAIL, {
-            params: { "email": original_email.value }
-        });
-        if (response.code === 200) {
-            alert("验证码已经发送")
-            countdown.value = 60;
-            countdown_timer = setInterval(() => {
-                countdown.value--;
-                if (countdown.value <= 0) {
-                    clearInterval(countdown_timer);
-                }
-            }, 1000);
-        } else {
-            api_error.value = response.message || '发送失败，请稍后再试';
-        }
+        await SENDCODE(original_email.value)
+        alert("验证码已经发送")
+        countdown.value = 60;
+        countdown_timer = setInterval(() => {
+            countdown.value--;
+            if (countdown.value <= 0) {
+                clearInterval(countdown_timer);
+            }
+        }, 1000);
     } catch (error) {
         console.error("发送验证码失败:", error);
         api_error.value = '请求失败，请检查网络连接';
@@ -106,33 +89,24 @@ const HandleConfirmAndSave = async () => {
     }
     is_saving.value = true;
     api_error.value = '';
-
     try {
         const payload = {
             "username": cur_user_name.value,
             "email": cur_email.value,
             "user_code": verification_code.value,
-            "password":new_password.value.trim(),
-            "user_id":localStorage.getItem("UserId")
+            "password": new_password.value.trim(),
+            "user_id": localStorage.getItem("UserId")
         };
-
-        const response = await service.post(API_PATHS.VERIFYANDMODIFY, payload);
-
-        if (response.code === 200) {
-            alert("修改成功")
-            console.log("Email", response.email);
-            console.log("UserName", response.username);
-            localStorage.setItem("Email", response.email);
-            localStorage.setItem("UserName", response.username);
-            original_email.value = cur_email.value;
-            original_username.value = cur_user_name.value;
-            new_password.value = '';
-
-
-            CloseModal();
-        } else {
-            api_error.value = response.data.message || '验证失败，请重试';
-        }
+        const response = await SEND_EMAIL_FORPROFILE(payload);
+        alert("修改成功")
+        console.log("Email", response.email);
+        console.log("UserName", response.username);
+        localStorage.setItem("Email", response.email);
+        localStorage.setItem("UserName", response.username);
+        original_email.value = cur_email.value;
+        original_username.value = cur_user_name.value;
+        new_password.value = '';
+        CloseModal();
     } catch (error) {
         console.error("修改信息失败:", error);
         api_error.value = '请求失败，请检查网络或联系管理员';
@@ -141,18 +115,15 @@ const HandleConfirmAndSave = async () => {
     }
 };
 
-// --- Computed Properties (snake_case) ---
-const send_code_button_text = computed(() => {
+const SendCodeButtonText = computed(() => {
     if (countdown.value > 0) return `重新发送 (${countdown.value}s)`;
     if (is_sending_code.value) return '发送中...';
     return '发送验证码';
 });
 
-// --- Lifecycle Hooks ---
 onMounted(() => {
     const email = localStorage.getItem("Email");
     const userName = localStorage.getItem("UserName");
-
     if (!email || !userName) {
         ElMessage.error("本地数据读取错误，请重新登录!");
         router.push({ name: 'Login' });
@@ -174,7 +145,6 @@ onMounted(() => {
             <header class="card-header">
                 <h1 class="title">Profile Settings</h1>
             </header>
-
             <form @submit.prevent="HandleSaveChangesClick">
                 <section class="form-section">
                     <h2 class="section-title">Personal Information</h2>
@@ -187,7 +157,6 @@ onMounted(() => {
                         <input type="email" id="email" class="form-input" v-model="cur_email" required>
                     </div>
                 </section>
-
                 <section class="form-section">
                     <h2 class="section-title">Change Password</h2>
                     <div class="form-group">
@@ -216,7 +185,7 @@ onMounted(() => {
                     <input v-model="verification_code" type="text" class="form-input" placeholder="输入6位验证码"
                         maxlength="6" />
                     <button @click="HandleSendCode" class="btn btn-ghost" :disabled="is_sending_code || countdown > 0">
-                        {{ send_code_button_text }}
+                        {{ SendCodeButtonText }}
                     </button>
                 </div>
 
@@ -236,8 +205,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
-@import url('../static/Common.css');
-@import url('../static/Profile.css');
+@import url('@/static/Common.css');
+@import url('@/static/Profile.css');
 
 .api-error-text {
     color: #e74c3c;

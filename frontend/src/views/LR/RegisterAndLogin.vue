@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from 'vue';
-import service from '../components/request';
+import service from '@/utils/request';
 import { useRouter } from 'vue-router';
-import { ShowCustomModal } from '../components/show'
+import { ShowCustomModal } from '@/utils/show'
+import { LOGIN,REGISTER} from '@/utils/api';
 
 // ------------------------------
 // 绑定页面的输入内容
@@ -17,10 +18,7 @@ const show_login_warning_for_password = ref(false)
 const show_register_warning_for_user_name = ref(false)
 const show_register_warning_for_password = ref(false)
 const show_register_warning_for_email = ref(false)
-const API_PATHS = {
-    LOGIN: '/Login/login',
-    REGISTER: '/Register/register'
-};
+
 const router = useRouter();
 
 // ------------------------------
@@ -67,19 +65,12 @@ const Login = async () => {
     }
 
     console.log("即将发起登录请求...");
-    // 理解一下会话： 就是手环 编号
-    // 理解一下 token : 
     try {
         const login_info = {
             username: username_login.value,
             password: password_login.value
         }
-
-        const response = await service.post(
-            API_PATHS.LOGIN,
-            login_info
-        )
-
+        const response = await LOGIN(login_info);
         alert("登录成功，后端返回的完整数据是:", JSON.stringify(response, null, 2));
         localStorage.setItem('AuthToken', response.token);
         localStorage.setItem('UserName', response.username);
@@ -140,10 +131,7 @@ const Register = async () => {
             password: password_register.value,
             email: email_register.value
         }
-        const response = await service.post(
-            API_PATHS.REGISTER,
-            register_info
-        )
+        const response = await REGISTER(register_info);
         const token = response.token;
         const user_id = response.user_id;
         const username = response.username;
@@ -165,6 +153,7 @@ const Register = async () => {
 </script>
 
 <template>
+    <router-view></router-view>
     <div class="page-body">
         <div class="container" :class="{ 'right-panel-active': isrightpanelactive }">
 
@@ -186,7 +175,6 @@ const Register = async () => {
                     如果 v-if 的值为 false，元素会从 DOM 中被移除
                     
                     -->
-
                     <div v-if="show_register_warning_for_user_name" class="warning_word">用户名输入格式错误!</div>
                     <div v-if="show_register_warning_for_password" class="warning_word">密码输入格式错误!</div>
                     <div v-if="show_register_warning_for_email" class="warning_word">邮箱输入格式错误!</div>
@@ -203,6 +191,7 @@ const Register = async () => {
                     <input type="password" placeholder="密码" v-model="password_login" required />
                     <div v-if="show_login_warning_for_user_name" class="warning_word">用户名输入格式错误!</div>
                     <div v-if="show_login_warning_for_password" class="warning_word">密码输入格式错误!</div>
+                    <router-link to="RegisterAndLogin/ForgetPassword">忘记密码</router-link>
                     <button @click="Login">登 录</button>
                 </form>
             </div>
@@ -233,5 +222,5 @@ const Register = async () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
-@import '../static/RegisterAndLogin.css';
+@import '@/static/RegisterAndLogin.css';
 </style>

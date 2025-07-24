@@ -62,6 +62,8 @@ void Service::EmailService::SendEmail(const std::string &to, const std::string &
 
     const auto &smtpconfig = Utils::ConfigManage::GetInstance().GetSmtpConfig();
     MY_LOG_INF(smtpconfig);
+    MY_LOG_INF("to:", to);
+    MY_LOG_INF("code:", code);
 
     Utils::SmptUtil sc(smtpconfig);
 
@@ -112,11 +114,13 @@ drogon::Task<Service::EmailServiceReturn> Service::EmailService::Verify(std::str
 {
     std::string rediskey = "verify:code:" + email_address;
     auto redis_client = drogon::app().getRedisClient();
+    MY_LOG_INF("email_address", email_address);
+    MY_LOG_INF("user_code", user_code);
 
     try
     {
-
         auto result = co_await redis_client->execCommandCoro("GET %s", rediskey.c_str());
+
         if (result.type() == drogon::nosql::RedisResultType::kNil)
         {
             EmailServiceReturn ret;
@@ -124,7 +128,6 @@ drogon::Task<Service::EmailServiceReturn> Service::EmailService::Verify(std::str
             ret.message = "验证码错误或已过期";
             co_return ret;
         }
-
         std::string correct_code = result.asString();
 
         if (correct_code == user_code)

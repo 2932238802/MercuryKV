@@ -1,5 +1,5 @@
 <script setup lang="js">
-import { isModalVisible, modalMessage, CloseCustomModal } from './components/show'; 
+import { isModalVisible, modalMessage, CloseCustomModal } from '@/utils/show'; 
 </script>
 
 <template>

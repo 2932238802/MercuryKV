@@ -9,11 +9,13 @@ set(CMAKE_TOOLCHAIN_FILE "/home/losangelous/LosAngelous/dev/vcpkg/scripts/builds
 
 set(APP_SOURCES
   main.cc
+  
   models/Users/Users.cc
   models/ApiKey/ApiKeys.cc
   models/KV_Tag/KvTagAssociation.cc
   models/KVStore/KvStore.cc
   models/Tags/Tags.cc
+
   controllers/LoginApi/Login.cc
   controllers/RegisterApi/Register.cc
   controllers/FetchDataApi/FetchData.cc
@@ -22,6 +24,8 @@ set(APP_SOURCES
   controllers/AlterApi/UpdateData.cc
   controllers/EmailVerifyApi/SendEmail.cc
   controllers/EmailVerifyApi/VerifyAndModify.cc
+  controllers/ModifyPasswordApi/ModifyPassword.cc
+
   services/LoginService/LoginService.cc
   services/RegisterService/RegisterService.cc
   services/CheckTokenService/CheckTokenService.cc
@@ -30,6 +34,7 @@ set(APP_SOURCES
   services/AlterService/DeleteDataService.cc
   services/EmailService/EmailService.cc
   services/AlterPersonInfoService/AlterPersonInfo.cc
+
   utils/ConfigManage/ConfigManage.cc
   utils/SmptUtil/SmptUtil.cc
 )

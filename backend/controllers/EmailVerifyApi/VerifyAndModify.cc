@@ -1,4 +1,4 @@
-#include "EmailVerify.hpp"
+#include "EmailVerify.h"
 #include "MyLog.hpp"
 
 drogon::Task<drogon::HttpResponsePtr> EmailVerify::VerifyAndModify(drogon::HttpRequestPtr req)

@@ -46,18 +46,15 @@ drogon::Task<drogon::HttpResponsePtr> Register::HandleRegister(HttpRequestPtr re
         if (dynamic_cast<const Service::DBOperatorWrong *>(&e))
         {
             error["code"] = 500;
-            error["message"] = "服务器内部错误，请稍后重试";
-            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-            resp->setStatusCode(drogon::k500InternalServerError);
-            co_return resp;
+            error["message"] = e.what();
         }
         else if (dynamic_cast<const Service::UnkownWrong *>(&e))
         {
             error["code"] = 501;
-            error["message"] = "服务器发生未知错误";
-            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-            resp->setStatusCode(drogon::k500InternalServerError);
-            co_return resp;
+            error["message"] = e.what();
         }
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(drogon::k500InternalServerError);
+        co_return resp;
     }
 }

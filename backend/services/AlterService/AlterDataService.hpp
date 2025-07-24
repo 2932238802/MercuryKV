@@ -4,6 +4,7 @@
 #include "MyLog.hpp"
 #include "Tags/Tags.h"
 #include "Type.hpp"
+#include <cstddef>
 #include <cstdint>
 #include <drogon/HttpResponse.h>
 #include <drogon/orm/Criteria.h>
@@ -19,10 +20,16 @@
 
 namespace Service
 {
-using db_t = drogon::orm::DbClientPtr;
 using namespace common;
 
+enum class AlterType
+{
+    AlterData = 0,
+    AlterPassword = 1
+};
+
 class AddDataServiceFactory;
+
 struct AlterDataReturn
 {
     int64_t code;
@@ -32,31 +39,62 @@ struct AlterDataReturn
     std::string updated_at;
 };
 
-class AlterDataService
+struct AlterPasswordReturn
+{
+    std::string message;
+    size_t code;
+};
+
+class BaseService
+{
+  public:
+    using ptr = std::shared_ptr<BaseService>;
+    virtual ~BaseService() = default;
+};
+template <class R> class AlterService : public BaseService
 {
   public:
     drogon::orm::DbClientPtr db_client;
-    using ptr = std::shared_ptr<AlterDataService>;
-    virtual drogon::Task<AlterDataReturn> AlterData(const Json::Value &sjon);
+    using ptr = std::shared_ptr<AlterService<R>>;
+    virtual drogon::Task<R> Alter(const Json::Value &sjon) = 0;
 
   protected:
-    AlterDataService(db_t db_out) : db_client(db_out)
+    AlterService(drogon::orm::DbClientPtr db_out) : db_client(db_out)
     {
     }
 };
-
+class AlterDataService : public AlterService<Service::AlterDataReturn>
+{
+  public:
+    drogon::Task<AlterDataReturn> Alter(const Json::Value &sjon) override;
+    AlterDataService(drogon::orm::DbClientPtr db_out)
+        : AlterService<Service::AlterDataReturn>(db_out)
+    {
+    }
+};
+class AlterPasswordService : public AlterService<Service::AlterPasswordReturn>
+{
+  public:
+    drogon::Task<AlterPasswordReturn> Alter(const Json::Value &sjon) override;
+    AlterPasswordService(drogon::orm::DbClientPtr db_out)
+        : AlterService<Service::AlterPasswordReturn>(db_out)
+    {
+    }
+};
 class AlterDataServiceFactory
 {
   public:
-    static AlterDataService::ptr MakeService(db_t db_out)
+    static Service::BaseService::ptr MakeService(AlterType type, drogon::orm::DbClientPtr db_out)
     {
-        struct Enable : public AlterDataService
+        if (type == AlterType::AlterData)
         {
-            Enable(db_t db_out) : AlterDataService(db_out)
-            {
-            }
-        };
-        return std::make_shared<Enable>(db_out);
+            return std::make_shared<Service::AlterDataService>(db_out);
+        }
+        else if (type == AlterType::AlterPassword)
+        {
+            return std::make_shared<Service::AlterPasswordService>(db_out);
+        }
+        return nullptr;
     }
 };
 } // namespace Service

@@ -1,7 +1,8 @@
-#include "EmailVerify.hpp"
+#include "EmailVerify.h"
 #include "MyLog.hpp"
 #include "Type.hpp"
 #include <drogon/HttpAppFramework.h>
+#include <drogon/orm/SqlBinder.h>
 
 drogon::Task<drogon::HttpResponsePtr> EmailVerify::SendEmail(drogon::HttpRequestPtr req)
 {
@@ -13,7 +14,13 @@ drogon::Task<drogon::HttpResponsePtr> EmailVerify::SendEmail(drogon::HttpRequest
         auto redis_client = drogon::app().getRedisClient();
         std::string code = common::RandStr(6); // 生成验证码
         std::string rediskey = "verify:code:" + email_address;
-        co_await redis_client->execCommandCoro("SET %s %s EX 600", rediskey.c_str(), code.c_str());
+        auto redis_res = co_await redis_client->execCommandCoro("SET %s %s EX 600",
+                                                                rediskey.c_str(), code.c_str());
+
+        if (redis_res.asString() == "OK")
+        {
+            MY_LOG_SUC("redis 数据设置成功");
+        }
 
         static std::atomic<size_t> io_loop_counter = {0};
         size_t num_io_threads = drogon::app().getThreadNum();

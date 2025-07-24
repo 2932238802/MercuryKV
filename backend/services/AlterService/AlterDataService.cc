@@ -1,8 +1,12 @@
 
 
 #include "AlterService/AlterDataService.hpp"
+#include "MyCrypt.hpp"
+#include "MyLog.hpp"
+#include "Type.hpp"
 
-drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(const Json::Value &json)
+using namespace common;
+drogon::Task<Service::AlterDataReturn> Service::AlterDataService::Alter(const Json::Value &json)
 {
     if (!json)
     {
@@ -51,8 +55,7 @@ drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(cons
         }
         co_await trans->execSqlCoro("UPDATE kv_store SET key_input=\$1, value_input=\$2, "
                                     "previous_value=\$3, updated_at=\$4 WHERE kv_id=\$5",
-                                    key_input, value_input, value_previous, trantor::Date::now(),
-                                    kv_id);
+                                    key_input, value_input, value_previous, now, kv_id);
         co_await trans->execSqlCoro("DELETE FROM kv_tag_association WHERE kv_id = \$1", kv_id);
         for (const auto &tag_json : tags_json)
         {
@@ -94,6 +97,68 @@ drogon::Task<Service::AlterDataReturn> Service::AlterDataService::AlterData(cons
     catch (const std::exception &e)
     {
         MY_LOG_ERROR("exception Captured: ", e.what());
+        throw common::UnkownWrong("处理修改函数中 发生未知错误", e.what());
+    }
+}
+
+// ----- ----- ----- ----- -----
+/**
+ * @brief 这个是修改密码的服务
+ *
+ * @param json
+ * @return drogon::Task<Service::AlterPasswordReturn>
+ */
+drogon::Task<Service::AlterPasswordReturn>
+Service::AlterPasswordService::Alter(const Json::Value &json)
+{
+
+    if (!json.isMember("password") || !json["password"].isString())
+    {
+        MY_LOG_WARN(json);
+        throw common::RequestWrong("密码信息错误或缺失");
+    }
+    if (!json.isMember("email") || !json["email"].isString())
+    {
+        MY_LOG_WARN(json);
+        throw common::RequestWrong("邮件有一个信息错误或缺失");
+    }
+
+    MY_LOG_INF(json);
+
+    // json 请求体没问题
+    std::string password = json["password"].asString();
+    std::string salt(MyCrypt::GenerateSalt());
+    std::string password_hash = MyCrypt::Hash(password + salt);
+    std::string email = json["email"].asString();
+
+    try
+    {
+        auto trains = co_await db_client->newTransactionCoro();
+
+        auto res_dbexec = co_await trains->execSqlCoro(
+            "UPDATE users SET password_hash = \$1 , salt = \$2 WHERE email = \$3", password_hash,
+            salt, email);
+
+        Service::AlterPasswordReturn ret;
+
+        if (res_dbexec.affectedRows() < 1)
+        {
+            throw common::RequestWrong("邮件书写错误,不存在用户" + email);
+        }
+
+        // 运行到这里 说明没有问题了
+        ret.code = 200;
+        ret.message = "修改密码成功";
+        co_return ret;
+    }
+    catch (const drogon::orm::DrogonDbException &e)
+    {
+        MY_LOG_ERROR(e.base().what());
+        throw common::DBOperatorWrong("数据库操作错误", e.base().what());
+    }
+    catch (const std::exception &e)
+    {
+        MY_LOG_ERROR(e.what());
         throw common::UnkownWrong("处理修改函数中 发生未知错误", e.what());
     }
 }

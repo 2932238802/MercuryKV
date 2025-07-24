@@ -1,33 +1,30 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import service from '../components/request';
-import { ShowCustomModal } from '../components/show';
+import service from '@/utils/request';
+import { ShowCustomModal } from '@/utils/show';
+import { TOKEN_CHECK } from '@/utils/api';
 
 const router = useRouter();
-const API_PATH = {
-    TOKEN_CHECK: "/Login/checktoken"
-}
-
-const CheckTokenForLastLogin = async () => {
-    try {
-        const response = await service.get(API_PATH.TOKEN_CHECK);
-        return response;
-    } catch (error) {
-        console.error("Token 验证失败!", error.message);
-        return null;
-    }
-}
 
 const Login = async () => {
-    const responseData = await CheckTokenForLastLogin();
-    if (!responseData || responseData.code !== 200) {
+    try {
+        const responsedata = await TOKEN_CHECK();
+        console.log("验证成功，后端返回:", responsedata);
+        console.log("后端返回的 code:", responsedata.code);
+        if (responsedata.code === 200) { 
+            router.push({ name: "Mercury" });
+            const username = localStorage.getItem("UserName");
+            ShowCustomModal(`欢迎回来 ${username}`);
+        } else {
+            ShowCustomModal(responsedata.message || "验证失败");
+            router.push({ name: "RegisterAndLogin" });
+        }
+    } catch (error) {
+        console.error("登录失败:", error);
         router.push({ name: "RegisterAndLogin" });
-    } else {
-        router.push({ name: "Mercury" });
-        const username = localStorage.getItem("UserName");
-        ShowCustomModal(`欢迎回来 ${username}`);
     }
-}
+};
+
 
 const About = () => {
     router.push({ name: "About" });
@@ -56,6 +53,6 @@ const About = () => {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap');
-@import "../static/Index.css"
+@import "@/static/Index.css"
 
 </style>

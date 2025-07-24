@@ -1,9 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { debounce } from 'lodash'; // 防抖
 import { useRouter } from 'vue-router';
-import service from '../components/request';
-import { ShowCustomModal } from '../components/show';
+import service from '@/utils/request';
+import { ShowCustomModal } from '@/utils/show';
 
 // ----------------- ------------------------------------------------
 const KvPairs = ref([]);
@@ -199,8 +198,7 @@ const HandleDelete = async (itemtodelete) => {
   }
 }
 // -----------------------------------------------------------------
-
-const filterkvpairs = computed(() => {
+const FilterKvPairs = computed(() => {
   const search = search_content.value.toLowerCase().trim(); // 获取搜索词并清理格式
   if (!search) {
     return KvPairs.value;
@@ -216,8 +214,7 @@ const filterkvpairs = computed(() => {
 });
 
 
-const loadInitialData = async () => {
-
+const LoadInitialData = async () => {
   const user_id = localStorage.getItem("UserId");
   username.value = localStorage.getItem("UserName");
   if (!user_id) {
@@ -241,7 +238,7 @@ const loadInitialData = async () => {
 onMounted(() => {
   console.log(`username.value ${username.value}`)
   console.log("开始初始化!");
-  loadInitialData();
+  LoadInitialData();
 });
 </script>
 
@@ -287,7 +284,7 @@ onMounted(() => {
           </thead>
           <tbody>
             <!-- 使用 v-for 循环渲染 KvPairs 数组 -->
-            <tr v-for="item in filterkvpairs" :key="item.kv_id">
+            <tr v-for="item in FilterKvPairs" :key="item.kv_id">
               <td>{{ item.key_input }}</td>
               <td class="value-cell">
                 <span class="value-text">{{ item.value_input }}</span>
@@ -361,6 +358,6 @@ onMounted(() => {
 /* 样式部分保持不变 */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
-@import "../static/Mercury.css";
-@import "../static/Common.css";
+@import "@/static/Mercury.css";
+@import "@/static/Common.css";
 </style>

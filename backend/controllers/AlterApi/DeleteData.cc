@@ -10,14 +10,14 @@
 drogon::Task<drogon::HttpResponsePtr> Alter::DeleteData(HttpRequestPtr req,
                                                         const std::string &kv_str)
 {
-
+    // 数据库
     auto db_client = app().getDbClient();
 
     Service::DeleteDataService::ptr service =
         Service::DeleteDataServiceFactory::MakeService(db_client);
-
     try
     {
+        //
         auto ret = co_await service->DeleteData(kv_str);
         Json::Value res_json;
         res_json["code"] = ret.code;
@@ -32,25 +32,20 @@ drogon::Task<drogon::HttpResponsePtr> Alter::DeleteData(HttpRequestPtr req,
         {
             error["code"] = 500;
             error["message"] = e.what();
-            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-            resp->setStatusCode(drogon::k500InternalServerError);
-            co_return resp;
         }
         else if (dynamic_cast<const common::UnkownWrong *>(&e))
         {
             error["code"] = 501;
             error["message"] = e.what();
-            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-            resp->setStatusCode(drogon::k500InternalServerError);
-            co_return resp;
         }
         else if (dynamic_cast<const common::RequestWrong *>(&e))
         {
             error["code"] = 400;
             error["message"] = e.what();
-            auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
-            resp->setStatusCode(drogon::k500InternalServerError);
-            co_return resp;
         }
+
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(error);
+        resp->setStatusCode(drogon::k500InternalServerError);
+        co_return resp;
     }
 }

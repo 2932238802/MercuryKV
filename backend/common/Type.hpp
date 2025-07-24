@@ -94,7 +94,7 @@ class StmpWrong : public common::BaseException
     }
 };
 
-// 请求错误 500
+// 服务器错误 500
 class PocoNetWrong : public common::BaseException
 {
   public:
@@ -116,6 +116,7 @@ class UnkownWrong : public common::BaseException
     }
 };
 
+// 服务器错误 500
 class ConfigWrong : public common::BaseException
 {
   public:
@@ -126,6 +127,3 @@ class ConfigWrong : public common::BaseException
     }
 };
 } // namespace common
-
-// 创造 201
-// 通过 200

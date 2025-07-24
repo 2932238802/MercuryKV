@@ -1,4 +1,5 @@
 #include "Alter.h"
+#include "AlterService/AlterDataService.hpp"
 
 using namespace drogon;
 using namespace drogon_model::mercury;
@@ -24,12 +25,13 @@ drogon::Task<drogon::HttpResponsePtr> Alter::AlterData(HttpRequestPtr req)
     auto jsonobject = req->getJsonObject();
     auto db_client = app().getDbClient();
 
-    Service::AlterDataService::ptr service =
-        Service::AlterDataServiceFactory::MakeService(db_client);
+    Service::BaseService::ptr service =
+        Service::AlterDataServiceFactory::MakeService(Service::AlterType::AlterData, db_client);
 
     try
     {
-        auto ret = co_await service->AlterData(*jsonobject);
+        auto dataservice = std::dynamic_pointer_cast<Service::AlterDataService>(service);
+        auto ret = co_await dataservice->Alter(*jsonobject);
         const Json::Value &tags_json = (*jsonobject)["tags"];
         Json::Value success_resp;
         Json::Value data;

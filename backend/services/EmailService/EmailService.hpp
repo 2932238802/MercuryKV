@@ -28,6 +28,7 @@
 #include <Poco/Net/SMTPClientSession.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/SecureSMTPClientSession.h>
+#include <memory>
 
 namespace Service
 {
@@ -41,12 +42,23 @@ struct EmailServiceReturn
 class EmailService
 {
   public:
+    using ptr = std::shared_ptr<EmailService>;
     static void SendEmail(const std::string &to, const std::string &code);
     static drogon::Task<Service::EmailServiceReturn> Verify(std::string email_address,
                                                             std::string user_code);
 
   private:
     static std::string BuildeEmailBodyForModifyPersonInfo(const std::string &code);
+};
+
+class EmailServiceFactory
+{
+
+  public:
+    static EmailService::ptr MakeService()
+    {
+        return std::make_shared<EmailService>();
+    }
 };
 
 } // namespace Service

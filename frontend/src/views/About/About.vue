@@ -22,7 +22,7 @@ const TeamMembers = [
             <h2>技术栈与理念</h2>
             <ul>
                 <li><strong>前端：</strong> Vue 3 (Composition API) + Vite + Pinia + Vue Router</li>
-                <li><strong>后端：</strong> C++ Drogon 框架，追求极致性能与高并发。</li>
+                <li><strong>后端：</strong> C++ Drogon 框架，追求极致性能与高并发</li>
                 <li><strong>数据库：</strong> PostgreSQL</li>
                 <li><strong>设计理念：</strong> 我们遵循极简主义设计...</li>
             </ul>
@@ -57,5 +57,5 @@ const TeamMembers = [
 </template>
 
 <style scoped>
-@import "../static/About.css"
+@import "@/static/About.css"
 </style>
